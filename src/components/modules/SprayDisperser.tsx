@@ -75,6 +75,22 @@ function formatAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+function isSuccessfulReceiptStatus(status: unknown) {
+  if (status == null) {
+    return true;
+  }
+  if (typeof status === "bigint") {
+    return status === BigInt(1);
+  }
+  if (typeof status === "number") {
+    return status === 1;
+  }
+  if (typeof status === "string") {
+    return status === "0x1" || status === "1";
+  }
+  return false;
+}
+
 export default function SprayDisperser() {
   const t = useTranslations("SprayDisperser");
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
@@ -447,7 +463,7 @@ export default function SprayDisperser() {
         setFeedback(t("messages.transactionSent"));
         const receipt = await tx.wait();
 
-        if (receipt.status === BigInt(1)) {
+        if (isSuccessfulReceiptStatus(receipt.status)) {
           setFeedback(t("messages.transactionConfirmed"));
           setHistory((prev) =>
             prev.map((entry) =>
@@ -514,7 +530,7 @@ export default function SprayDisperser() {
         setFeedback(t("messages.transactionSent"));
         const receipt = await tx.wait();
 
-        if (receipt.status === BigInt(1)) {
+        if (isSuccessfulReceiptStatus(receipt.status)) {
           setFeedback(t("messages.transactionConfirmed"));
           setHistory((prev) =>
             prev.map((entry) =>
