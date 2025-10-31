@@ -76,6 +76,9 @@ function formatAddress(address: string) {
 }
 
 function isSuccessfulReceiptStatus(status: unknown) {
+  if (status == null) {
+    return true;
+  }
   if (typeof status === "bigint") {
     return status === BigInt(1);
   }
