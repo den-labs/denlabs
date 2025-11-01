@@ -9,7 +9,7 @@ export default function DenLayout({ children }: { children: ReactNode }) {
   return (
     <div className="wolf-neon-backdrop text-wolf-foreground">
       <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-2 sm:px-6">
-        <div className="hidden lg:flex lg:flex-col lg:gap-4">
+        <div className="hidden md:flex md:flex-col md:gap-4 lg:gap-4">
           <SidebarNav />
           <StatusStrip className="justify-end" />
           <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-6">
@@ -25,7 +25,7 @@ export default function DenLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <div className="lg:hidden">
+        <div className="md:hidden">
           <MobileDenLayout
             main={
               <>

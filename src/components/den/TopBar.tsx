@@ -14,7 +14,8 @@ type ModuleKey =
   | "leaderboard"
   | "settings"
   | "mindGames"
-  | "auth";
+  | "auth"
+  | "spray";
 
 const moduleKeys: Record<string, ModuleKey> = {
   "/quests": "quests",
@@ -26,6 +27,7 @@ const moduleKeys: Record<string, ModuleKey> = {
   "/leaderboard": "leaderboard",
   "/settings": "settings",
   "/mind-games": "mindGames",
+  "/spray": "spray",
   "/auth": "auth",
 };
 

@@ -200,7 +200,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
               />
             </summary>
             <div className="space-y-2 px-4 pb-4 pt-3">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#6f7783]">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#7d8794b3]">
                 {t(`sections.${group.key}.description`)}
               </p>
               {group.items.map((item) => {
@@ -244,9 +244,9 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
     <>
       <div
         ref={containerRef}
-        className="relative z-50 flex w-full flex-col gap-5 rounded-[20px] border border-[#2a2f36] bg-[linear-gradient(135deg,rgba(18,20,30,0.96),rgba(11,12,18,0.9))] px-6 py-4 backdrop-blur-[18px] text-white shadow-[0_40px_120px_-80px_rgba(0,0,0,0.55)] lg:gap-4"
+        className="relative z-50 flex w-full flex-col gap-5 rounded-[20px] border border-[#2a2f36] bg-[linear-gradient(135deg,rgba(18,20,30,0.96),rgba(11,12,18,0.9))] px-5 py-4 backdrop-blur-[18px] text-white shadow-[0_40px_120px_-80px_rgba(0,0,0,0.55)] md:px-6 lg:gap-4"
       >
-        <div className="flex flex-col gap-4 lg:grid lg:min-h-[52px] lg:grid-cols-[minmax(0,1fr)_max-content_minmax(220px,0.9fr)] lg:items-center">
+        <div className="flex flex-col gap-4 md:grid md:min-h-[52px] md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
           <div className="flex items-center gap-4">
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[10px] border border-[#2f3440] bg-[#161821]">
               <Image
@@ -265,13 +265,13 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
               </h1>
             </div>
             <span
-              className="hidden h-8 w-px bg-[rgba(255,255,255,0.08)] lg:inline-block"
+              className="hidden h-8 w-px bg-[rgba(255,255,255,0.08)] md:inline-block"
               aria-hidden="true"
             />
           </div>
           <nav
             aria-label={t("aria.navigation")}
-            className="order-last flex w-full flex-wrap items-center justify-center gap-4 lg:order-none lg:justify-center"
+            className="order-last flex w-full flex-wrap items-center justify-center gap-4 md:order-none md:flex-nowrap md:justify-center md:gap-3"
           >
             {navGroups.map((group) => {
               dropdownRefs.current[group.key] = [];
@@ -284,11 +284,11 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
               return (
                 <div
                   key={group.key}
-                  className="relative basis-full xl:basis-auto xl:flex-none"
+                  className="relative basis-full md:basis-auto md:flex-none"
                 >
                   <button
                     type="button"
-                    className={`group relative inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#2a2f36] bg-[rgba(20,24,29,0.7)] px-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#e9eef2] shadow-none transition-all duration-150 ease-out hover:-translate-y-[1px] hover:border-[rgba(137,226,74,0.4)] hover:bg-[rgba(20,24,29,0.82)] active:translate-y-0 active:border-[rgba(76,162,42,0.55)] ${focusRing} ${
+                    className={`group relative inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#2a2f36] bg-[rgba(20,24,29,0.7)] px-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#e9eef2] shadow-none transition-all duration-150 ease-out hover:-translate-y-[1px] hover:border-[rgba(137,226,74,0.4)] hover:bg-[rgba(20,24,29,0.82)] active:translate-y-0 active:border-[rgba(76,162,42,0.55)] md:w-auto ${focusRing} ${
                       isOpen
                         ? "border-[rgba(137,226,74,0.55)] bg-[rgba(20,24,29,0.88)]"
                         : ""
@@ -336,7 +336,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
                         : "pointer-events-none opacity-0 -translate-y-3"
                     }`}
                   >
-                    <p className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#6f7783]">
+                    <p className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#7d8794b3]">
                       {sectionDescription}
                     </p>
                     <div className="space-y-2">
@@ -417,7 +417,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
       {showOverlay ? (
         <div
           aria-hidden="true"
-          className="fixed inset-0 z-40 bg-[rgba(11,12,16,0.2)] backdrop-blur-[4px] transition-opacity duration-150"
+          className="fixed inset-0 z-40 bg-[rgba(11,12,16,0.15)] backdrop-blur-[4px] transition-opacity duration-150"
         />
       ) : null}
     </>

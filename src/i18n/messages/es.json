@@ -41,6 +41,10 @@
         "title": "Laboratorio de minijuegos",
         "description": "Activa ruleta y carreras con overlays listos para patrocinio."
       },
+      "spray": {
+        "title": "Consola Spray",
+        "description": "Dispersa recompensas CELO o ERC20 a múltiples wallets al instante."
+      },
       "auth": {
         "title": "Self Auth",
         "description": "Verifica staff y asistentes con Self."
@@ -264,6 +268,10 @@
   "QuestsPage": {
     "title": "Misión del día",
     "description": "Completa tu check-in, comparte progreso en Showcase y envía evidencia para sumar puntos HOWL."
+  },
+  "SprayPage": {
+    "title": "Consola Spray",
+    "description": "Agrupa recompensas CELO o ERC20 en un solo lanzamiento coordinado."
   },
   "VotingList": {
     "title": "Demo Day",

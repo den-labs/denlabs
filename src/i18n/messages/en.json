@@ -41,6 +41,10 @@
         "title": "Mini-Games Lab",
         "description": "Spin up ruleta and animal races with sponsor-ready overlays."
       },
+      "spray": {
+        "title": "Spray Console",
+        "description": "Disperse CELO or ERC20 rewards to multiple wallets at once."
+      },
       "auth": {
         "title": "Self Auth",
         "description": "Verify staff and attendees with Self."
@@ -264,6 +268,10 @@
   "QuestsPage": {
     "title": "Quest of the day",
     "description": "Check in, share progress in Showcase, and ship evidence to earn HOWL points."
+  },
+  "SprayPage": {
+    "title": "Spray Console",
+    "description": "Bundle CELO or ERC20 rewards into one powered drop."
   },
   "VotingList": {
     "title": "Demo Day",
