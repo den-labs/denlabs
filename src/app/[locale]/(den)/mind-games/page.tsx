@@ -148,7 +148,7 @@ export default function MindGamesPage() {
             <button
               type="button"
               onClick={startGame}
-              className="flex-1 rounded-full bg-[linear-gradient(135deg,#a053ff,#5b2dff)] px-4 py-2 font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_24px_rgba(160,83,255,0.45)] transition hover:shadow-[0_0_30px_rgba(160,83,255,0.55)]"
+              className="flex-1 rounded-full bg-[linear-gradient(180deg,#c8ff64_0%,#8bea4e_55%,#3b572a_100%)] px-4 py-2 font-semibold uppercase tracking-[0.2em] text-[#0b1407] shadow-[0_0_24px_rgba(186,255,92,0.45)] transition hover:shadow-[0_0_30px_rgba(186,255,92,0.55)]"
             >
               {t("controls.start")}
             </button>

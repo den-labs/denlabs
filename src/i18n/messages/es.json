@@ -63,10 +63,7 @@
       }
     },
     "statusBar": {
-      "questLabel": "Misión activa",
-      "questValue": "Sprint de onboarding de builders",
-      "verificationLabel": "Verificación",
-      "helper": "Solo humanos — Self.xyz pendiente"
+      "helper": "Verificación Self.xyz pendiente"
     },
     "sections": {
       "essentials": {

@@ -16,7 +16,6 @@ import {
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import SelfBadge from "@/components/ui/SelfBadge";
 import { Link, usePathname } from "@/i18n/routing";
 
 const navGroups = [
@@ -80,14 +79,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
   const dropdownRefs = useRef<Record<string, Array<HTMLAnchorElement>>>({});
   const focusIntentRef = useRef<"first" | "last" | null>(null);
   const focusRing =
-    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a053ff]";
-  const cta = t.raw("meta.cta") as { label: string; href: string };
-  const statusBarContent = t.raw("statusBar") as {
-    questLabel: string;
-    questValue: string;
-    verificationLabel: string;
-    helper: string;
-  };
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c]";
 
   useEffect(() => {
     const handler = (event: PointerEvent) => {
@@ -171,16 +163,16 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
     return (
       <nav className="space-y-5 text-white" aria-label={t("aria.navigation")}>
         <div className="flex items-center gap-3 rounded-[14px] border border-[#2a2f36] bg-[#11131a] px-4 py-3">
-          <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] border border-[#2f3440] bg-[#161821]">
+          <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[10px] border border-[#2f3440] bg-[#14171c]">
             <Image
-              src="/wolf-den-bn.png"
+              src="/denlabs.png"
               alt={t("branding.badgeAlt")}
               fill
               className="object-contain"
             />
           </div>
           <div>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[#9ba3af]">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[#7d8794]">
               {t("branding.subtitle")}
             </p>
             <h1 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
@@ -188,24 +180,18 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
             </h1>
           </div>
         </div>
-        <Link
-          href={cta.href}
-          className="den-button-primary w-full justify-center px-6 py-3 text-[0.78rem] tracking-[0.2em]"
-        >
-          {cta.label}
-        </Link>
         {navGroups.map((group) => (
           <details
             key={group.key}
             open={openGroup === group.key}
-            className="group rounded-[14px] border border-[#2a2f36] bg-[rgba(17,19,24,0.55)] backdrop-blur-[12px] transition-shadow duration-150"
+            className="group rounded-[10px] border border-[#22282e] bg-[rgba(17,19,24,0.58)] backdrop-blur-[12px] transition-shadow duration-150"
             onToggle={(event) => {
               const target = event.currentTarget;
               setOpenGroup(target.open ? group.key : null);
             }}
           >
             <summary
-              className={`flex cursor-pointer items-center justify-between gap-3 rounded-[14px] bg-[linear-gradient(135deg,rgba(160,83,255,0.22),rgba(91,45,255,0.08))] px-4 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white outline-none transition-all duration-150 [&::-webkit-details-marker]:hidden ${focusRing}`}
+              className={`flex cursor-pointer items-center justify-between gap-3 rounded-[10px] bg-[rgba(20,24,29,0.8)] px-4 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#e9eef2] outline-none transition-all duration-150 [&::-webkit-details-marker]:hidden ${focusRing}`}
             >
               <span>{t(`sections.${group.key}.title`)}</span>
               <ChevronDown
@@ -214,7 +200,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
               />
             </summary>
             <div className="space-y-2 px-4 pb-4 pt-3">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#9ba3af]">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#7d8794]">
                 {t(`sections.${group.key}.description`)}
               </p>
               {group.items.map((item) => {
@@ -229,14 +215,14 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
                     key={`${group.key}-${item.key}`}
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`grid grid-cols-[16px_1fr] items-center gap-3 rounded-[12px] border border-[#2a2f36] px-3 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] transition ${focusRing} ${
+                    className={`grid grid-cols-[16px_1fr] items-center gap-3 rounded-[10px] border border-[#2a2f36] px-3 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] transition ${focusRing} ${
                       isActive
-                        ? "border-transparent bg-[linear-gradient(135deg,#a053ff,#5b2dff)] text-white shadow-[0_0_22px_rgba(160,83,255,0.35)]"
-                        : "bg-[rgba(17,19,24,0.45)] text-[#c2c7d2] hover:border-[rgba(160,83,255,0.35)] hover:bg-[rgba(160,83,255,0.12)] hover:text-white"
+                        ? "border-[#4ca22a] bg-[#89e24a] text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)]"
+                        : "bg-[rgba(20,24,29,0.6)] text-[#c2c7d2] hover:border-[rgba(186,255,92,0.35)] hover:bg-[rgba(20,24,29,0.85)] hover:text-white"
                     }`}
                   >
                     <ItemIcon
-                      className="h-3 w-3 text-[rgba(212,196,255,0.9)]"
+                      className="h-3 w-3 text-[rgba(186,255,92,0.8)]"
                       aria-hidden
                     />
                     <span className="truncate">
@@ -258,184 +244,183 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
     <>
       <div
         ref={containerRef}
-        className="relative z-50 flex w-full flex-col gap-4 rounded-[20px] border border-[#2a2f36] bg-[linear-gradient(135deg,rgba(18,20,30,0.96),rgba(11,12,18,0.9))] px-6 py-4 backdrop-blur-[18px] text-white shadow-[0_40px_120px_-80px_rgba(0,0,0,0.55)]"
+        className="relative z-50 flex w-full flex-col gap-5 rounded-[20px] border border-[#2a2f36] bg-[linear-gradient(135deg,rgba(18,20,30,0.96),rgba(11,12,18,0.9))] px-6 py-4 backdrop-blur-[18px] text-white shadow-[0_40px_120px_-80px_rgba(0,0,0,0.55)] lg:gap-4"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] border border-[#2f3440] bg-[#161821]">
+        <div className="flex flex-col gap-4 lg:grid lg:min-h-[72px] lg:grid-cols-[minmax(0,1fr)_max-content_minmax(220px,0.9fr)] lg:items-center">
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[10px] border border-[#2f3440] bg-[#161821]">
               <Image
-                src="/wolf-den-bn.png"
+                src="/denlabs.png"
                 alt={t("branding.badgeAlt")}
                 fill
                 className="object-contain"
               />
             </div>
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#9ba3af]">
+            <div className="flex flex-col leading-snug">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#9ba3af]">
                 {t("branding.subtitle")}
               </p>
-              <h1 className="text-base font-semibold uppercase tracking-[0.18em] text-white">
+              <h1 className="text-[0.95rem] font-semibold uppercase tracking-[0.18em] text-white">
                 {t("branding.title")}
               </h1>
             </div>
+            <span
+              className="hidden h-8 w-px bg-[rgba(255,255,255,0.08)] lg:inline-block"
+              aria-hidden="true"
+            />
           </div>
-        </div>
-        <nav
-          aria-label={t("aria.navigation")}
-          className="flex w-full flex-wrap items-center justify-center gap-4 xl:justify-start"
-        >
-          {navGroups.map((group) => {
-            dropdownRefs.current[group.key] = [];
-            const Icon = group.icon;
-            const isOpen = openGroup === group.key;
-            const sectionDescription = t(
-              `sections.${group.key}.description`,
-            ) as string;
-            return (
-              <div
-                key={group.key}
-                className="relative xl:basis-auto xl:flex-none basis-full"
-              >
-                <button
-                  type="button"
-                  className={`group relative inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border border-[rgba(255,255,255,0.18)] bg-[linear-gradient(135deg,#a053ff,#5b2dff)] px-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_0_24px_rgba(160,83,255,0.35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] backdrop-blur-[18px] transition-all duration-150 ease-out hover:scale-[1.02] hover:shadow-[0_0_36px_rgba(160,83,255,0.55)] active:scale-95 ${focusRing} ${
-                    isOpen ? "shadow-[0_0_32px_rgba(160,83,255,0.55)]" : ""
-                  }`}
-                  aria-expanded={isOpen}
-                  aria-haspopup="true"
-                  onClick={() => {
-                    focusIntentRef.current = "first";
-                    setOpenGroup(isOpen ? null : group.key);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "ArrowDown") {
-                      event.preventDefault();
-                      focusIntentRef.current = "first";
-                      setOpenGroup(group.key);
-                    } else if (event.key === "ArrowUp") {
-                      event.preventDefault();
-                      focusIntentRef.current = "last";
-                      setOpenGroup(group.key);
-                    }
-                  }}
-                >
-                  <Icon
-                    className="h-[18px] w-[18px] text-[rgba(255,255,255,0.92)] transition-transform duration-200 ease-out group-hover:-translate-y-0.5"
-                    aria-hidden
-                  />
-                  <span className="truncate">
-                    {t(`sections.${group.key}.title`)}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ease-out ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
-                    aria-hidden
-                  />
-                </button>
+          <nav
+            aria-label={t("aria.navigation")}
+            className="order-last flex w-full flex-wrap items-center justify-center gap-4 lg:order-none lg:justify-center"
+          >
+            {navGroups.map((group) => {
+              dropdownRefs.current[group.key] = [];
+              const Icon = group.icon;
+              const isOpen = openGroup === group.key;
+              const sectionDescription = t(
+                `sections.${group.key}.description`,
+              ) as string;
+              const menuId = `nav-menu-${group.key}`;
+              return (
                 <div
-                  role="menu"
-                  style={{ minWidth: "max(240px, 100%)" }}
-                  className={`absolute left-1/2 top-[calc(100%+12px)] z-40 w-full -translate-x-1/2 rounded-[16px] border border-[#2a2f36] bg-[rgba(17,19,24,0.78)] px-4 py-4 backdrop-blur-[18px] shadow-[0_30px_90px_-60px_rgba(0,0,0,0.65)] transition-all duration-200 ease-out ${
-                    isOpen
-                      ? "pointer-events-auto opacity-100 translate-y-0"
-                      : "pointer-events-none opacity-0 -translate-y-3"
-                  }`}
+                  key={group.key}
+                  className="relative basis-full xl:basis-auto xl:flex-none"
                 >
-                  <p className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#9ba3af]">
-                    {sectionDescription}
-                  </p>
-                  <div className="space-y-2">
-                    {group.items.map((item) => {
-                      const isActive =
-                        item.href === "/auth"
-                          ? pathname?.startsWith(item.href)
-                          : pathname === item.href ||
-                            pathname?.startsWith(`${item.href}/`);
-                      const ItemIcon = navItemIcons[item.key];
-                      return (
-                        <div key={`${group.key}-${item.key}`} role="none">
-                          <Link
-                            role="menuitem"
-                            ref={(node) => {
-                              if (!dropdownRefs.current[group.key]) {
-                                dropdownRefs.current[group.key] = [];
-                              }
-                              const list = dropdownRefs.current[group.key];
-                              if (!node) {
-                                return;
-                              }
-                              if (!list.includes(node)) {
-                                list.push(node);
-                              }
-                            }}
-                            href={item.href}
-                            onKeyDown={(event) => {
-                              const items =
-                                dropdownRefs.current[group.key] ?? [];
-                              const index = items.indexOf(event.currentTarget);
-                              if (index === -1) {
-                                return;
-                              }
-                              if (event.key === "ArrowDown") {
-                                event.preventDefault();
-                                items[(index + 1) % items.length]?.focus();
-                              } else if (event.key === "ArrowUp") {
-                                event.preventDefault();
-                                items[
-                                  (index - 1 + items.length) % items.length
-                                ]?.focus();
-                              } else if (event.key === "Home") {
-                                event.preventDefault();
-                                items[0]?.focus();
-                              } else if (event.key === "End") {
-                                event.preventDefault();
-                                items[items.length - 1]?.focus();
-                              }
-                            }}
-                            className={`grid grid-cols-[16px_1fr] items-center gap-3 rounded-[12px] border border-[#2a2f36] px-3 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] transition ${focusRing} ${
-                              isActive
-                                ? "border-transparent bg-[linear-gradient(135deg,#a053ff,#5b2dff)] text-white shadow-[0_0_24px_rgba(160,83,255,0.38)]"
-                                : "bg-[rgba(17,19,24,0.45)] text-[#c2c7d2] hover:border-[rgba(160,83,255,0.35)] hover:bg-[rgba(160,83,255,0.12)] hover:text-white"
-                            }`}
-                          >
-                            <ItemIcon
-                              className="h-3 w-3 text-[rgba(212,196,255,0.9)]"
-                              aria-hidden
-                            />
-                            <span className="truncate">
-                              {t(`sections.${group.key}.items.${item.key}`)}
-                            </span>
-                          </Link>
-                        </div>
-                      );
-                    })}
+                  <button
+                    type="button"
+                    className={`group relative inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#2a2f36] bg-[rgba(20,24,29,0.7)] px-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-[#e9eef2] shadow-none transition-all duration-150 ease-out hover:-translate-y-[1px] hover:border-[rgba(137,226,74,0.4)] hover:bg-[rgba(20,24,29,0.82)] active:translate-y-0 active:border-[rgba(76,162,42,0.55)] ${focusRing} ${
+                      isOpen
+                        ? "border-[rgba(137,226,74,0.55)] bg-[rgba(20,24,29,0.88)]"
+                        : ""
+                    }`}
+                    aria-expanded={isOpen}
+                    aria-haspopup="menu"
+                    aria-controls={menuId}
+                    onClick={() => {
+                      focusIntentRef.current = "first";
+                      setOpenGroup(isOpen ? null : group.key);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        focusIntentRef.current = "first";
+                        setOpenGroup(group.key);
+                      } else if (event.key === "ArrowUp") {
+                        event.preventDefault();
+                        focusIntentRef.current = "last";
+                        setOpenGroup(group.key);
+                      }
+                    }}
+                  >
+                    <Icon
+                      className="h-[18px] w-[18px] text-[rgba(186,255,92,0.8)] transition-transform duration-200 ease-out group-hover:-translate-y-0.5"
+                      aria-hidden
+                    />
+                    <span className="truncate">
+                      {t(`sections.${group.key}.title`)}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 text-[rgba(186,255,92,0.8)] transition-transform duration-200 ease-out ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                      aria-hidden
+                    />
+                  </button>
+                  <div
+                    id={menuId}
+                    role="menu"
+                    style={{ minWidth: "min(max(320px, 100%), 360px)" }}
+                    className={`absolute left-1/2 top-[calc(100%+12px)] z-40 w-full -translate-x-1/2 rounded-[16px] border border-[#22282e] bg-[rgba(16,19,22,0.9)] px-4 py-4 backdrop-blur-[18px] shadow-[0_30px_90px_-60px_rgba(0,0,0,0.65)] transition-all duration-200 ease-out ${
+                      isOpen
+                        ? "pointer-events-auto opacity-100 translate-y-0"
+                        : "pointer-events-none opacity-0 -translate-y-3"
+                    }`}
+                  >
+                    <p className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#7d8794]">
+                      {sectionDescription}
+                    </p>
+                    <div className="space-y-2">
+                      {group.items.map((item) => {
+                        const isActive =
+                          item.href === "/auth"
+                            ? pathname?.startsWith(item.href)
+                            : pathname === item.href ||
+                              pathname?.startsWith(`${item.href}/`);
+                        const ItemIcon = navItemIcons[item.key];
+                        return (
+                          <div key={`${group.key}-${item.key}`} role="none">
+                            <Link
+                              role="menuitem"
+                              ref={(node) => {
+                                if (!dropdownRefs.current[group.key]) {
+                                  dropdownRefs.current[group.key] = [];
+                                }
+                                const list = dropdownRefs.current[group.key];
+                                if (!node) {
+                                  return;
+                                }
+                                if (!list.includes(node)) {
+                                  list.push(node);
+                                }
+                              }}
+                              href={item.href}
+                              onKeyDown={(event) => {
+                                const items =
+                                  dropdownRefs.current[group.key] ?? [];
+                                const index = items.indexOf(
+                                  event.currentTarget,
+                                );
+                                if (index === -1) {
+                                  return;
+                                }
+                                if (event.key === "ArrowDown") {
+                                  event.preventDefault();
+                                  items[(index + 1) % items.length]?.focus();
+                                } else if (event.key === "ArrowUp") {
+                                  event.preventDefault();
+                                  items[
+                                    (index - 1 + items.length) % items.length
+                                  ]?.focus();
+                                } else if (event.key === "Home") {
+                                  event.preventDefault();
+                                  items[0]?.focus();
+                                } else if (event.key === "End") {
+                                  event.preventDefault();
+                                  items[items.length - 1]?.focus();
+                                }
+                              }}
+                              className={`grid grid-cols-[16px_1fr] items-center gap-3 rounded-[10px] border border-[#2a2f36] px-3 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.18em] transition ${focusRing} ${
+                                isActive
+                                  ? "border-[#4ca22a] bg-[#89e24a] text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)]"
+                                  : "bg-[rgba(20,24,29,0.7)] text-[#c2c7d2] hover:border-[rgba(137,226,74,0.35)] hover:bg-[rgba(20,24,29,0.88)] hover:text-white"
+                              }`}
+                            >
+                              <ItemIcon
+                                className="h-3 w-3 text-[rgba(186,255,92,0.8)]"
+                                aria-hidden
+                              />
+                              <span className="truncate">
+                                {t(`sections.${group.key}.items.${item.key}`)}
+                              </span>
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </nav>
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#2a2f36] bg-[rgba(17,19,24,0.6)] px-4 py-3 text-[0.68rem] uppercase tracking-[0.22em] text-[#9ba3af]">
-          <div className="flex flex-wrap items-center gap-2 text-white">
-            <span>{statusBarContent.questLabel}</span>
-            <span className="tracking-[0.18em] text-[#c2c7d2]">
-              {statusBarContent.questValue}
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <span>{statusBarContent.verificationLabel}</span>
-            <SelfBadge status="pending" />
-            <span className="text-[0.6rem] tracking-[0.24em] text-[#7d83a3]">
-              {statusBarContent.helper}
-            </span>
-          </div>
+              );
+            })}
+          </nav>
+        </div>
+        <div className="flex justify-end">
+          <SelfBadge status="pending" />
         </div>
       </div>
       {showOverlay ? (
         <div
           aria-hidden="true"
-          className="fixed inset-0 z-40 bg-[rgba(11,12,16,0.55)] backdrop-blur-[6px] transition-opacity duration-150"
+          className="fixed inset-0 z-40 bg-[rgba(11,12,16,0.2)] backdrop-blur-[4px] transition-opacity duration-150"
         />
       ) : null}
     </>

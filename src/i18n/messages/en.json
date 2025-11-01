@@ -63,10 +63,7 @@
       }
     },
     "statusBar": {
-      "questLabel": "Active Quest",
-      "questValue": "Builder onboarding sprint",
-      "verificationLabel": "Verification",
-      "helper": "Humans only — Self.xyz pending"
+      "helper": "Self verification pending via Self.xyz"
     },
     "sections": {
       "essentials": {

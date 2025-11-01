@@ -14,7 +14,7 @@ export function CheckInPanel({ qrUrl, status }: CheckInPanelProps) {
   return (
     <div className="grid gap-6 text-wolf-foreground lg:grid-cols-[360px_1fr]">
       <div className="wolf-card relative overflow-hidden p-6">
-        <div className="pointer-events-none absolute inset-x-6 top-4 h-28 rounded-[1.75rem] bg-[radial-gradient(circle_at_top,#a053ff_0%,rgba(12,16,24,0)_70%)] opacity-80" />
+        <div className="pointer-events-none absolute inset-x-6 top-4 h-28 rounded-[1.75rem] bg-[radial-gradient(circle_at_top,#baff5c_0%,rgba(12,16,24,0)_70%)] opacity-80" />
         <div className="relative z-10 flex flex-col">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold tracking-[0.08em] uppercase text-white/90">

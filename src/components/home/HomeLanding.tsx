@@ -74,7 +74,7 @@ export default function HomeLanding() {
             </div>
           </div>
           <div className="wolf-card den-halo-accent den-noise-surface relative h-full min-h-[360px] overflow-hidden p-10">
-            <div className="pointer-events-none absolute inset-x-10 top-10 h-20 rounded-full bg-[radial-gradient(circle_at_top,#a053ff_0%,rgba(11,13,19,0)_75%)] opacity-70" />
+            <div className="pointer-events-none absolute inset-x-10 top-10 h-20 rounded-full bg-[radial-gradient(circle_at_top,#baff5c_0%,rgba(10,12,13,0)_75%)] opacity-70" />
             <div className="relative z-10 flex h-full flex-col justify-between gap-8">
               <p className="text-xs font-semibold uppercase tracking-[0.32em] text-wolf-text-subtle">
                 {t("hero.visionLabel")}

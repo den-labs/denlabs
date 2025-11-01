@@ -584,7 +584,7 @@ export default function SprayDisperser() {
               type="button"
               onClick={connectWallet}
               disabled={isConnecting}
-              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#a053ff,#5b2dff)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-[0_0_24px_rgba(160,83,255,0.45)] transition hover:shadow-[0_0_30px_rgba(160,83,255,0.55)] disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#c8ff64_0%,#8bea4e_55%,#3b572a_100%)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0b1407] shadow-[0_0_24px_rgba(186,255,92,0.45)] transition hover:shadow-[0_0_30px_rgba(186,255,92,0.55)] disabled:opacity-60"
             >
               {signerAddress
                 ? t("actions.connected", {
@@ -741,7 +741,7 @@ export default function SprayDisperser() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={ctaDisabled}
-                className="ml-auto inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#a053ff,#5b2dff)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.28em] text-white shadow-[0_0_28px_rgba(160,83,255,0.45)] transition hover:shadow-[0_0_36px_rgba(160,83,255,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="ml-auto inline-flex items-center justify-center rounded-full bg-[linear-gradient(180deg,#c8ff64_0%,#8bea4e_55%,#3b572a_100%)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.28em] text-[#0b1407] shadow-[0_0_28px_rgba(186,255,92,0.45)] transition hover:shadow-[0_0_36px_rgba(186,255,92,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? t("actions.submitting") : t("actions.send")}
               </button>

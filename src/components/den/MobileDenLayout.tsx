@@ -82,7 +82,7 @@ export function MobileDenLayout({
                   <span
                     className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
                       isActive
-                        ? "border-wolf-border-xstrong bg-[linear-gradient(135deg,#a053ff,#5b2dff)] text-white shadow-[0_0_28px_rgba(160,83,255,0.45)]"
+                        ? "border-wolf-border-xstrong bg-[linear-gradient(180deg,#c8ff64_0%,#8bea4e_55%,#3b572a_100%)] text-[#0b1407] shadow-[0_0_28px_rgba(186,255,92,0.45)]"
                         : "border-transparent bg-wolf-charcoal-60 text-wolf-emerald"
                     }`}
                   >

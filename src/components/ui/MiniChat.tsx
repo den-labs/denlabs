@@ -33,7 +33,7 @@ export function MiniChat() {
         />
         <button
           type="submit"
-          className="den-button-primary w-full py-2 text-sm font-medium tracking-[0.18em]"
+          className="den-button-primary w-full text-sm font-medium"
         >
           {t("submit")}
         </button>

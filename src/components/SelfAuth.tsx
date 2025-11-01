@@ -377,7 +377,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
                       value="hide"
                       checked={!showQr}
                       onChange={() => handleQrToggle("hide")}
-                      className="h-4 w-4 accent-[#a053ff]"
+                      className="h-4 w-4 accent-[#baff5c]"
                     />
                     <span>{t("intro.mobileQrHide")}</span>
                   </label>
@@ -388,7 +388,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
                       value="show"
                       checked={showQr}
                       onChange={() => handleQrToggle("show")}
-                      className="h-4 w-4 accent-[#a053ff]"
+                      className="h-4 w-4 accent-[#baff5c]"
                     />
                     <span>{t("intro.mobileQrShow")}</span>
                   </label>

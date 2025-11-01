@@ -2,38 +2,46 @@
 
 :root {
   color-scheme: dark;
-  --den-bg: #0b0b10;
-  --den-bg-soft: #0e0e12;
-  --den-surface-glass: rgba(17, 19, 24, 0.65);
-  --den-surface-strong: rgba(17, 19, 24, 0.78);
-  --den-surface-solid: rgba(11, 12, 16, 0.94);
-  --den-text: #ffffff;
-  --den-muted: #b6bbc7;
-  --den-border: #2a2f36;
-  --den-border-strong: rgba(160, 83, 255, 0.65);
-  --den-border-soft: rgba(42, 47, 54, 0.55);
-  --den-border-faint: rgba(42, 47, 54, 0.35);
-  --den-accent: #a053ff;
-  --den-accent-deep: #5b2dff;
-  --den-accent-soft: rgba(160, 83, 255, 0.16);
-  --den-accent-muted: rgba(160, 83, 255, 0.12);
-  --den-warm: #ffb03a;
-  --den-warm-soft: rgba(255, 176, 58, 0.18);
-  --den-success: #52e191;
-  --den-danger: #ff7a7a;
+  --den-bg: #0a0b0d;
+  --den-bg-soft: #0e1013;
+  --den-surface-glass: rgba(20, 23, 28, 0.72);
+  --den-surface-strong: #14171c;
+  --den-surface-solid: #0e1013;
+  --den-panel-elev: #1a1f24;
+  --den-text: #e9eef2;
+  --den-muted: #a6b0b8;
+  --den-tertiary: #74808d;
+  --den-icon-inactive: #8a94a1b3;
+  --den-border: #22282e;
+  --den-divider: #1b2026;
+  --den-lime: #baff5c;
+  --den-lime-deep: #89e24a;
+  --den-lime-dark: #4ca22a;
+  --den-emerald: #2fe68b;
+  --den-emerald-dark: #0fa35b;
+  --den-gold: #ffd66b;
+  --den-bolt: #ffc84d;
+  --den-success: #9dff6b;
+  --den-warning: #ffc94a;
+  --den-danger: #ff6b6b;
+  --den-glass: rgba(255, 255, 255, 0.04);
+  --den-glow-lime: rgba(186, 255, 92, 0.35);
+  --den-glow-gold: rgba(255, 200, 77, 0.25);
   --den-radius-sm: 0.75rem;
   --den-radius-md: 1rem;
-  --den-radius-lg: 1.25rem;
-  --den-radius-xl: 1.75rem;
-  --den-radius-pill: 2.25rem;
+  --den-radius-lg: 0.75rem;
+  --den-radius-xl: 1.25rem;
+  --den-radius-pill: 0.75rem;
   --den-blur-glass: 14px;
   --den-shadow-glow-accent:
-    0 0 24px rgba(160, 83, 255, 0.6), 0 0 48px rgba(91, 45, 255, 0.45);
-  --den-shadow-glow-warm:
-    0 0 24px rgba(255, 176, 58, 0.45), 0 0 48px rgba(255, 176, 58, 0.25);
-  --den-shadow-elev: 0 12px 42px rgba(0, 0, 0, 0.45);
-  --den-shadow-halo: 0 0 120px rgba(160, 83, 255, 0.18);
-  --den-shadow-halo-warm: 0 0 120px rgba(255, 176, 58, 0.12);
+    0 0 18px rgba(186, 255, 92, 0.35), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --den-shadow-glow-warm: 0 0 16px rgba(255, 200, 77, 0.25);
+  --den-shadow-elev: 0 14px 48px rgba(0, 0, 0, 0.45);
+  --den-shadow-halo: radial-gradient(
+    at 50% 0%,
+    rgba(186, 255, 92, 0.25),
+    rgba(0, 0, 0, 0) 60%
+  );
   --den-font-sans: var(
     --font-den-sans,
     "DM Sans",
@@ -43,46 +51,42 @@
   );
   --background: var(--den-bg);
   --foreground: var(--den-text);
-  --wolf-panel: var(--den-surface-glass);
-  --wolf-panel-muted: rgba(17, 19, 24, 0.58);
-  --wolf-soft: rgba(17, 19, 24, 0.92);
-  --wolf-surface: var(--den-surface-solid);
-  --wolf-border: rgba(42, 47, 54, 0.7);
-  --wolf-border-soft: var(--den-border-soft);
-  --wolf-border-mid: rgba(42, 47, 54, 0.68);
-  --wolf-border-strong: rgba(42, 47, 54, 0.85);
-  --wolf-border-xstrong: var(--den-border-strong);
-  --wolf-border-faint: var(--den-border-faint);
-  --wolf-border-glow: rgba(160, 83, 255, 0.45);
-  --wolf-emerald: var(--den-accent);
-  --wolf-emerald-soft: var(--den-accent-soft);
-  --wolf-emerald-mid: rgba(160, 83, 255, 0.24);
-  --wolf-emerald-faint: rgba(160, 83, 255, 0.08);
-  --wolf-emerald-border-strong: rgba(160, 83, 255, 0.52);
-  --wolf-emerald-tint: rgba(160, 83, 255, 0.26);
-  --wolf-emerald-strong: rgba(160, 83, 255, 0.65);
-  --wolf-glow: rgba(160, 83, 255, 0.45);
-  --wolf-amber: var(--den-warm);
+  --wolf-panel: var(--den-surface-strong);
+  --wolf-panel-muted: var(--den-surface-glass);
+  --wolf-soft: rgba(20, 23, 28, 0.88);
+  --wolf-surface: var(--den-panel-elev);
+  --wolf-border: rgba(34, 40, 46, 0.85);
+  --wolf-border-soft: rgba(34, 40, 46, 0.6);
+  --wolf-border-mid: rgba(34, 40, 46, 0.78);
+  --wolf-border-strong: rgba(34, 40, 46, 0.92);
+  --wolf-border-xstrong: rgba(186, 255, 92, 0.55);
+  --wolf-border-faint: rgba(34, 40, 46, 0.4);
+  --wolf-border-glow: var(--den-glow-lime);
+  --wolf-emerald: var(--den-lime);
+  --wolf-emerald-soft: rgba(186, 255, 92, 0.2);
+  --wolf-emerald-mid: rgba(137, 226, 74, 0.32);
+  --wolf-emerald-faint: rgba(74, 162, 42, 0.18);
+  --wolf-emerald-border-strong: rgba(76, 162, 42, 0.62);
+  --wolf-emerald-tint: rgba(47, 230, 139, 0.24);
+  --wolf-emerald-strong: rgba(47, 230, 139, 0.65);
+  --wolf-glow: var(--den-glow-lime);
+  --wolf-amber: var(--den-gold);
   --wolf-text-subtle: var(--den-muted);
   --wolf-radius-xl: var(--den-radius-lg);
   --wolf-radius-2xl: var(--den-radius-xl);
-  --wolf-charcoal: rgba(17, 19, 24, 0.82);
-  --wolf-charcoal-60: rgba(17, 19, 24, 0.6);
-  --wolf-charcoal-65: rgba(17, 19, 24, 0.65);
-  --wolf-charcoal-70: rgba(17, 19, 24, 0.7);
-  --wolf-charcoal-75: rgba(17, 19, 24, 0.75);
-  --wolf-charcoal-85: rgba(17, 19, 24, 0.85);
-  --wolf-violet-soft: var(--den-accent-soft);
-  --wolf-violet-border: rgba(160, 83, 255, 0.35);
-  --wolf-violet-accent: #ceb9ff;
-  --wolf-forest-60: rgba(91, 45, 255, 0.42);
+  --wolf-charcoal: rgba(10, 11, 13, 0.82);
+  --wolf-charcoal-60: rgba(10, 11, 13, 0.6);
+  --wolf-charcoal-65: rgba(10, 11, 13, 0.65);
+  --wolf-charcoal-70: rgba(10, 11, 13, 0.7);
+  --wolf-charcoal-75: rgba(10, 11, 13, 0.75);
+  --wolf-charcoal-85: rgba(10, 11, 13, 0.85);
   --wolf-neutral-soft: rgba(255, 255, 255, 0.04);
   --wolf-neutral-border: rgba(255, 255, 255, 0.08);
   --wolf-neutral-haze: rgba(255, 255, 255, 0.06);
-  --wolf-error-soft: rgba(255, 122, 122, 0.12);
-  --wolf-error-border: rgba(255, 122, 122, 0.45);
-  --wolf-error-glow: rgba(255, 122, 122, 0.25);
-  --wolf-error-border-strong: rgba(255, 122, 122, 0.55);
+  --wolf-error-soft: rgba(255, 107, 107, 0.14);
+  --wolf-error-border: rgba(255, 107, 107, 0.45);
+  --wolf-error-glow: rgba(255, 107, 107, 0.28);
+  --wolf-error-border-strong: rgba(255, 107, 107, 0.55);
 }
 
 @theme inline {
@@ -111,10 +115,6 @@
   --color-wolf-emerald-faint: var(--wolf-emerald-faint);
   --color-wolf-border-glow: var(--wolf-border-glow);
   --color-wolf-emerald-border-strong: var(--wolf-emerald-border-strong);
-  --color-wolf-forest-60: var(--wolf-forest-60);
-  --color-wolf-violet-soft: var(--wolf-violet-soft);
-  --color-wolf-violet-border: var(--wolf-violet-border);
-  --color-wolf-violet-accent: var(--wolf-violet-accent);
   --color-wolf-neutral-soft: var(--wolf-neutral-soft);
   --color-wolf-neutral-border: var(--wolf-neutral-border);
   --color-wolf-neutral-haze: var(--wolf-neutral-haze);
@@ -135,13 +135,14 @@
 body {
   background:
     radial-gradient(
-      120% 120% at 12% -20%,
-      rgba(160, 83, 255, 0.18),
+      140% 120% at 50% -10%,
+      rgba(186, 255, 92, 0.25),
       transparent
-    ), radial-gradient(80% 80% at 88% 4%, rgba(91, 45, 255, 0.16), transparent),
+    ),
+    radial-gradient(120% 120% at 90% 0%, rgba(47, 230, 139, 0.15), transparent),
     radial-gradient(
       140% 120% at 50% 120%,
-      rgba(255, 176, 58, 0.08),
+      rgba(255, 214, 107, 0.08),
       transparent
     ), var(--background);
   color: var(--foreground);
@@ -170,10 +171,10 @@ body::after {
   inset: 0;
   background: radial-gradient(
     50% 50% at 50% 10%,
-    rgba(160, 83, 255, 0.12),
+    rgba(186, 255, 92, 0.16),
     transparent 60%
   );
-  opacity: 0.75;
+  opacity: 0.6;
   z-index: -2;
 }
 
@@ -249,7 +250,7 @@ body::after {
   inset: -40%;
   background: radial-gradient(
     circle at 50% 0%,
-    rgba(160, 83, 255, 0.16),
+    rgba(186, 255, 92, 0.2),
     transparent 55%
   );
   opacity: 0.85;
@@ -276,7 +277,7 @@ body::after {
   height: 60%;
   background: radial-gradient(
     circle at top,
-    rgba(160, 83, 255, 0.12),
+    rgba(137, 226, 74, 0.18),
     transparent 65%
   );
   opacity: 0.5;
@@ -294,11 +295,11 @@ body::after {
   border-radius: var(--den-radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(
-    120deg,
-    rgba(160, 83, 255, 0.16),
-    rgba(91, 45, 255, 0.08)
+    180deg,
+    rgba(200, 255, 100, 0.22),
+    rgba(12, 18, 12, 0.55)
   );
-  color: #ffffff;
+  color: #c8ff64;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.24em;
@@ -311,7 +312,7 @@ body::after {
   inset: -50%;
   background: radial-gradient(
     60% 60% at 50% 50%,
-    rgba(160, 83, 255, 0.18),
+    rgba(186, 255, 92, 0.2),
     transparent 70%
   );
   opacity: 0.6;
@@ -322,9 +323,10 @@ body::after {
 .wolf-gradient-text {
   background: linear-gradient(
     135deg,
-    var(--den-accent),
-    var(--den-accent-deep) 50%,
-    var(--den-warm)
+    #c8ff64,
+    #89e24a 45%,
+    #2fe68b 70%,
+    #ffd66b
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -352,7 +354,7 @@ body::after {
   left: -20%;
   width: 620px;
   height: 620px;
-  background: rgba(160, 83, 255, 0.22);
+  background: rgba(186, 255, 92, 0.22);
 }
 
 .wolf-neon-backdrop::after {
@@ -360,14 +362,14 @@ body::after {
   right: -25%;
   width: 540px;
   height: 540px;
-  background: rgba(255, 176, 58, 0.16);
+  background: rgba(255, 214, 107, 0.16);
 }
 
 .den-glass {
   position: relative;
   border-radius: var(--den-radius-lg);
-  border: 1px solid var(--den-border-soft);
-  background: var(--den-surface-glass);
+  border: 1px solid rgba(34, 40, 46, 0.72);
+  background: rgba(20, 23, 28, 0.72);
   backdrop-filter: blur(var(--den-blur-glass));
   box-shadow: var(--den-shadow-elev);
 }
@@ -386,7 +388,7 @@ body::after {
   inset: -20%;
   background: radial-gradient(
     70% 70% at 50% 50%,
-    rgba(160, 83, 255, 0.32),
+    rgba(186, 255, 92, 0.32),
     transparent 70%
   );
   filter: blur(40px);
@@ -400,7 +402,7 @@ body::after {
   inset: -20%;
   background: radial-gradient(
     70% 70% at 50% 50%,
-    rgba(255, 176, 58, 0.28),
+    rgba(255, 214, 107, 0.28),
     transparent 70%
   );
   filter: blur(40px);
@@ -430,8 +432,8 @@ body::after {
   border-radius: 45%;
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(160, 83, 255, 0.45),
-    rgba(91, 45, 255, 0.18)
+    rgba(186, 255, 92, 0.4),
+    rgba(47, 230, 139, 0.18)
   );
   filter: blur(40px);
   opacity: 0.55;
@@ -441,8 +443,8 @@ body::after {
 .den-blob--warm {
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(255, 176, 58, 0.4),
-    rgba(160, 83, 255, 0)
+    rgba(255, 214, 107, 0.35),
+    rgba(47, 230, 139, 0)
   );
 }
 
@@ -451,6 +453,7 @@ body::after {
   100% {
     transform: translate3d(0, -6px, 0) scale(1);
   }
+
   50% {
     transform: translate3d(0, 6px, 0) scale(1.04);
   }
@@ -461,28 +464,32 @@ body::after {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.5rem;
-  border-radius: var(--den-radius-xl);
-  background: linear-gradient(135deg, var(--den-accent), var(--den-accent-deep));
-  color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 0.625rem;
+  background: #89e24a;
+  color: #09140a;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  box-shadow: var(--den-shadow-glow-accent);
+  /* letter-spacing: 0.12em; */
+  /* text-transform: uppercase; */
+  box-shadow: none;
+  border: 1px solid rgba(137, 226, 74, 0.55);
   transition:
     transform 120ms ease,
-    box-shadow 120ms ease;
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
 .den-button-primary:hover {
   transform: translateY(-1px);
-  box-shadow:
-    0 0 32px rgba(160, 83, 255, 0.72),
-    0 0 64px rgba(91, 45, 255, 0.5);
+  background: #75d33d;
+  border-color: rgba(137, 226, 74, 0.75);
 }
 
 .den-button-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  background: #4ca22a;
+  border-color: rgba(76, 162, 42, 0.85);
 }
 
 .den-button-ghost {
@@ -491,10 +498,10 @@ body::after {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.9rem 1.5rem;
-  border-radius: var(--den-radius-xl);
-  border: 1px solid var(--den-border);
-  background: rgba(255, 255, 255, 0.02);
-  color: #ffffff;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(26, 31, 36, 0.72);
+  color: var(--den-text);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -505,8 +512,8 @@ body::after {
 }
 
 .den-button-ghost:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(137, 226, 74, 0.45);
+  background: rgba(26, 31, 36, 0.85);
 }
 
 .den-chip {
@@ -515,9 +522,9 @@ body::after {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.35rem 0.9rem;
-  border-radius: var(--den-radius-lg);
+  border-radius: 0.625rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(17, 19, 24, 0.6);
+  background: rgba(26, 31, 36, 0.7);
   backdrop-filter: blur(12px);
   font-size: 0.8rem;
   font-weight: 500;
@@ -526,12 +533,8 @@ body::after {
 }
 
 .den-chip--active {
-  border-color: rgba(160, 83, 255, 0.6);
-  background: linear-gradient(
-    135deg,
-    rgba(160, 83, 255, 0.65),
-    rgba(91, 45, 255, 0.45)
-  );
+  border-color: rgba(186, 255, 92, 0.55);
+  background: linear-gradient(180deg, #c8ff64 0%, #8bea4e 55%, #3b572a 100%);
   box-shadow: var(--den-shadow-glow-accent);
 }
 
@@ -553,10 +556,10 @@ body::after {
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(160, 83, 255, 0.8),
-    rgba(91, 45, 255, 0.6)
+    rgba(137, 226, 74, 0.9),
+    rgba(47, 230, 139, 0.75)
   );
-  box-shadow: 0 0 18px rgba(160, 83, 255, 0.6);
+  box-shadow: 0 0 18px rgba(186, 255, 92, 0.55);
   transition: inset 160ms ease;
 }
 
@@ -564,14 +567,14 @@ body::after {
   position: absolute;
   width: 20px;
   height: 20px;
-  border-radius: var(--den-radius-md);
+  border-radius: 0.5rem;
   border: 2px solid rgba(255, 255, 255, 0.18);
   background: linear-gradient(
     135deg,
-    rgba(17, 19, 24, 0.8),
-    rgba(11, 13, 19, 0.6)
+    rgba(26, 31, 36, 0.9),
+    rgba(10, 11, 13, 0.75)
   );
-  box-shadow: 0 0 24px rgba(160, 83, 255, 0.6);
+  box-shadow: 0 0 24px rgba(186, 255, 92, 0.55);
   transform: translate(-50%, -45%);
 }
 
