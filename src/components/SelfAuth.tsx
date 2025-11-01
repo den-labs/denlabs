@@ -12,6 +12,10 @@ import {
   useState,
 } from "react";
 import { normalizeSelfEndpoint } from "@/lib/selfEndpoint";
+import {
+  getSelfVerification,
+  setSelfVerification,
+} from "@/lib/selfVerification";
 
 interface SelfAuthProps {
   onSuccess?: (data: unknown) => void;
@@ -27,37 +31,6 @@ type QrWrapperProps = {
 };
 
 type QrWrapperComponent = (props: QrWrapperProps) => ReactElement | null;
-
-const SELF_VERIFICATION_STORAGE_KEY = "wolf-den:self-verified";
-
-function persistVerificationStatus(value: boolean) {
-  if (typeof window === "undefined") {
-    return;
-  }
-  try {
-    if (value) {
-      window.sessionStorage.setItem(SELF_VERIFICATION_STORAGE_KEY, "true");
-    } else {
-      window.sessionStorage.removeItem(SELF_VERIFICATION_STORAGE_KEY);
-    }
-  } catch (error) {
-    console.warn("Unable to persist Self verification status.", error);
-  }
-}
-
-function readVerificationStatus() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  try {
-    return (
-      window.sessionStorage.getItem(SELF_VERIFICATION_STORAGE_KEY) === "true"
-    );
-  } catch (error) {
-    console.warn("Unable to read Self verification status.", error);
-    return false;
-  }
-}
 
 export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
   const t = useTranslations("SelfAuth");
@@ -78,7 +51,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
   const Wrapper = qrWrapper;
 
   const markVerified = useCallback(() => {
-    persistVerificationStatus(true);
+    setSelfVerification(true);
     if (!isVerified) {
       onSuccess?.(undefined);
     }
@@ -86,7 +59,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
   }, [isVerified, onSuccess]);
 
   const clearVerified = useCallback(() => {
-    persistVerificationStatus(false);
+    setSelfVerification(false);
     setIsVerified(false);
   }, []);
 
@@ -133,7 +106,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
     if (isVerified) {
       return;
     }
-    if (readVerificationStatus()) {
+    if (getSelfVerification()) {
       markVerified();
     }
   }, [isVerified, markVerified]);

@@ -2,9 +2,14 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { HowlBadge } from "@/components/ui/HowlBadge";
 import { SelfBadge } from "@/components/ui/SelfBadge";
 import { Link, usePathname } from "@/i18n/routing";
+import {
+  getSelfVerification,
+  subscribeToSelfVerification,
+} from "@/lib/selfVerification";
 
 type ModuleKey =
   | "quests"
@@ -34,6 +39,7 @@ const moduleKeys: Record<string, ModuleKey> = {
 export function TopBar() {
   const t = useTranslations("TopBar");
   const pathname = usePathname();
+  const [isSelfVerified, setIsSelfVerified] = useState(false);
   const activeKey = Object.keys(moduleKeys).find(
     (path) => pathname === path || pathname?.startsWith(`${path}/`),
   );
@@ -46,6 +52,14 @@ export function TopBar() {
         title: t("fallback.title"),
         description: t("fallback.description"),
       };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    setIsSelfVerified(getSelfVerification());
+    return subscribeToSelfVerification(setIsSelfVerified);
+  }, []);
 
   return (
     <header className="flex flex-col justify-between gap-4 text-wolf-foreground">
@@ -68,7 +82,7 @@ export function TopBar() {
 
       <div className="flex items-center gap-3 text-wolf-foreground">
         <HowlBadge level="Lobo" />
-        <SelfBadge status="pending" />
+        <SelfBadge status={isSelfVerified ? "verified" : "pending"} />
       </div>
     </header>
   );
