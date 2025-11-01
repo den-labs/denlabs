@@ -1,13 +1,14 @@
 # Wolf Den Labs
 
- Wolf Den Labs is the pack’s on-chain event lab and digital command center. Organizers spin up mini-games with instant
- crypto payouts, sponsors light up customized touchpoints, and mentors extend momentum through the Taberna itinerary—
- all running on the original builder-grade Wolf Den infrastructure so the pack keeps shipping fast and playing smarter.
+Wolf Den Labs is the pack’s on-chain event lab and digital command center. Organizers spin up mini-games with instant
+crypto payouts, sponsors light up customized touchpoints, and mentors extend momentum through the Taberna itinerary—
+all running on the original builder-grade Wolf Den infrastructure so the pack keeps shipping fast and playing smarter.
 
 ## Highlights
 - Event control panel that imports attendees, defines crypto prize pools, and launches ruleta/carrera mini-games with on-chain payouts
 - Locale-aware routing with `next-intl` so organizers, mentors, and sponsors can navigate in English (`en`) and Spanish (`es`)
 - Feature surface grouped under `src/app/[locale]/(den)` with reusable modules in `src/components/{den,modules,ui}`
+- Cohesive lime/emerald neon-glass theme with pill navigation, focus outlines, and status strip aligning desktop, tablet, and mobile shells
 - Self identity verification via `@selfxyz/core`/`@selfxyz/qrcode` pairing check-ins with trusted identities
 - Tailwind CSS v4 (PostCSS pipeline) layered with custom “wolf” tokens for consistent visuals
 - Biome-enforced TypeScript 5 + React 19 codebase using Next.js 15 and Turbopack in development
@@ -41,7 +42,7 @@
 src/
   app/
     [locale]/
-      (den)/            # Auth, quests, mentorship, leaderboard, taberna, etc.
+      (den)/            # Auth, quests, mentorship, spray console, leaderboard, taberna, etc.
       layout.tsx        # Locale provider wiring
       page.tsx          # Landing page (delegates to components/home)
     api/self/verify     # Self attestation verification route
@@ -69,10 +70,17 @@ Keep shared UI inside `src/components`. Route-specific assets belong in their pa
 - `globals.css` defines the “wolf” color tokens used throughout the dashboard. Extend tokens here instead of inlined hex values.
 - Fonts: Geist (sans + mono) from Vercel plus Bitcount Single Ink for headlines. Global font setup resides in `src/app/layout.tsx`.
 - A simple localStorage-backed script (`wolf-den-theme`) seeds `data-theme` for future light/dark work; preserve it if you expand theme support.
+- The neon-glass theme relies on lime/emerald primaries (`--den-lime`, `--den-emerald`) with flat pill buttons (`rounded-[10px]`) and muted secondary copy. Keep new components aligned with these tokens and focus styles.
 
 ## Self Verification Flow
 - `/api/self/verify` uses `@selfxyz/core` to validate proofs server-side. It currently allows attestation id `1` and enforces age ≥ 18 with OFAC screening.
 - For sandboxed development, set `SELF_USE_SANDBOX=true` to skip live verification while keeping the flow intact.
+
+## Spray Console
+- `/[locale]/spray` now lives inside the Den layout so it inherits the shared header, status strip, and activity rail.
+- `SprayDisperser` manages CELO / ERC20 airdrops; configure `NEXT_PUBLIC_SPRAY_ADDRESS` to target a different contract.
+- Top bar metadata comes from `TopBar.modules.spray`; update translations in `src/i18n/messages/*` if you adjust copy.
+- The module expects a connected wallet on Celo mainnet (chain id 42220) and optionally performs ERC20 allowance approval.
 
 ## Development Workflow
 - Use TypeScript strict mode—export component prop types and avoid `any`.
@@ -84,6 +92,7 @@ Keep shared UI inside `src/components`. Route-specific assets belong in their pa
 ## Deployment
 - Run `npm run build` to produce the production bundle and `npm run start` to serve it.
 - Ensure environment variables are provided in your hosting platform. The Self verifier must be reachable over HTTPS, and any iframe origins (e.g., `NEXT_PUBLIC_TABERNA_URL`) should permit camera/microphone usage.
+- Configure `NEXT_PUBLIC_SPRAY_ADDRESS` with the deployed Spray disperser contract if you are not targeting the default Celo mainnet address.
 
 ## Contributing
 - Open issues or start discussions before shipping large feature work so we can align on UX and platform requirements.
