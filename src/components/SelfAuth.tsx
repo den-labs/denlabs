@@ -132,7 +132,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
     if (!userIdRef.current) {
       const randomId =
         typeof globalThis !== "undefined" &&
-          typeof globalThis.crypto?.randomUUID === "function"
+        typeof globalThis.crypto?.randomUUID === "function"
           ? globalThis.crypto.randomUUID()
           : Math.random().toString(36).slice(2);
       userIdRef.current = randomId;
@@ -141,7 +141,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
     if (!sessionIdRef.current) {
       const randomSessionId =
         typeof globalThis !== "undefined" &&
-          typeof globalThis.crypto?.randomUUID === "function"
+        typeof globalThis.crypto?.randomUUID === "function"
           ? globalThis.crypto.randomUUID()
           : Math.random().toString(36).slice(2);
       sessionIdRef.current = randomSessionId;

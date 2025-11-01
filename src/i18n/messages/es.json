@@ -178,18 +178,64 @@
     "submit": "Enviar cast"
   },
   "CheckInPanel": {
-    "title": "Check-in",
-    "qrAlt": "QR para check-in",
-    "cta": "Firmar con la manada",
-    "howItWorks": {
-      "title": "Cómo funciona",
-      "steps": [
-        "* Escanea el QR desde la app Manada.",
-        "* Firma el reto con tu wallet.",
-        "* ¡Listo! asistencia registrada."
-      ]
+    "title": "Verifica con Self",
+    "selfHelper": "Admins, mentores y ops deben verificar con Self antes de administrar dinámicas en vivo.",
+    "qrAlt": "Código QR para check-in",
+    "cta": "Abrir app Self",
+    "footnote": "Cada check-in verificado suma HOWL y prepara tu wallet para perks on-chain.",
+    "wallet": {
+      "title": "Acceso con wallet",
+      "description": "Conecta una wallet para recibir premios, sprays y drops posteriores.",
+      "helper": "Las personas participantes pueden empezar con wallet. Suma Self para desbloquear puntos HOWL y métricas confiables para sponsors.",
+      "connect": "Conectar wallet",
+      "disconnect": "Desconectar",
+      "connected": "Wallet conectada",
+      "connectLabel": "Wallet pendiente",
+      "connectedLabel": "Wallet lista"
     },
-    "footnote": "Cada check-in verificado suma HOWL y prepara tu cuenta para los beneficios futuros del token."
+    "events": {
+      "title": "Cartelera de eventos",
+      "description": "Regístrate con anticipación y haz check-in cuando abra la sala.",
+      "identityRequired": "Self pendiente",
+      "selfReady": "Self listo",
+      "identityHint": "Conecta una wallet o completa Self para reservar tu lugar.",
+      "identityReminder": "Necesitas identidad para registrarte.",
+      "register": "Registrar",
+      "registered": "Registrado",
+      "checkIn": "Hacer check-in",
+      "checkedIn": "Check-in completado",
+      "checkedInHelper": "Ya estás contado. HOWL y recompensas listos.",
+      "closed": "Registro cerrado.",
+      "empty": "Aún no hay eventos próximos. Vuelve pronto.",
+      "status": {
+        "live": "En vivo",
+        "upcoming": "Próximo",
+        "closed": "Cerrado"
+      },
+      "items": [
+        {
+          "id": "event-1",
+          "name": "Demo Day • Wolf Den",
+          "date": "Hoy • 18:00",
+          "location": "Escenario principal",
+          "status": "live"
+        },
+        {
+          "id": "event-2",
+          "name": "Mentor Sprints",
+          "date": "Mañana • 10:00",
+          "location": "Salas Taberna",
+          "status": "upcoming"
+        },
+        {
+          "id": "event-3",
+          "name": "Cierre con sponsors",
+          "date": "Ayer • 20:30",
+          "location": "Deck de operaciones",
+          "status": "closed"
+        }
+      ]
+    }
   },
   "MentorBooking": {
     "title": "Agenda",

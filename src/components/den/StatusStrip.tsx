@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { type ComponentProps, useEffect, useState } from "react";
 import HowlBadge from "@/components/ui/HowlBadge";
 import SelfBadge from "@/components/ui/SelfBadge";
+import { usePathname } from "@/i18n/routing";
 import {
   getSelfVerification,
   subscribeToSelfVerification,
@@ -13,11 +15,24 @@ type StatusStripProps = {
   className?: string;
 };
 
+const CELO_CHAIN_ID = 42220;
+
 export function StatusStrip({
   level = "Lobo",
   className = "",
 }: StatusStripProps) {
+  const tSpray = useTranslations("SprayDisperser");
+  const pathname = usePathname();
   const [isSelfVerified, setIsSelfVerified] = useState(false);
+  const [walletState, setWalletState] = useState<{
+    address: string | null;
+    isConnecting: boolean;
+    chainId: number | null;
+  }>({
+    address: null,
+    isConnecting: false,
+    chainId: null,
+  });
   const socialLinks = [
     {
       href: "https://github.com/wolfcito/wolf-den",
@@ -63,12 +78,99 @@ export function StatusStrip({
     return subscribeToSelfVerification(setIsSelfVerified);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const handleWalletState = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        address: string | null;
+        isConnecting: boolean;
+        chainId: number | null;
+      }>;
+      if (customEvent.detail) {
+        setWalletState(customEvent.detail);
+      }
+    };
+    window.addEventListener(
+      "wolf-wallet-state",
+      handleWalletState as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        "wolf-wallet-state",
+        handleWalletState as EventListener,
+      );
+    };
+  }, []);
+
+  const formatAddress = (address: string) =>
+    address.length <= 10
+      ? address
+      : `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+  const handleWalletConnect = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("wolf-wallet-connect-request"));
+  };
+
+  const isSprayRoute = Boolean(pathname?.includes("/spray"));
+  const isCeloReady = walletState.chainId === CELO_CHAIN_ID;
+  const translateSpray = (
+    key: string,
+    fallback: string,
+    values?: Record<string, string | number>,
+  ) => {
+    try {
+      return values ? tSpray(key, values) : tSpray(key);
+    } catch {
+      return fallback;
+    }
+  };
+
+  const walletButtonLabel = walletState.isConnecting
+    ? "Connecting..."
+    : walletState.address
+      ? translateSpray(
+          "actions.connected",
+          `Connected: ${formatAddress(walletState.address)}`,
+          { address: formatAddress(walletState.address) },
+        )
+      : translateSpray("actions.connect", "Connect Wallet");
+
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       <div className="flex items-center gap-3">
         <HowlBadge level={level} />
         <SelfBadge status={isSelfVerified ? "verified" : "pending"} />
       </div>
+      {isSprayRoute ? (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleWalletConnect}
+            disabled={walletState.isConnecting}
+            className="inline-flex items-center justify-center rounded-full border border-wolf-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-wolf-foreground transition hover:border-wolf-border-xstrong hover:text-wolf-emerald disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {walletButtonLabel}
+          </button>
+          {walletState.address ? (
+            <span
+              className={`wolf-pill text-xs uppercase tracking-[0.26em] ${
+                isCeloReady
+                  ? "bg-wolf-emerald-soft text-wolf-emerald"
+                  : "bg-wolf-charcoal-70 text-wolf-text-subtle"
+              }`}
+            >
+              {isCeloReady
+                ? translateSpray("network.ready", "Celo mainnet detected")
+                : translateSpray("network.switch", "Switch to Celo mainnet")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex items-center gap-2">
         {socialLinks.map((link) => (
           <a

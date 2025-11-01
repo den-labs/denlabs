@@ -178,18 +178,64 @@
     "submit": "Send cast"
   },
   "CheckInPanel": {
-    "title": "Check-in",
+    "title": "Verify with Self",
+    "selfHelper": "Admins, mentors, and ops must verify with Self before managing live experiences.",
     "qrAlt": "QR code for check-in",
-    "cta": "Sign with the pack",
-    "howItWorks": {
-      "title": "How it works",
-      "steps": [
-        "* Scan the QR from the Pack app.",
-        "* Sign the challenge with your wallet.",
-        "* Done! Attendance recorded."
-      ]
+    "cta": "Open Self app",
+    "footnote": "Every verified check-in adds HOWL and readies your wallet for on-chain perks.",
+    "wallet": {
+      "title": "Wallet access",
+      "description": "Connect a wallet to receive prizes, sprays, and follow-up drops.",
+      "helper": "Participants can start with a wallet. Add Self verification to unlock HOWL points and sponsor-trusted scores.",
+      "connect": "Connect wallet",
+      "disconnect": "Disconnect",
+      "connected": "Connected wallet",
+      "connectLabel": "Wallet needed",
+      "connectedLabel": "Wallet linked"
     },
-    "footnote": "Every verified check-in adds HOWL and preps your wallet for future token perks."
+    "events": {
+      "title": "Event roster",
+      "description": "Register ahead of time and check in when doors open.",
+      "identityRequired": "Self pending",
+      "selfReady": "Self ready",
+      "identityHint": "Connect a wallet or finish Self verification to reserve your spot.",
+      "identityReminder": "Identity required to register.",
+      "register": "Register",
+      "registered": "Registered",
+      "checkIn": "Check-in now",
+      "checkedIn": "Checked in",
+      "checkedInHelper": "You’re counted in. HOWL points and rewards are ready.",
+      "closed": "Registration closed.",
+      "empty": "No upcoming events yet. Check back soon.",
+      "status": {
+        "live": "Live",
+        "upcoming": "Upcoming",
+        "closed": "Closed"
+      },
+      "items": [
+        {
+          "id": "event-1",
+          "name": "Demo Day • Wolf Den",
+          "date": "Today • 18:00",
+          "location": "Main Stage",
+          "status": "live"
+        },
+        {
+          "id": "event-2",
+          "name": "Mentor Sprints",
+          "date": "Tomorrow • 10:00",
+          "location": "Taberna Rooms",
+          "status": "upcoming"
+        },
+        {
+          "id": "event-3",
+          "name": "Sponsor Wrap Session",
+          "date": "Yesterday • 20:30",
+          "location": "Ops Deck",
+          "status": "closed"
+        }
+      ]
+    }
   },
   "MentorBooking": {
     "title": "Schedule",
