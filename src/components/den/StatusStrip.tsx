@@ -1,5 +1,6 @@
 "use client";
 
+import { BrowserProvider } from "ethers";
 import { useTranslations } from "next-intl";
 import { type ComponentProps, useEffect, useState } from "react";
 import HowlBadge from "@/components/ui/HowlBadge";
@@ -9,12 +10,44 @@ import {
   subscribeToSelfVerification,
 } from "@/lib/selfVerification";
 
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: {
+        method: string;
+        params?: unknown[];
+      }) => Promise<unknown>;
+      on?: (event: string, listener: (...args: unknown[]) => void) => void;
+      removeListener?: (
+        event: string,
+        listener: (...args: unknown[]) => void,
+      ) => void;
+    };
+  }
+}
+
 type StatusStripProps = {
   level?: ComponentProps<typeof HowlBadge>["level"];
   className?: string;
 };
 
+type WalletBroadcastDetail = {
+  address: string | null;
+  isConnecting: boolean;
+  chainId: number | null;
+  provider: BrowserProvider | null;
+};
+
 const CELO_CHAIN_ID = 42220;
+
+const broadcastWalletState = (detail: WalletBroadcastDetail) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.dispatchEvent(
+    new CustomEvent<WalletBroadcastDetail>("wolf-wallet-state", { detail }),
+  );
+};
 
 export function StatusStrip({
   level = "Lobo",
@@ -22,15 +55,15 @@ export function StatusStrip({
 }: StatusStripProps) {
   const tSpray = useTranslations("SprayDisperser");
   const [isSelfVerified, setIsSelfVerified] = useState(false);
-  const [walletState, setWalletState] = useState<{
-    address: string | null;
-    isConnecting: boolean;
-    chainId: number | null;
-  }>({
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [walletState, setWalletState] = useState<
+    Omit<WalletBroadcastDetail, "provider">
+  >({
     address: null,
     isConnecting: false,
     chainId: null,
   });
+
   const socialLinks = [
     {
       href: "https://github.com/wolfcito/wolf-den",
@@ -76,45 +109,6 @@ export function StatusStrip({
     return subscribeToSelfVerification(setIsSelfVerified);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const handleWalletState = (event: Event) => {
-      const customEvent = event as CustomEvent<{
-        address: string | null;
-        isConnecting: boolean;
-        chainId: number | null;
-      }>;
-      if (customEvent.detail) {
-        setWalletState(customEvent.detail);
-      }
-    };
-    window.addEventListener(
-      "wolf-wallet-state",
-      handleWalletState as EventListener,
-    );
-    return () => {
-      window.removeEventListener(
-        "wolf-wallet-state",
-        handleWalletState as EventListener,
-      );
-    };
-  }, []);
-
-  const formatAddress = (address: string) =>
-    address.length <= 10
-      ? address
-      : `${address.slice(0, 6)}...${address.slice(-4)}`;
-
-  const handleWalletConnect = () => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    window.dispatchEvent(new CustomEvent("wolf-wallet-connect-request"));
-  };
-
-  const isCeloReady = walletState.chainId === CELO_CHAIN_ID;
   const translateSpray = (
     key: string,
     fallback: string,
@@ -126,6 +120,172 @@ export function StatusStrip({
       return fallback;
     }
   };
+
+  const formatAddress = (address: string) =>
+    address.length <= 10
+      ? address
+      : `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+  const handleWalletConnect = async () => {
+    if (walletState.isConnecting) {
+      return;
+    }
+    if (typeof window === "undefined" || !window.ethereum) {
+      return;
+    }
+    setWalletState((prev) => {
+      const next = { ...prev, isConnecting: true };
+      broadcastWalletState({ ...next, provider });
+      return next;
+    });
+    try {
+      const nextProvider = new BrowserProvider(window.ethereum);
+      await nextProvider.send("eth_requestAccounts", []);
+      const signer = await nextProvider.getSigner();
+      const address = await signer.getAddress();
+      const network = await nextProvider.getNetwork();
+      setProvider(nextProvider);
+      setWalletState({
+        address,
+        isConnecting: false,
+        chainId: Number(network.chainId),
+      });
+      broadcastWalletState({
+        address,
+        isConnecting: false,
+        chainId: Number(network.chainId),
+        provider: nextProvider,
+      });
+    } catch {
+      setProvider(null);
+      setWalletState({
+        address: null,
+        isConnecting: false,
+        chainId: null,
+      });
+      broadcastWalletState({
+        address: null,
+        isConnecting: false,
+        chainId: null,
+        provider: null,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.ethereum) {
+      return;
+    }
+    let mounted = true;
+
+    const syncExisting = async () => {
+      try {
+        const { ethereum } = window;
+        if (!ethereum?.request) {
+          return;
+        }
+        const accounts = (await ethereum.request({
+          method: "eth_accounts",
+        })) as string[] | undefined;
+        if (!mounted || !accounts || accounts.length === 0) {
+          return;
+        }
+        const nextProvider = new BrowserProvider(ethereum);
+        const network = await nextProvider.getNetwork();
+        setProvider(nextProvider);
+        setWalletState({
+          address: accounts[0],
+          isConnecting: false,
+          chainId: Number(network.chainId),
+        });
+        broadcastWalletState({
+          address: accounts[0],
+          isConnecting: false,
+          chainId: Number(network.chainId),
+          provider: nextProvider,
+        });
+      } catch {
+        // ignore
+      }
+    };
+
+    void syncExisting();
+
+    const handleAccountsChanged = async (accounts: unknown) => {
+      if (!Array.isArray(accounts) || accounts.length === 0) {
+        setProvider(null);
+        setWalletState({
+          address: null,
+          isConnecting: false,
+          chainId: null,
+        });
+        broadcastWalletState({
+          address: null,
+          isConnecting: false,
+          chainId: null,
+          provider: null,
+        });
+        return;
+      }
+      const { ethereum } = window;
+      if (!ethereum) {
+        return;
+      }
+      const nextProvider = new BrowserProvider(ethereum);
+      const network = await nextProvider.getNetwork();
+      setProvider(nextProvider);
+      setWalletState({
+        address: String(accounts[0]),
+        isConnecting: false,
+        chainId: Number(network.chainId),
+      });
+      broadcastWalletState({
+        address: String(accounts[0]),
+        isConnecting: false,
+        chainId: Number(network.chainId),
+        provider: nextProvider,
+      });
+    };
+
+    const handleChainChanged = (newChainId: unknown) => {
+      if (typeof newChainId === "string") {
+        const parsed = Number.parseInt(newChainId, 16);
+        setWalletState((prev) => {
+          const next = {
+            ...prev,
+            chainId: Number.isNaN(parsed) ? prev.chainId : parsed,
+          };
+          broadcastWalletState({ ...next, provider });
+          return next;
+        });
+      }
+    };
+
+    window.ethereum.on?.("accountsChanged", handleAccountsChanged);
+    window.ethereum.on?.("chainChanged", handleChainChanged);
+
+    return () => {
+      mounted = false;
+      window.ethereum?.removeListener?.(
+        "accountsChanged",
+        handleAccountsChanged,
+      );
+      window.ethereum?.removeListener?.("chainChanged", handleChainChanged);
+    };
+  }, [provider]);
+
+  useEffect(() => {
+    return () => {
+      broadcastWalletState({
+        address: null,
+        isConnecting: false,
+        chainId: null,
+        provider: null,
+      });
+    };
+  }, []);
+
+  const isCeloReady = walletState.chainId === CELO_CHAIN_ID;
 
   const walletButtonLabel = walletState.isConnecting
     ? "Connecting..."

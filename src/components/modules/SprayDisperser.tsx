@@ -1,7 +1,7 @@
 "use client";
 
+import type { BrowserProvider } from "ethers";
 import {
-  BrowserProvider,
   Contract,
   formatEther,
   isAddress,
@@ -9,7 +9,7 @@ import {
   parseUnits,
 } from "ethers";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const SPRAY_ADDRESS = (
   process.env.NEXT_PUBLIC_SPRAY_ADDRESS ??
@@ -107,7 +107,6 @@ export default function SprayDisperser() {
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [signerAddress, setSignerAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [mode, setMode] = useState<"native" | "token">("native");
@@ -220,73 +219,31 @@ export default function SprayDisperser() {
     if (typeof window === "undefined") {
       return;
     }
-    window.dispatchEvent(
-      new CustomEvent("wolf-wallet-state", {
-        detail: {
-          address: signerAddress,
-          isConnecting,
-          chainId,
-        },
-      }),
+    const handleWalletState = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        address: string | null;
+        isConnecting: boolean;
+        chainId: number | null;
+        provider: BrowserProvider | null;
+      }>;
+      if (!customEvent.detail) {
+        return;
+      }
+      setSignerAddress(customEvent.detail.address);
+      setChainId(customEvent.detail.chainId ?? null);
+      setProvider(customEvent.detail.provider ?? null);
+    };
+    window.addEventListener(
+      "wolf-wallet-state",
+      handleWalletState as EventListener,
     );
-  }, [signerAddress, isConnecting, chainId]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
     return () => {
-      window.dispatchEvent(
-        new CustomEvent("wolf-wallet-state", {
-          detail: { address: null, isConnecting: false, chainId: null },
-        }),
+      window.removeEventListener(
+        "wolf-wallet-state",
+        handleWalletState as EventListener,
       );
     };
   }, []);
-
-  const connectWallet = useCallback(async () => {
-    if (isConnecting) {
-      return;
-    }
-
-    if (typeof window === "undefined" || !window.ethereum) {
-      setError(t("errors.noWallet"));
-      return;
-    }
-
-    setIsConnecting(true);
-    setError(null);
-    setFeedback(null);
-
-    try {
-      const nextProvider = new BrowserProvider(window.ethereum);
-      await nextProvider.send("eth_requestAccounts", []);
-      const signer = await nextProvider.getSigner();
-      const address = await signer.getAddress();
-      const network = await nextProvider.getNetwork();
-
-      setProvider(nextProvider);
-      setSignerAddress(address);
-      setChainId(Number(network.chainId));
-    } catch (_connectError) {
-      setError(t("errors.connectFailed"));
-    } finally {
-      setIsConnecting(false);
-    }
-  }, [isConnecting, t]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const handleRequest = () => {
-      void connectWallet();
-    };
-    window.addEventListener("wolf-wallet-connect-request", handleRequest);
-    return () => {
-      window.removeEventListener("wolf-wallet-connect-request", handleRequest);
-    };
-  }, [connectWallet]);
 
   async function ensureCeloNetwork() {
     if (typeof window === "undefined" || !window.ethereum) {
