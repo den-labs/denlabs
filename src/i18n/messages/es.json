@@ -185,7 +185,7 @@
       "title": "Cómo funciona",
       "steps": [
         "* Escanea el QR desde la app Manada.",
-        "* Firma el reto con tu wallet (Privy).",
+        "* Firma el reto con tu wallet.",
         "* ¡Listo! asistencia registrada."
       ]
     },
@@ -499,16 +499,16 @@
       "description": "Cada activación se vuelve verificable: payouts on-chain, Self.xyz blindando la economía de puntos y recaps listos para el blog antes de que termine el evento.",
       "items": [
         {
-          "title": "Payouts on-chain inmediatos",
-          "description": "Los minijuegos disparan el smart contract en cuanto eliges a la persona ganadora, mostrando hashes auditables."
+          "title": "Payout comprobable en tiempo real",
+          "description": "Los minijuegos activan contratos auditados en cuanto emerge la persona campeona, exponiendo hashes y recibos en los que los sponsors pueden confiar."
         },
         {
-          "title": "Frontera anti-sybil Self.xyz",
-          "description": "Las personas asistentes inician sesión, completan Self y recién entonces ganan puntos o premios. Bots fuera, métricas limpias."
+          "title": "Muro de confianza con Self.xyz",
+          "description": "Las personas asistentes pasan verificación Self antes de ganar puntos o premios, manteniendo a los bots fuera y las métricas defendibles."
         },
         {
-          "title": "Recaps listos para el blog",
-          "description": "Los resultados verificados alimentan el motor de storytelling para publicar recaps y highlights de patrocinio confiables."
+          "title": "Recaps que se escriben solos",
+          "description": "Los resultados verificados fluyen al motor de storytelling para publicar recaps nivel sponsor antes de que la audiencia salga del venue."
         }
       ]
     },
@@ -519,19 +519,19 @@
       "items": [
         {
           "value": "95%",
-          "label": "Payouts automáticos en vivo"
+          "label": "Payouts autoejecutados en vivo"
         },
         {
           "value": "8/10",
-          "label": "NPS de organizador tras el piloto"
+          "label": "NPS de organizador post-piloto"
         },
         {
           "value": "70%",
-          "label": "Asistentes jugando un minijuego"
+          "label": "Asistentes entrando a minijuegos"
         },
         {
           "value": "3+",
-          "label": "Activaciones de patrocinio por evento"
+          "label": "Activaciones de patrocinio en cada evento"
         },
         {
           "value": "100%",
@@ -550,15 +550,15 @@
       "items": [
         {
           "title": "Motor de recompensas instantáneas",
-          "description": "Minijuegos de ruleta y carreras conectados a contratos inteligentes entregan premios al momento."
+          "description": "Motores de ruleta y carreras conectados a contratos inteligentes entregan premios on-chain justo cuando el reflector cae sobre la persona ganadora."
         },
         {
           "title": "Panel de operaciones unificado",
-          "description": "Las Ops Leads configuran eventos, monitorean pools y transmiten experiencias desde una sola interfaz."
+          "description": "Las Ops Leads diseñan flujos, supervisan pools de premios y transmiten momentos épicos desde un único mission control."
         },
         {
           "title": "Loop de comunidad verificada",
-          "description": "Self.xyz y Taberna mantienen conectados a mentores, asistentes y patrocinadores antes y después del evento."
+          "description": "La verificación Self.xyz y los itinerarios Taberna mantienen a mentores, asistentes y sponsors orbitando la historia antes, durante y después del evento."
         }
       ]
     },
@@ -569,7 +569,7 @@
       {
         "id": "events",
         "title": "Panel de control de eventos",
-        "description": "Configura el evento, importa asistentes y arma pools de premios auditables.",
+        "description": "Prepara la agenda, importa la lista de asistentes y monta pools de premios con recibos auditables para sponsors.",
         "cta": {
           "label": "Abrir panel de evento",
           "href": "/checkin"
@@ -578,7 +578,7 @@
       {
         "id": "mind-games",
         "title": "Motores de payouts automáticos",
-        "description": "Lanza ruleta y carreras conectadas al contrato para dispersar premios al instante.",
+        "description": "Enciende motores de ruleta y carreras, enruta recompensas por smart contracts y deja que la rueda narre sola.",
         "cta": {
           "label": "Entrar al laboratorio",
           "href": "/mind-games"
@@ -587,7 +587,7 @@
       {
         "id": "self-verification",
         "title": "Frontera Self.xyz",
-        "description": "Valida mentores y asistentes antes de las sesiones, restringiendo recompensas y paneles solo a personas reales.",
+        "description": "Confirma mentores y asistentes con Self antes de cada sesión, restringiendo recompensas y dashboards a humanos verificados.",
         "cta": {
           "label": "Revisar reglas de verificación",
           "href": "/mentorship"
@@ -596,7 +596,7 @@
       {
         "id": "taberna",
         "title": "Mentoría Taberna",
-        "description": "Guía a las personas asistentes por itinerarios de mentoría que extienden el momentum del evento.",
+        "description": "Encamina a builders por itinerarios de mentoría que capturan el momentum y lo convierten en sesiones de seguimiento.",
         "cta": {
           "label": "Abrir Taberna",
           "href": "/taberna"
@@ -605,7 +605,7 @@
       {
         "id": "stats",
         "title": "Analítica y reportes",
-        "description": "Monitorea payouts, engagement y retención con dashboards exportables para patrocinadores.",
+        "description": "Expone tendencias de payouts, engagement y retención con dashboards exportables directo a decks de patrocinio.",
         "cta": {
           "label": "Ver insights",
           "href": "/stats"
@@ -614,7 +614,7 @@
       {
         "id": "showcase",
         "title": "Activaciones de patrocinio",
-        "description": "Orquesta skins, micro-dispersión y paquetes de recap para partners.",
+        "description": "Monta skins, microdispersión y paquetes de recap para que cada partner se lleve prueba de impacto.",
         "cta": {
           "label": "Destacar patrocinio",
           "href": "/showcase"
@@ -623,7 +623,7 @@
       {
         "id": "quests",
         "title": "Extensiones builder",
-        "description": "Despliega quests y automatizaciones creadas por la manada para potenciar tu loop de evento.",
+        "description": "Despliega quests y automatizaciones de la manada para estirar el loop del evento en momentum builder continuo.",
         "cta": {
           "label": "Explorar quests",
           "href": "/quests"
@@ -636,15 +636,15 @@
       "items": [
         {
           "title": "Configura y verifica",
-          "description": "Define la agenda, importa asistentes, arma pools y confirma mentores con verificaciones Self.xyz."
+          "description": "Define la agenda, importa wallets de asistentes, arma pools y confirma mentores detrás del muro de confianza Self.xyz."
         },
         {
           "title": "Ejecuta experiencias en vivo",
-          "description": "Activa ruleta y carreras, ejecuta payouts del smart contract y exhibe activaciones de patrocinio."
+          "description": "Dispara ruleta y carreras, transmite payouts on-chain en vivo y exhibe activaciones de patrocinio en tiempo real."
         },
         {
           "title": "Mide y extiende",
-          "description": "Revisa analítica en vivo, exporta resultados y encamina a la comunidad hacia seguimiento en Taberna."
+          "description": "Revisa analítica en vivo, exporta evidencia para sponsors y encamina a la comunidad a seguimientos Taberna que sostienen la historia."
         }
       ]
     },
@@ -658,15 +658,15 @@
       "items": [
         {
           "title": "Recaps verificados",
-          "description": "Publica resúmenes respaldados por Self.xyz para que sponsors y comunidad vean el impacto real."
+          "description": "Publica resúmenes respaldados por Self.xyz para que sponsors y comunidad vean el impacto irrefutable."
         },
         {
           "title": "Mentor spotlights",
-          "description": "Destaca facilitadores y sesiones de Taberna que mantuvieron vivo el momentum."
+          "description": "Destaca mentores y sesiones Taberna que mantuvieron el impulso encendido después del escenario principal."
         },
         {
           "title": "Storytelling para sponsors",
-          "description": "Empaqueta activaciones, payouts y reacciones en narrativas listas para compartir."
+          "description": "Empaqueta activaciones, payouts y reacciones en narrativas que los sponsors pueden soltar directo en sus canales."
         }
       ]
     }

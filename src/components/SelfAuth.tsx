@@ -132,7 +132,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
     if (!userIdRef.current) {
       const randomId =
         typeof globalThis !== "undefined" &&
-        typeof globalThis.crypto?.randomUUID === "function"
+          typeof globalThis.crypto?.randomUUID === "function"
           ? globalThis.crypto.randomUUID()
           : Math.random().toString(36).slice(2);
       userIdRef.current = randomId;
@@ -141,7 +141,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
     if (!sessionIdRef.current) {
       const randomSessionId =
         typeof globalThis !== "undefined" &&
-        typeof globalThis.crypto?.randomUUID === "function"
+          typeof globalThis.crypto?.randomUUID === "function"
           ? globalThis.crypto.randomUUID()
           : Math.random().toString(36).slice(2);
       sessionIdRef.current = randomSessionId;
@@ -316,7 +316,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
   }, [isMobile]);
 
   return (
-    <div className="wolf-card flex flex-col items-center justify-center gap-5 rounded-[1.9rem] border border-wolf-border-strong px-6 py-8 text-center text-wolf-foreground">
+    <div className="flex flex-col items-center justify-center gap-5 px-6 py-8 text-center text-wolf-foreground">
       {missingConfig.length > 0 ? (
         <div className="space-y-3">
           <div className="text-4xl">⚠️</div>
@@ -342,14 +342,6 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold text-white">
-              {t("intro.title")}
-            </h2>
-            <p className="mt-2 text-sm text-white/70">
-              {isMobile ? t("intro.mobile") : t("intro.body")}
-            </p>
-          </div>
           {isMobile ? (
             <div className="space-y-4">
               <button
@@ -365,7 +357,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
                   ? t("intro.mobileHint")
                   : t("intro.mobileUnavailable")}
               </p>
-              <fieldset className="space-y-2 rounded-[1.15rem] border border-wolf-border-soft px-4 py-3 text-left">
+              <fieldset className="space-y-2 px-4 py-3 text-left">
                 <legend className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
                   {t("intro.mobileQrLabel")}
                 </legend>
@@ -399,7 +391,7 @@ export default function SelfAuth({ onSuccess, onError }: SelfAuthProps) {
           {selfApp ? (
             !isMobile || showQr ? (
               Wrapper ? (
-                <div className="mx-auto w-full max-w-[260px] sm:max-w-[300px] [&>div>div:first-child]:hidden [&>div>div:last-child]:overflow-hidden [&>div>div:last-child]:rounded-[1.15rem] [&>div>div:last-child]:border [&>div>div:last-child]:border-wolf-border-soft [&>div>div:last-child]:bg-wolf-charcoal-90/85 [&>div>div:last-child]:shadow-[0_28px_75px_-55px_rgba(0,0,0,0.7)]">
+                <div className="mx-auto w-full max-w-[260px] sm:max-w-[300px] [&>div>div:first-child]:hidden [&>div>div:last-child]:overflow-hidden [&>div>div:last-child]:bg-wolf-charcoal-90/85 [&>div>div:last-child]:shadow-[0_28px_75px_-55px_rgba(0,0,0,0.7)]">
                   <Wrapper
                     selfApp={selfApp}
                     onSuccess={handleSuccess}

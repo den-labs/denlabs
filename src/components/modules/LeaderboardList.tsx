@@ -10,11 +10,7 @@ export function LeaderboardList() {
 
   return (
     <div className="text-wolf-foreground">
-      <h3 className="text-lg font-semibold uppercase tracking-[0.18em] text-white/90">
-        {t("title")}
-      </h3>
-      <p className="mt-1 text-sm text-wolf-text-subtle">{t("subtitle")}</p>
-      <div className="mt-4 space-y-3">
+      <div className="space-y-3">
         {leaderboard.map((entry) => (
           <div
             key={entry.team}

@@ -10,12 +10,6 @@ export function StatsPanel() {
 
   return (
     <div className="space-y-5 text-wolf-foreground">
-      <div className="wolf-card flex flex-col gap-2 rounded-[1.75rem] border border-wolf-border-strong px-6 py-6 text-sm text-white/80">
-        <p className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle">
-          {t("hero.title")}
-        </p>
-        <p className="text-sm text-white/90">{t("hero.description")}</p>
-      </div>
       <div className="wolf-card rounded-[1.9rem] border border-wolf-border-strong p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-white/90">

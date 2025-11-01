@@ -185,7 +185,7 @@
       "title": "How it works",
       "steps": [
         "* Scan the QR from the Pack app.",
-        "* Sign the challenge with your wallet (Privy).",
+        "* Sign the challenge with your wallet.",
         "* Done! Attendance recorded."
       ]
     },
@@ -499,16 +499,16 @@
       "description": "Every activation stays verifiable: payouts fire on-chain, Self.xyz guards the points economy, and the recap hits your blog before attendees head home.",
       "items": [
         {
-          "title": "Instant on-chain payouts",
-          "description": "Mini-games trigger smart contracts the moment a winner is declared — with hashes surfaced for every sponsor."
+          "title": "Payout proof in real time",
+          "description": "Mini-games fire audited contracts the instant a champion wins, surfacing hashes and receipts sponsors can trust."
         },
         {
-          "title": "Self.xyz anti-sybil gate",
-          "description": "Attendees log in, complete Self verification, and only then earn points or rewards. Bots stay out, metrics stay clean."
+          "title": "Self.xyz-powered trust wall",
+          "description": "Attendees clear Self verification before earning points or rewards, keeping bots out and engagement metrics defensible."
         },
         {
-          "title": "Blog-ready recaps",
-          "description": "Verified results flow straight into the storytelling engine so you can publish trusted recaps and sponsor highlights."
+          "title": "Recaps that write themselves",
+          "description": "Verified outcomes stream into the storytelling engine so you publish sponsor-grade recaps before the crowd heads home."
         }
       ]
     },
@@ -519,19 +519,19 @@
       "items": [
         {
           "value": "95%",
-          "label": "Auto payouts fired live"
+          "label": "Live payouts auto-executed"
         },
         {
           "value": "8/10",
-          "label": "Organizer NPS after pilot"
+          "label": "Organizer NPS post-pilot"
         },
         {
           "value": "70%",
-          "label": "Attendees playing a mini-game"
+          "label": "Attendees entering mini-games"
         },
         {
           "value": "3+",
-          "label": "Sponsor activations per event"
+          "label": "Sponsor activations each event"
         },
         {
           "value": "100%",
@@ -550,15 +550,15 @@
       "items": [
         {
           "title": "Instant Rewards Engine",
-          "description": "Ruleta and race mini-games wired to smart contracts unlock on-chain payouts the moment winners are declared."
+          "description": "Ruleta and race engines wired to smart contracts deliver on-chain payouts the moment the spotlight lands on a winner."
         },
         {
           "title": "Unified Ops Panel",
-          "description": "Ops Leads configure events, monitor pools, and broadcast experiences from a single command interface."
+          "description": "Ops Leads design flows, supervise prize pools, and broadcast hero moments from a single mission control."
         },
         {
           "title": "Verified Community Loop",
-          "description": "Self.xyz verification and Taberna itineraries keep mentors, attendees, and sponsors engaged before and after the event."
+          "description": "Self.xyz verification and Taberna itineraries keep mentors, attendees, and sponsors circling the story before, during, and after the event."
         }
       ]
     },
@@ -569,7 +569,7 @@
       {
         "id": "events",
         "title": "Event Control Panel",
-        "description": "Configure the event, import attendees, and arm prize pools with audit-ready payouts.",
+        "description": "Prime the agenda, import attendee rosters, and stage prize pools with receipts sponsors can audit.",
         "cta": {
           "label": "Open Event Panel",
           "href": "/checkin"
@@ -578,7 +578,7 @@
       {
         "id": "mind-games",
         "title": "Auto Payout Engines",
-        "description": "Launch ruleta and race mini-games wired to the smart contract for instant prize distribution.",
+        "description": "Spin up ruleta and race engines, route rewards through smart contracts, and watch the prize wheel narrate itself.",
         "cta": {
           "label": "Enter Mini-Games",
           "href": "/mind-games"
@@ -587,7 +587,7 @@
       {
         "id": "self-verification",
         "title": "Self.xyz Identity Gate",
-        "description": "Validate mentors and attendees before sessions, gating access to rewards and dashboards for real humans only.",
+        "description": "Confirm mentors and attendees through Self before sessions, gating rewards and dashboards for verified humans only.",
         "cta": {
           "label": "Review Verification Rules",
           "href": "/mentorship"
@@ -596,7 +596,7 @@
       {
         "id": "taberna",
         "title": "Taberna Mentorship",
-        "description": "Guide attendees into mentorship itineraries that extend the event’s momentum.",
+        "description": "Route builders into mentorship itineraries that capture momentum and convert it into follow-on sessions.",
         "cta": {
           "label": "Open Taberna",
           "href": "/taberna"
@@ -605,7 +605,7 @@
       {
         "id": "stats",
         "title": "Analytics & Reporting",
-        "description": "Track payouts, engagement, and retention with exportable, sponsor-ready dashboards.",
+        "description": "Surface payouts, engagement, and retention trends with dashboards sponsors can export and route to decks.",
         "cta": {
           "label": "View Insights",
           "href": "/stats"
@@ -614,7 +614,7 @@
       {
         "id": "showcase",
         "title": "Sponsor Activations",
-        "description": "Orchestrate branded skins, micro-dispersions, and recap packages for partners.",
+        "description": "Stage branded skins, micro-dispersions, and recap packages so every partner walks away with proof of impact.",
         "cta": {
           "label": "Highlight Sponsors",
           "href": "/showcase"
@@ -623,7 +623,7 @@
       {
         "id": "quests",
         "title": "Builder Extensions",
-        "description": "Deploy quests and automations from the pack to expand your event loop.",
+        "description": "Deploy quests and automations from the pack to stretch the event loop into ongoing builder momentum.",
         "cta": {
           "label": "Browse Quests",
           "href": "/quests"
@@ -636,15 +636,15 @@
       "items": [
         {
           "title": "Configure & verify",
-          "description": "Set the agenda, import attendees, define prize pools, and confirm mentors with Self.xyz checks."
+          "description": "Set the agenda, import attendee wallets, define prize pools, and confirm mentors behind the Self.xyz trust wall."
         },
         {
           "title": "Run live experiences",
-          "description": "Trigger ruleta and race engines, execute smart-contract payouts, and spotlight sponsor activations."
+          "description": "Trigger ruleta and race engines, stream smart-contract payouts, and spotlight sponsor activations in real time."
         },
         {
           "title": "Measure & extend",
-          "description": "Review live analytics, export results, and route the community into Taberna follow-ups."
+          "description": "Review live analytics, export proof for sponsors, and route the community into Taberna follow-ups that sustain the story."
         }
       ]
     },
@@ -658,15 +658,15 @@
       "items": [
         {
           "title": "Verified recaps",
-          "description": "Publish event summaries backed by Self.xyz data so sponsors and community see the real impact."
+          "description": "Publish event summaries backed by Self.xyz data so sponsors and community see the undeniable impact."
         },
         {
           "title": "Mentor spotlights",
-          "description": "Highlight facilitators and Taberna sessions that kept momentum alive beyond the main stage."
+          "description": "Highlight mentors and Taberna sessions that kept momentum surging after the main stage lights dim."
         },
         {
           "title": "Sponsor storytelling",
-          "description": "Package activations, payouts, and community reactions into ready-to-share narratives."
+          "description": "Package activations, payouts, and community reactions into narratives sponsors can drop straight into their own channels."
         }
       ]
     }

@@ -48,11 +48,6 @@ export default function MindGamesPage() {
 
   return (
     <div className="space-y-8 text-wolf-foreground">
-      <div className="wolf-card--muted rounded-[1.9rem] border border-wolf-border px-6 py-6 text-white/80">
-        <p className="font-medium text-white">{t("intro.title")}</p>
-        <p className="mt-2 text-sm text-white/70">{t("intro.description")}</p>
-      </div>
-
       <div className="flex flex-col gap-6 lg:flex-row">
         <section className="wolf-card flex-1 space-y-6 rounded-[2rem] border border-wolf-border-strong p-6 shadow-[0_45px_120px_-80px_rgba(0,0,0,0.75)]">
           <div className="flex items-center justify-between rounded-[1.5rem] border border-wolf-border-strong bg-wolf-charcoal-60 px-4 py-4">
