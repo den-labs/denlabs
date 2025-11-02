@@ -291,15 +291,15 @@ export function StatusStrip({
     ? "Connecting..."
     : walletState.address
       ? translateSpray(
-          "actions.connected",
-          `Connected: ${formatAddress(walletState.address)}`,
-          { address: formatAddress(walletState.address) },
-        )
+        "actions.connected",
+        `Connected: ${formatAddress(walletState.address)}`,
+        { address: formatAddress(walletState.address) },
+      )
       : translateSpray("actions.connect", "Connect Wallet");
 
   return (
     <div
-      className={`flex items-center gap-4 bg-[linear-gradient(135deg,rgba(18,20,30,0.96),rgba(11,12,18,0.9))] rounded-lg p-2 ${className}`}
+      className={`flex items-center gap-4 bg-[#14181f]/70 rounded-lg p-2 ${className}`}
     >
       <div className="flex items-center gap-3">
         <HowlBadge level={level} />
@@ -316,11 +316,10 @@ export function StatusStrip({
         </button>
         {walletState.address ? (
           <span
-            className={`wolf-pill text-xs uppercase tracking-[0.26em] ${
-              isCeloReady
-                ? "bg-wolf-emerald-soft text-wolf-emerald"
-                : "bg-wolf-charcoal-70 text-wolf-text-subtle"
-            }`}
+            className={`wolf-pill text-xs uppercase tracking-[0.26em] ${isCeloReady
+              ? "bg-wolf-emerald-soft text-wolf-emerald"
+              : "bg-wolf-charcoal-70 text-wolf-text-subtle"
+              }`}
           >
             {isCeloReady
               ? translateSpray("network.ready", "Celo mainnet detected")

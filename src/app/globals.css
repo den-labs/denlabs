@@ -133,18 +133,12 @@
 }
 
 body {
-  background:
-    radial-gradient(
-      140% 120% at 50% -10%,
-      rgba(186, 255, 92, 0.25),
-      transparent
-    ),
-    radial-gradient(120% 120% at 90% 0%, rgba(47, 230, 139, 0.15), transparent),
-    radial-gradient(
-      140% 120% at 50% 120%,
-      rgba(255, 214, 107, 0.08),
-      transparent
-    ), var(--background);
+  background-color: #050809;
+  background-image: url("/bgf.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--den-font-sans);
   min-height: 100vh;
@@ -169,12 +163,20 @@ body::after {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  background: radial-gradient(
-    50% 50% at 50% 10%,
-    rgba(186, 255, 92, 0.16),
-    transparent 60%
-  );
-  opacity: 0.6;
+  background:
+    radial-gradient(
+      140% 120% at 50% -10%,
+      rgba(186, 255, 92, 0.25),
+      transparent
+    ),
+    radial-gradient(120% 120% at 90% 0%, rgba(47, 230, 139, 0.15), transparent),
+    radial-gradient(
+      140% 120% at 50% 120%,
+      rgba(255, 214, 107, 0.08),
+      transparent
+    ), rgba(5, 8, 9, 0.75);
+  opacity: 0.85;
+  mix-blend-mode: normal;
   z-index: -2;
 }
 

@@ -13,12 +13,12 @@ export default function DenLayout({ children }: { children: ReactNode }) {
           <SidebarNav />
           <StatusStrip className="justify-end" />
           <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-6">
-            <main className="rounded-lg border border-wolf-border-strong bg-[#14181f] p-6 shadow-[0_40px_110px_-80px_rgba(0,0,0,0.75)]">
+            <main className="rounded-lg border border-wolf-border-strong bg-[#14181f]/70 p-6 shadow-[0_40px_110px_-80px_rgba(0,0,0,0.75)]">
               <TopBar />
               <section className="mt-6">{children}</section>
             </main>
             <aside>
-              <div className="rounded-lg border border-wolf-border-strong bg-[#14181f] p-4 shadow-[0_30px_95px_-70px_rgba(0,0,0,0.75)]">
+              <div className="rounded-lg border border-wolf-border-strong bg-[#14181f]/70 shadow-[0_30px_95px_-70px_rgba(0,0,0,0.75)]">
                 <ActivityRail />
               </div>
             </aside>
