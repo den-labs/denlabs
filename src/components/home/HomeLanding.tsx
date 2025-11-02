@@ -95,7 +95,7 @@ export default function HomeLanding() {
               Events toolkit
             </p> */}
             <h1 className="max-w-[22ch] text-4xl font-semibold leading-tight sm:text-5xl">
-              {`{Den Labs}`}
+              {`{ Den Labs }`}
             </h1>
             <p className="max-w-[46ch] text-base text-white/75">
               Verified On-Chain Event Lab
