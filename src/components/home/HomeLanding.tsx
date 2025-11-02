@@ -1,10 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useCallback, useState } from "react";
-import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { Link } from "@/i18n/routing";
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -82,17 +81,9 @@ function Modal({
 }
 
 export default function HomeLanding() {
-  const t = useTranslations("SidebarNav");
   const [isSelfGateOpen, setIsSelfGateOpen] = useState(false);
   const [isOpsPanelOpen, setIsOpsPanelOpen] = useState(false);
   const [showMethodology, setShowMethodology] = useState(false);
-
-  const scrollToSection = useCallback((id: string) => {
-    const target = document.getElementById(id);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
 
   return (
     <>
@@ -109,17 +100,21 @@ export default function HomeLanding() {
             <p className="max-w-[46ch] text-base text-white/75">
               Verified On-Chain Event Lab
             </p>
+            <Image
+              src="/denlabs.png"
+              alt="Den Labs logo"
+              width={160}
+              height={160}
+              className="mx-auto h-24 w-24 sm:h-32 sm:w-32"
+              priority
+            />
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/auth" className="den-button-primary uppercase font-bold">
+              <Link
+                href="/auth"
+                className="den-button-primary uppercase font-bold"
+              >
                 Ship Fast, Play Smart
               </Link>
-              {/* <button
-                type="button"
-                className="den-button-ghost"
-                onClick={() => scrollToSection("mini-games")}
-              >
-                See Demo
-              </button> */}
             </div>
             <p className="text-sm font-medium text-white/60">
               1,240+ payouts • 0 disputes • 6 pilot sponsors
