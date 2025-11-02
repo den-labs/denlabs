@@ -29,22 +29,22 @@ function formatAddress(address: string) {
 
 function eventTone(status: EventStatus) {
   if (status === "live") {
-    return "bg-[linear-gradient(180deg,rgba(186,255,92,0.12)_0%,rgba(15,18,26,0.88)_100%)] border border-wolf-border-xstrong shadow-[0_35px_95px_-70px_rgba(186,255,92,0.45)]";
+    return "bg-[#14181f]/70";
   }
   if (status === "upcoming") {
-    return "wolf-card--muted border border-wolf-border";
+    return "bg-[#14181f]/70";
   }
-  return "wolf-card--muted border border-wolf-border-faint opacity-75";
+  return "bg-[#14181f]/70";
 }
 
 function statusBadgeTone(status: EventStatus) {
   if (status === "live") {
-    return "bg-wolf-emerald-soft text-wolf-emerald";
+    return "bg-[#14181f]/70";
   }
   if (status === "upcoming") {
-    return "bg-wolf-charcoal-70 text-wolf-text-subtle";
+    return "bg-[#14181f]/70";
   }
-  return "bg-wolf-charcoal-65 text-wolf-text-subtle";
+  return "bg-[#14181f]/70";
 }
 
 function getRegisterClass(
@@ -138,14 +138,12 @@ export function CheckInPanel() {
 
   return (
     <div className="grid gap-6 text-wolf-foreground lg:grid-cols-[360px_1fr]">
-      <div className="wolf-card relative overflow-hidden p-6">
-        <div className="pointer-events-none absolute inset-x-6 top-4 h-28 rounded-lg bg-[radial-gradient(circle_at_top,#baff5c_0%,rgba(12,16,24,0)_70%)] opacity-80" />
+      <div className="relative overflow-hidden p-6">
+        <div className="pointer-events-none absolute inset-x-6 top-4 h-28 rounded-lg" />
         <div className="relative z-10 flex flex-col">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold tracking-[0.08em] uppercase text-white/90">
-              {t("title")}
-            </h3>
-            <span className="wolf-pill bg-wolf-emerald-soft text-xs uppercase tracking-[0.3em] text-wolf-emerald">
+
+            <span className="text-xs uppercase tracking-[0.3em] text-wolf-emerald">
               HOWL Sync
             </span>
           </div>
@@ -158,19 +156,10 @@ export function CheckInPanel() {
           <div className="mt-6">
             <SelfAuth />
           </div>
-          <div className="mt-5">
-            <StatusPill status={checkInStatus} />
-          </div>
-          <p className="mt-4 text-xs text-white/60">
-            {translate(
-              "footnote",
-              "Every verified check-in adds HOWL and readies your wallet for on-chain perks.",
-            )}
-          </p>
         </div>
       </div>
       <div className="flex flex-col gap-6">
-        <div className="wolf-card--muted rounded-lg border border-wolf-border px-7 py-6 text-white/80">
+        <div className="bg-[#14181f]/70 rounded-lg border border-wolf-border px-7 py-6 text-white/80">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle">
@@ -183,40 +172,11 @@ export function CheckInPanel() {
                 )}
               </p>
             </div>
-            <span className="wolf-pill border border-wolf-border-mid text-xs uppercase tracking-[0.28em] text-wolf-text-subtle">
+            <span className="border border-wolf-border-mid text-xs uppercase tracking-[0.28em] text-wolf-text-subtle">
               {walletAddress
                 ? translate("wallet.connectedLabel", "Wallet linked")
                 : translate("wallet.connectLabel", "Wallet needed")}
             </span>
-          </div>
-          <div className="mt-5 flex items-center gap-3">
-            {walletAddress ? (
-              <>
-                <div className="flex flex-col text-sm text-white/80">
-                  <span className="text-xs uppercase tracking-[0.24em] text-wolf-text-subtle">
-                    {translate("wallet.connected", "Connected wallet")}
-                  </span>
-                  <span className="mt-1 font-semibold text-white">
-                    {formatAddress(walletAddress)}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleDisconnectWallet}
-                  className="den-button-ghost ml-auto text-xs tracking-[0.22em]"
-                >
-                  {translate("wallet.disconnect", "Disconnect")}
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={handleConnectWallet}
-                className="den-button-secondary ml-auto text-xs tracking-[0.22em]"
-              >
-                {translate("wallet.connect", "Connect wallet")}
-              </button>
-            )}
           </div>
           <p className="mt-5 text-xs text-white/60">
             {translate(
@@ -225,7 +185,7 @@ export function CheckInPanel() {
             )}
           </p>
         </div>
-        <div className="wolf-card rounded-lg border border-wolf-border-strong px-7 py-6">
+        <div className="rounded-lg border border-wolf-border-strong py-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-white/90">
@@ -238,11 +198,6 @@ export function CheckInPanel() {
                 )}
               </p>
             </div>
-            <span className="wolf-pill bg-wolf-charcoal-70 text-xs uppercase tracking-[0.26em] text-wolf-text-subtle">
-              {isSelfVerified
-                ? translate("events.selfReady", "Self ready")
-                : translate("events.identityRequired", "Self pending")}
-            </span>
           </div>
           {!hasIdentity ? (
             <div className="mt-5 rounded-lg border border-dashed border-wolf-border-mid bg-wolf-charcoal-70/40 px-4 py-3 text-xs text-white/65">

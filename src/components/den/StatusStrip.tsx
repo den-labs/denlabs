@@ -42,9 +42,16 @@ const broadcastWalletState = (detail: WalletBroadcastDetail) => {
   if (typeof window === "undefined") {
     return;
   }
-  window.dispatchEvent(
-    new CustomEvent<WalletBroadcastDetail>("wolf-wallet-state", { detail }),
-  );
+  const dispatch = () => {
+    window.dispatchEvent(
+      new CustomEvent<WalletBroadcastDetail>("wolf-wallet-state", { detail }),
+    );
+  };
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(dispatch);
+    return;
+  }
+  window.setTimeout(dispatch, 0);
 };
 
 export function StatusStrip({
@@ -54,6 +61,7 @@ export function StatusStrip({
   const tSpray = useTranslations("SprayDisperser");
   const [isSelfVerified, setIsSelfVerified] = useState(false);
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [isManuallyDisconnected, setIsManuallyDisconnected] = useState(false);
   const [walletState, setWalletState] = useState<
     Omit<WalletBroadcastDetail, "provider">
   >({
@@ -131,11 +139,7 @@ export function StatusStrip({
     if (typeof window === "undefined" || !window.ethereum) {
       return;
     }
-    setWalletState((prev) => {
-      const next = { ...prev, isConnecting: true };
-      broadcastWalletState({ ...next, provider });
-      return next;
-    });
+    setWalletState((prev) => ({ ...prev, isConnecting: true }));
     try {
       const nextProvider = new BrowserProvider(window.ethereum);
       await nextProvider.send("eth_requestAccounts", []);
@@ -143,16 +147,11 @@ export function StatusStrip({
       const address = await signer.getAddress();
       const network = await nextProvider.getNetwork();
       setProvider(nextProvider);
+      setIsManuallyDisconnected(false);
       setWalletState({
         address,
         isConnecting: false,
         chainId: Number(network.chainId),
-      });
-      broadcastWalletState({
-        address,
-        isConnecting: false,
-        chainId: Number(network.chainId),
-        provider: nextProvider,
       });
     } catch {
       setProvider(null);
@@ -161,27 +160,16 @@ export function StatusStrip({
         isConnecting: false,
         chainId: null,
       });
-      broadcastWalletState({
-        address: null,
-        isConnecting: false,
-        chainId: null,
-        provider: null,
-      });
     }
   };
 
   const handleWalletDisconnect = () => {
     setProvider(null);
+    setIsManuallyDisconnected(true);
     setWalletState({
       address: null,
       isConnecting: false,
       chainId: null,
-    });
-    broadcastWalletState({
-      address: null,
-      isConnecting: false,
-      chainId: null,
-      provider: null,
     });
   };
 
@@ -203,6 +191,9 @@ export function StatusStrip({
         if (!mounted || !accounts || accounts.length === 0) {
           return;
         }
+        if (isManuallyDisconnected) {
+          return;
+        }
         const nextProvider = new BrowserProvider(ethereum);
         const network = await nextProvider.getNetwork();
         setProvider(nextProvider);
@@ -210,12 +201,6 @@ export function StatusStrip({
           address: accounts[0],
           isConnecting: false,
           chainId: Number(network.chainId),
-        });
-        broadcastWalletState({
-          address: accounts[0],
-          isConnecting: false,
-          chainId: Number(network.chainId),
-          provider: nextProvider,
         });
       } catch {
         // ignore
@@ -232,12 +217,9 @@ export function StatusStrip({
           isConnecting: false,
           chainId: null,
         });
-        broadcastWalletState({
-          address: null,
-          isConnecting: false,
-          chainId: null,
-          provider: null,
-        });
+        return;
+      }
+      if (isManuallyDisconnected) {
         return;
       }
       const { ethereum } = window;
@@ -252,25 +234,18 @@ export function StatusStrip({
         isConnecting: false,
         chainId: Number(network.chainId),
       });
-      broadcastWalletState({
-        address: String(accounts[0]),
-        isConnecting: false,
-        chainId: Number(network.chainId),
-        provider: nextProvider,
-      });
     };
 
     const handleChainChanged = (newChainId: unknown) => {
+      if (isManuallyDisconnected) {
+        return;
+      }
       if (typeof newChainId === "string") {
         const parsed = Number.parseInt(newChainId, 16);
-        setWalletState((prev) => {
-          const next = {
-            ...prev,
-            chainId: Number.isNaN(parsed) ? prev.chainId : parsed,
-          };
-          broadcastWalletState({ ...next, provider });
-          return next;
-        });
+        setWalletState((prev) => ({
+          ...prev,
+          chainId: Number.isNaN(parsed) ? prev.chainId : parsed,
+        }));
       }
     };
 
@@ -285,7 +260,16 @@ export function StatusStrip({
       );
       window.ethereum?.removeListener?.("chainChanged", handleChainChanged);
     };
-  }, [provider]);
+  }, [isManuallyDisconnected]);
+
+  useEffect(() => {
+    broadcastWalletState({
+      address: walletState.address,
+      isConnecting: walletState.isConnecting,
+      chainId: walletState.chainId,
+      provider,
+    });
+  }, [walletState, provider]);
 
   useEffect(() => {
     return () => {

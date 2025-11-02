@@ -17,7 +17,7 @@ export function ActivityRail() {
 
   return (
     <div className="flex h-full flex-col gap-4 text-wolf-foreground">
-      <section className="wolf-card--muted rounded-2xl border border-wolf-border-soft p-5">
+      <section className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">
             {t("sections.activity.title")}
@@ -33,7 +33,7 @@ export function ActivityRail() {
         </div>
       </section>
 
-      <section className="wolf-card--muted rounded-2xl border border-wolf-border-soft p-5">
+      <section className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">
             {t("sections.recent.title")}
@@ -57,7 +57,7 @@ export function ActivityRail() {
         </ul>
       </section>
 
-      <div className="wolf-card--muted rounded-2xl border border-wolf-border-soft p-5">
+      <div className="p-5">
         <MiniChat />
       </div>
     </div>
