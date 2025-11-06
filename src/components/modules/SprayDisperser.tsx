@@ -224,7 +224,9 @@ export default function SprayDisperser() {
   useEffect(() => {
     if (mode !== "token") return;
     if (!selectedTrustedToken) return;
-    const found = TRUSTED_TOKENS.find((t) => t.address === selectedTrustedToken);
+    const found = TRUSTED_TOKENS.find(
+      (t) => t.address === selectedTrustedToken,
+    );
     if (found) {
       setTokenAddress(found.address);
     }
@@ -706,7 +708,10 @@ export default function SprayDisperser() {
                     htmlFor="trusted-token-select"
                     className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle"
                   >
-                    {translate("form.trustedTokenLabel", "Trusted token (optional)")}
+                    {translate(
+                      "form.trustedTokenLabel",
+                      "Trusted token (optional)",
+                    )}
                   </label>
                   <div
                     ref={trustedDropdownRef}
@@ -719,27 +724,28 @@ export default function SprayDisperser() {
                       aria-expanded={isTrustedOpen}
                       aria-controls="trusted-token-options"
                       onClick={() => setIsTrustedOpen((v) => !v)}
-                    className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-left text-sm text-white/80 focus:border-wolf-emerald focus:outline-none"
+                      className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-left text-sm text-white/80 focus:border-wolf-emerald focus:outline-none"
                     >
                       {selectedTrustedToken
-                        ? TRUSTED_TOKENS.find(
+                        ? (TRUSTED_TOKENS.find(
                             (t) => t.address === selectedTrustedToken,
-                          )?.label ?? ""
+                          )?.label ?? "")
                         : translate(
                             "form.trustedTokenPlaceholder",
                             "Select a trusted token or choose custom",
                           )}
                     </button>
                     {isTrustedOpen ? (
-                      <ul
+                      <div
                         id="trusted-token-options"
                         role="listbox"
                         className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md border border-wolf-border bg-wolf-panel py-1 text-sm text-white/80 shadow-lg"
                       >
-                        <li
+                        <button
+                          type="button"
                           role="option"
                           aria-selected={!selectedTrustedToken}
-                          className="cursor-pointer px-3 py-2 hover:bg-wolf-neutral-haze"
+                          className="block w-full cursor-pointer px-3 py-2 text-left hover:bg-wolf-neutral-haze"
                           onClick={() => {
                             setSelectedTrustedToken("");
                             setIsTrustedOpen(false);
@@ -749,22 +755,23 @@ export default function SprayDisperser() {
                             "form.trustedTokenPlaceholder",
                             "Select a trusted token or choose custom",
                           )}
-                        </li>
+                        </button>
                         {TRUSTED_TOKENS.map((tok) => (
-                          <li
+                          <button
                             key={tok.address}
+                            type="button"
                             role="option"
                             aria-selected={selectedTrustedToken === tok.address}
-                            className="cursor-pointer px-3 py-2 hover:bg-wolf-neutral-haze"
+                            className="block w-full cursor-pointer px-3 py-2 text-left hover:bg-wolf-neutral-haze"
                             onClick={() => {
                               setSelectedTrustedToken(tok.address);
                               setIsTrustedOpen(false);
                             }}
                           >
                             {tok.label}
-                          </li>
+                          </button>
                         ))}
-                      </ul>
+                      </div>
                     ) : null}
                   </div>
                 </div>
