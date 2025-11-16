@@ -211,11 +211,7 @@ export function StatusStrip({
     <div
       className={`flex flex-wrap items-center gap-2 md:gap-4 bg-[#14181f]/70 rounded-lg p-2 ${className}`}
     >
-      <div className="flex items-center gap-3">
-        <HowlBadge level={level} />
-        <SelfBadge status={isSelfVerified ? "verified" : "pending"} />
-      </div>
-      <div className="flex items-center gap-2">
+      <div className="order-1 sm:order-2 flex items-center gap-2">
         {isConnected && address ? (
           <>
             <span className="inline-flex items-center gap-3 rounded-md border border-[#2a2f36] bg-[#14181f] px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-[#c2c7d2]">
@@ -240,7 +236,11 @@ export function StatusStrip({
           </button>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="order-2 sm:order-1 flex items-center gap-3">
+        <HowlBadge level={level} />
+        <SelfBadge status={isSelfVerified ? "verified" : "pending"} />
+      </div>
+      <div className="order-3 flex items-center gap-2">
         {socialLinks.map((link) => (
           <a
             key={link.href}
