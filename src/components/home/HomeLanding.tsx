@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Link } from "@/i18n/routing";
+import ConnectWalletButton from "@/components/ui/ConnectWalletButton";
 
 const HOW_IT_WORKS_STEPS = [
   {
@@ -122,6 +123,7 @@ export default function HomeLanding() {
               <Link href="/auth" className="den-button-primary font-bold">
                 Ship fast, play smart
               </Link>
+              <ConnectWalletButton />
             </div>
             <div className="mt-6 flex w-full max-w-[420px] gap-6 text-white/80 justify-between">
               <svg
