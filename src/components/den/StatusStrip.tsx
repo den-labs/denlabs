@@ -5,7 +5,6 @@ import {
   useAppKitNetwork,
   useAppKitProvider,
   useAppKitState,
-  useDisconnect,
 } from "@reown/appkit/react";
 import { BrowserProvider, type Eip1193Provider } from "ethers";
 import { useTranslations } from "next-intl";
@@ -53,7 +52,6 @@ export function StatusStrip({
   const tSpray = useTranslations("SprayDisperser");
   const [isSelfVerified, setIsSelfVerified] = useState(false);
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
-  const { disconnect } = useDisconnect();
   const { address, isConnected } = useAppKitAccount();
   const { caipNetwork, chainId } = useAppKitNetwork();
   const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
@@ -174,14 +172,6 @@ export function StatusStrip({
     };
   }, []);
 
-  const handleWalletDisconnect = async () => {
-    try {
-      await disconnect();
-    } finally {
-      setProvider(null);
-    }
-  };
-
   const walletButtonLabel = loading
     ? "Connecting..."
     : translateSpray("actions.connect", "Connect Wallet");
@@ -200,34 +190,28 @@ export function StatusStrip({
         )
       : "";
 
-  const logoutLabel = translateSpray("actions.logout", "Logout");
+  const connectedWalletButtonLabel =
+    walletInfoLabel ||
+    translateSpray(
+      "actions.connected",
+      "Wallet Connected",
+      {
+        address: address ? formatAddress(address) : "—",
+        network: connectedChainName,
+      },
+    );
 
   return (
     <div
       className={`flex flex-wrap items-center gap-2 md:gap-4 bg-[#14181f]/70 rounded-lg p-2 ${className}`}
     >
       <div className="order-1 sm:order-2 flex items-center gap-2">
-        {isConnected && address ? (
-          <>
-            <span className="inline-flex items-center gap-3 rounded-md border border-[#2a2f36] bg-[#14181f] px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-[#c2c7d2]">
-              {walletInfoLabel}
-            </span>
-            <button
-              type="button"
-              onClick={handleWalletDisconnect}
-              className="inline-flex items-center gap-3 rounded-md border border-[#2a2f36] bg-transparent px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-[#ffb1b1] transition hover:border-wolf-error-border hover:text-[#ff7a7a]"
-            >
-              {logoutLabel}
-            </button>
-          </>
-        ) : (
-          <ConnectWalletButton
-            className="inline-flex items-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
-            connectLabel={walletButtonLabel}
-            connectedLabel={walletButtonLabel}
-            disabled={loading}
-          />
-        )}
+        <ConnectWalletButton
+          className="inline-flex items-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+          connectLabel={walletButtonLabel}
+          connectedLabel={connectedWalletButtonLabel}
+          disabled={loading}
+        />
       </div>
       <div className="order-2 sm:order-1 flex items-center gap-3">
         <HowlBadge level={level} />
