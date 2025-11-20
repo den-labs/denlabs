@@ -723,10 +723,10 @@
     },
     "badge": "Spray Console",
     "heading": "Disperse Tokens Across the Pack",
-    "description": "Connect a wallet on Celo to spray CELO or ERC20 rewards across your roster.",
+    "description": "Connect a wallet to spray rewards on Celo, Optimism, Base, or Avalanche.",
     "actions": {
       "connect": "Connect Wallet",
-      "connected": "Celo: {address}",
+      "connected": "{network}: {address}",
       "logout": "Logout",
       "remove": "Remove",
       "addRecipient": "Add Recipient",
@@ -737,11 +737,12 @@
     },
     "network": {
       "prompt": "Connect a wallet to load Spray.",
-      "ready": "Celo mainnet detected",
-      "switch": "Switch to Celo mainnet"
+      "ready": "{network} detected",
+      "switch": "Switch to {network}",
+      "selectorLabel": "Target network"
     },
     "modes": {
-      "native": "Native (CELO)",
+      "native": "Native ({symbol})",
       "token": "ERC20"
     },
     "form": {
@@ -758,16 +759,16 @@
     },
     "summary": {
       "recipients": "{count, plural, one {1 recipient} other {{count} recipients}}",
-      "totalNative": "Total: {amount} CELO",
+      "totalNative": "Total: {amount} {symbol}",
       "totalToken": "Total: {amount} {symbol}",
       "tokenPlaceholder": "TOKEN"
     },
     "tips": {
       "title": "Runbook",
       "items": [
-        "Amounts are expected in whole token units (18 decimals for CELO).",
+        "Amounts are expected in whole token units. Confirm decimals before sending.",
         "Token dispersal requires approving the Spray contract before sending.",
-        "Track tx receipts in your wallet or Celoscan for final settlement."
+        "Track tx receipts in your wallet or the explorer for the selected network."
       ]
     },
     "history": {
@@ -792,7 +793,7 @@
     "errors": {
       "noWallet": "Wallet provider not detected.",
       "connectFailed": "Unable to connect wallet.",
-      "switchFailed": "Could not switch to Celo.",
+      "switchFailed": "Could not switch networks.",
       "tokenLookupFailed": "Could not fetch token metadata.",
       "invalidToken": "Provide a valid ERC20 token address.",
       "invalidRecipient": "All recipients must be valid addresses.",

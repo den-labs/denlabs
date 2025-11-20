@@ -193,7 +193,10 @@ export function StatusStrip({
       ? translateSpray(
           "actions.connected",
           `${connectedChainName}: ${formatAddress(address)}`,
-          { address: formatAddress(address) },
+          {
+            address: formatAddress(address),
+            network: connectedChainName,
+          },
         )
       : "";
 

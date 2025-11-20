@@ -1,13 +1,22 @@
-import { celo } from "@reown/appkit/networks";
+import {
+  type AppKitNetwork,
+  avalanche,
+  base,
+  celo,
+  optimism,
+} from "@reown/appkit/networks";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-
-type CeloNetwork = typeof celo;
 
 export const appKitProjectId =
   process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ??
   "b56e18d47c72ab683b10814fe9495694";
 
-export const appKitNetworks = [celo] satisfies [CeloNetwork, ...CeloNetwork[]];
+export const appKitNetworks: [AppKitNetwork, ...AppKitNetwork[]] = [
+  celo,
+  optimism,
+  base,
+  avalanche,
+];
 
 export const appKitMetadata = {
   name: "Wolf Den",

@@ -723,10 +723,10 @@
     },
     "badge": "Consola Spray",
     "heading": "Dispersa tokens a toda la manada",
-    "description": "Conecta una wallet en Celo para rociar recompensas en CELO o ERC20 a múltiples destinatarios.",
+    "description": "Conecta una wallet para rociar recompensas en Celo, Optimism, Base o Avalanche.",
     "actions": {
       "connect": "Conectar wallet",
-      "connected": "Celo: {address}",
+      "connected": "{network}: {address}",
       "logout": "Cerrar sesión",
       "remove": "Eliminar",
       "addRecipient": "Agregar destinatario",
@@ -737,11 +737,12 @@
     },
     "network": {
       "prompt": "Conecta una wallet para activar Spray.",
-      "ready": "Celo mainnet detectado",
-      "switch": "Cambia a Celo mainnet"
+      "ready": "Red {network} detectada",
+      "switch": "Cambia a {network}",
+      "selectorLabel": "Red objetivo"
     },
     "modes": {
-      "native": "Nativo (CELO)",
+      "native": "Nativo ({symbol})",
       "token": "ERC20"
     },
     "form": {
@@ -758,16 +759,16 @@
     },
     "summary": {
       "recipients": "{count, plural, one {1 destinatario} other {{count} destinatarios}}",
-      "totalNative": "Total: {amount} CELO",
+      "totalNative": "Total: {amount} {symbol}",
       "totalToken": "Total: {amount} {symbol}",
       "tokenPlaceholder": "TOKEN"
     },
     "tips": {
       "title": "Runbook",
       "items": [
-        "Los montos se capturan en unidades enteras del token (18 decimales para CELO).",
+        "Los montos se capturan en unidades enteras. Confirma los decimales antes de enviar.",
         "Para tokens ERC20 primero aprueba al contrato Spray como spender.",
-        "Consulta los recibos en tu wallet o en Celoscan para confirmar el settlement."
+        "Consulta los recibos en tu wallet o en el explorador de la red seleccionada para confirmar el settlement."
       ]
     },
     "history": {
@@ -792,7 +793,7 @@
     "errors": {
       "noWallet": "No se detectó un proveedor de wallet.",
       "connectFailed": "No se pudo conectar la wallet.",
-      "switchFailed": "No se pudo cambiar a Celo.",
+      "switchFailed": "No se pudo cambiar de red.",
       "tokenLookupFailed": "No se pudo obtener la metadata del token.",
       "invalidToken": "Proporciona una dirección ERC20 válida.",
       "invalidRecipient": "Todos los destinatarios deben ser direcciones válidas.",

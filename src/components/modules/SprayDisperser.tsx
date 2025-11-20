@@ -10,13 +10,12 @@ import {
 } from "ethers";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const SPRAY_ADDRESS = (
-  process.env.NEXT_PUBLIC_SPRAY_ADDRESS ??
-  "0x9b091AC8f8Db060B134A2FCE33563b3eF4A74015"
-).trim();
-const CELO_CHAIN_ID = 42220;
-const CELO_CHAIN_HEX = "0xa4ec";
+import {
+  DEFAULT_SPRAY_NETWORK_KEY,
+  SPRAY_NETWORKS,
+  type SprayNetworkConfig,
+  SUPPORTED_SPRAY_NETWORKS,
+} from "@/lib/sprayNetworks";
 
 const SPRAY_ABI = [
   "function disperseNative(address[] _recipients, uint256[] _amounts) payable",
@@ -28,16 +27,6 @@ const ERC20_ABI = [
   "function allowance(address owner, address spender) view returns (uint256)",
   "function decimals() view returns (uint8)",
   "function symbol() view returns (string)",
-];
-
-// Trusted ERC20 tokens (Celo mainnet)
-// Users can select from this list or enter any ERC20 address manually.
-const TRUSTED_TOKENS: Array<{ label: string; address: string }> = [
-  {
-    label: "Celo Colombian Peso (cCOP)",
-    address: "0x8A567e2aE79CA692Bd748aB832081C45de4041eA",
-  },
-  // Add more trusted tokens below as needed, keeping cCOP first in the list
 ];
 
 type RecipientRow = {
@@ -118,6 +107,10 @@ export default function SprayDisperser() {
     }
   };
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [selectedNetworkKey, setSelectedNetworkKey] = useState(
+    DEFAULT_SPRAY_NETWORK_KEY,
+  );
+  const [hasUserSelectedNetwork, setHasUserSelectedNetwork] = useState(false);
   const [signerAddress, setSignerAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,6 +133,11 @@ export default function SprayDisperser() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<TransactionRecord[]>([]);
   const tips = t.raw("tips.items") as string[];
+  const selectedNetwork =
+    SPRAY_NETWORKS[selectedNetworkKey] ??
+    SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY];
+  const trustedTokens = selectedNetwork.trustedTokens ?? [];
+  const sprayAddress = selectedNetwork.sprayAddress;
 
   useEffect(() => {
     const ethereum = getEthereum();
@@ -222,15 +220,14 @@ export default function SprayDisperser() {
 
   // When the user selects a trusted token, keep the address input in sync
   useEffect(() => {
-    if (mode !== "token") return;
     if (!selectedTrustedToken) return;
-    const found = TRUSTED_TOKENS.find(
-      (t) => t.address === selectedTrustedToken,
+    const found = trustedTokens.find(
+      (token) => token.address === selectedTrustedToken,
     );
     if (found) {
       setTokenAddress(found.address);
     }
-  }, [selectedTrustedToken, mode]);
+  }, [selectedTrustedToken, trustedTokens]);
 
   // Close the trusted token dropdown on outside click
   useEffect(() => {
@@ -257,7 +254,22 @@ export default function SprayDisperser() {
     return Number.isFinite(rawTotal) ? rawTotal : 0;
   }, [rows]);
 
-  const celoNetworkReady = signerAddress && chainId === CELO_CHAIN_ID;
+  const isTargetNetworkReady =
+    signerAddress != null && chainId === selectedNetwork.chainId;
+  const nativeSymbol = selectedNetwork.nativeCurrency.symbol;
+
+  const handleNetworkSelect = (networkKey: string) => {
+    setSelectedNetworkKey(networkKey);
+    setHasUserSelectedNetwork(true);
+  };
+
+  const networkStatusLabel = isTargetNetworkReady
+    ? translate("network.ready", `${selectedNetwork.name} network detected`, {
+        network: selectedNetwork.name,
+      })
+    : translate("network.switch", `Switch to ${selectedNetwork.name}`, {
+        network: selectedNetwork.name,
+      });
 
   const signerPromise = provider?.getSigner();
 
@@ -291,7 +303,40 @@ export default function SprayDisperser() {
     };
   }, []);
 
-  async function ensureCeloNetwork() {
+  useEffect(() => {
+    if (!chainId) {
+      return;
+    }
+    const matchedNetwork = SUPPORTED_SPRAY_NETWORKS.find(
+      (network) => network.chainId === chainId,
+    );
+    if (
+      matchedNetwork &&
+      !hasUserSelectedNetwork &&
+      matchedNetwork.key !== selectedNetworkKey
+    ) {
+      setSelectedNetworkKey(matchedNetwork.key);
+    }
+  }, [chainId, hasUserSelectedNetwork, selectedNetworkKey]);
+
+  useEffect(() => {
+    if (!trustedTokens.length) {
+      if (selectedTrustedToken !== "") {
+        setSelectedTrustedToken("");
+      }
+      return;
+    }
+    const stillAvailable = trustedTokens.some(
+      (token) => token.address === selectedTrustedToken,
+    );
+    if (!stillAvailable) {
+      setSelectedTrustedToken(trustedTokens[0].address);
+    }
+  }, [selectedTrustedToken, trustedTokens]);
+
+  async function ensureTargetNetwork(
+    targetConfig: SprayNetworkConfig = selectedNetwork,
+  ) {
     const ethereum = getEthereum();
     if (!ethereum) {
       setError(t("errors.noWallet"));
@@ -301,9 +346,9 @@ export default function SprayDisperser() {
     try {
       await ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: CELO_CHAIN_HEX }],
+        params: [{ chainId: targetConfig.chainHex }],
       });
-      setChainId(CELO_CHAIN_ID);
+      setChainId(targetConfig.chainId);
       return true;
     } catch (switchError: unknown) {
       const errorWithCode = switchError as { code?: number };
@@ -313,19 +358,15 @@ export default function SprayDisperser() {
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainId: CELO_CHAIN_HEX,
-                chainName: "Celo Mainnet",
-                nativeCurrency: {
-                  name: "Celo",
-                  symbol: "CELO",
-                  decimals: 18,
-                },
-                rpcUrls: ["https://forno.celo.org"],
-                blockExplorerUrls: ["https://celoscan.io"],
+                chainId: targetConfig.chainHex,
+                chainName: targetConfig.name,
+                nativeCurrency: targetConfig.nativeCurrency,
+                rpcUrls: targetConfig.rpcUrls,
+                blockExplorerUrls: targetConfig.explorerUrls,
               },
             ],
           });
-          setChainId(CELO_CHAIN_ID);
+          setChainId(targetConfig.chainId);
           return true;
         } catch (_addError) {
           setError(t("errors.switchFailed"));
@@ -414,7 +455,7 @@ export default function SprayDisperser() {
       const erc20 = new Contract(normalized, ERC20_ABI, signer);
       const allowance: bigint = await erc20.allowance(
         await signer.getAddress(),
-        SPRAY_ADDRESS,
+        sprayAddress,
       );
 
       if (allowance >= totalValue) {
@@ -422,7 +463,7 @@ export default function SprayDisperser() {
         return;
       }
 
-      const tx = await erc20.approve(SPRAY_ADDRESS, totalValue);
+      const tx = await erc20.approve(sprayAddress, totalValue);
       approvalHash = tx.hash;
       addHistoryRecord({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -468,8 +509,8 @@ export default function SprayDisperser() {
       return;
     }
 
-    if (!celoNetworkReady) {
-      const switched = await ensureCeloNetwork();
+    if (!isTargetNetworkReady) {
+      const switched = await ensureTargetNetwork();
       if (!switched) {
         return;
       }
@@ -494,7 +535,7 @@ export default function SprayDisperser() {
 
     try {
       const signer = await signerPromise;
-      const contract = new Contract(SPRAY_ADDRESS, SPRAY_ABI, signer);
+      const contract = new Contract(sprayAddress, SPRAY_ABI, signer);
 
       if (mode === "native") {
         const amounts = amountsInput.map((amount) => parseEther(amount));
@@ -514,7 +555,7 @@ export default function SprayDisperser() {
           status: "pending",
           timestamp: new Date().toISOString(),
           recipients: recipients.length,
-          totalFormatted: `${formatEther(totalValue)} CELO`,
+          totalFormatted: `${formatEther(totalValue)} ${nativeSymbol}`,
         });
         setFeedback(t("messages.transactionSent"));
         const receipt = await tx.wait();
@@ -559,7 +600,7 @@ export default function SprayDisperser() {
         const erc20 = new Contract(normalized, ERC20_ABI, signer);
         const allowance: bigint = await erc20.allowance(
           await signer.getAddress(),
-          SPRAY_ADDRESS,
+          sprayAddress,
         );
 
         if (allowance < totalValue) {
@@ -629,8 +670,11 @@ export default function SprayDisperser() {
               {signerAddress
                 ? translate(
                     "actions.connected",
-                    `Connected: ${formatAddress(signerAddress)}`,
-                    { address: formatAddress(signerAddress) },
+                    `${selectedNetwork.name}: ${formatAddress(signerAddress)}`,
+                    {
+                      address: formatAddress(signerAddress),
+                      network: selectedNetwork.name,
+                    },
                   )
                 : translate(
                     "network.prompt",
@@ -640,14 +684,12 @@ export default function SprayDisperser() {
             {signerAddress ? (
               <span
                 className={`wolf-pill text-xs uppercase tracking-[0.26em] ${
-                  celoNetworkReady
+                  isTargetNetworkReady
                     ? "bg-wolf-emerald-soft text-wolf-emerald"
                     : "bg-wolf-charcoal-70 text-wolf-text-subtle"
                 }`}
               >
-                {celoNetworkReady
-                  ? translate("network.ready", "Celo mainnet detected")
-                  : translate("network.switch", "Switch to Celo mainnet")}
+                {networkStatusLabel}
               </span>
             ) : (
               <p className="max-w-[32ch] text-xs text-white/60">
@@ -657,6 +699,28 @@ export default function SprayDisperser() {
                 )}
               </p>
             )}
+          </div>
+          <div className="flex flex-col gap-2 text-[11px] uppercase tracking-[0.26em] text-wolf-text-subtle">
+            <span>{translate("network.selectorLabel", "Target network")}</span>
+            <div className="flex flex-wrap gap-2">
+              {SUPPORTED_SPRAY_NETWORKS.map((network) => {
+                const isActive = network.key === selectedNetworkKey;
+                return (
+                  <button
+                    key={network.key}
+                    type="button"
+                    onClick={() => handleNetworkSelect(network.key)}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-semibold tracking-[0.26em] transition ${
+                      isActive
+                        ? "border-wolf-emerald text-wolf-emerald bg-wolf-emerald-soft"
+                        : "border-wolf-border text-white/70 hover:border-white/80 hover:text-white"
+                    }`}
+                  >
+                    {network.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </header>
 
@@ -672,7 +736,9 @@ export default function SprayDisperser() {
                     : "border border-wolf-border text-white/70"
                 }`}
               >
-                {t("modes.native")}
+                {translate("modes.native", `Native (${nativeSymbol})`, {
+                  symbol: nativeSymbol,
+                })}
               </button>
               <button
                 type="button"
@@ -690,9 +756,14 @@ export default function SprayDisperser() {
               </span>
               <span className="text-xs uppercase tracking-[0.28em] text-wolf-text-subtle">
                 {mode === "native"
-                  ? t("summary.totalNative", {
-                      amount: totalEntered.toFixed(4),
-                    })
+                  ? translate(
+                      "summary.totalNative",
+                      `Total: ${totalEntered.toFixed(4)} ${nativeSymbol}`,
+                      {
+                        amount: totalEntered.toFixed(4),
+                        symbol: nativeSymbol,
+                      },
+                    )
                   : t("summary.totalToken", {
                       amount: totalEntered.toFixed(4),
                       symbol:
@@ -727,7 +798,7 @@ export default function SprayDisperser() {
                       className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-left text-sm text-white/80 focus:border-wolf-emerald focus:outline-none"
                     >
                       {selectedTrustedToken
-                        ? (TRUSTED_TOKENS.find(
+                        ? (trustedTokens.find(
                             (t) => t.address === selectedTrustedToken,
                           )?.label ?? "")
                         : translate(
@@ -756,7 +827,7 @@ export default function SprayDisperser() {
                             "Select a trusted token or choose custom",
                           )}
                         </button>
-                        {TRUSTED_TOKENS.map((tok) => (
+                        {trustedTokens.map((tok) => (
                           <button
                             key={tok.address}
                             type="button"
