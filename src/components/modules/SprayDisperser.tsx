@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  type AppKitNetwork,
+  avalanche as avalancheNetwork,
+  base as baseNetwork,
+  celo as celoNetwork,
+  optimism as optimismNetwork,
+} from "@reown/appkit/networks";
+import { useAppKit, useAppKitNetwork } from "@reown/appkit/react";
 import type { BrowserProvider } from "ethers";
 import {
   Contract,
@@ -93,8 +101,17 @@ function isSuccessfulReceiptStatus(status: unknown) {
   return false;
 }
 
+const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
+  celo: celoNetwork,
+  optimism: optimismNetwork,
+  base: baseNetwork,
+  avalanche: avalancheNetwork,
+};
+
 export default function SprayDisperser() {
   const t = useTranslations("SprayDisperser");
+  const { open } = useAppKit();
+  const { switchNetwork } = useAppKitNetwork();
   const translate = (
     key: string,
     fallback: string,
@@ -261,6 +278,34 @@ export default function SprayDisperser() {
   const handleNetworkSelect = (networkKey: string) => {
     setSelectedNetworkKey(networkKey);
     setHasUserSelectedNetwork(true);
+  };
+
+  const handleNetworkPromptClick = async () => {
+    if (isTargetNetworkReady) {
+      return;
+    }
+
+    const targetAppKitNetwork = APPKIT_NETWORKS_BY_KEY[selectedNetworkKey];
+    if (targetAppKitNetwork) {
+      try {
+        await switchNetwork(targetAppKitNetwork);
+        return;
+      } catch (appKitSwitchError) {
+        console.warn("AppKit network switch failed", appKitSwitchError);
+      }
+    }
+
+    const hasInjectedProvider = Boolean(getEthereum());
+    if (hasInjectedProvider) {
+      const switched = await ensureTargetNetwork(selectedNetwork);
+      if (switched) {
+        return;
+      }
+    }
+
+    open?.({ view: "Networks" }).catch(() => {
+      setError(t("errors.switchFailed"));
+    });
   };
 
   const networkStatusLabel = isTargetNetworkReady
@@ -682,15 +727,19 @@ export default function SprayDisperser() {
                   )}
             </span>
             {signerAddress ? (
-              <span
-                className={`wolf-pill text-xs uppercase tracking-[0.26em] ${
-                  isTargetNetworkReady
-                    ? "bg-wolf-emerald-soft text-wolf-emerald"
-                    : "bg-wolf-charcoal-70 text-wolf-text-subtle"
-                }`}
-              >
-                {networkStatusLabel}
-              </span>
+              isTargetNetworkReady ? (
+                <span className="wolf-pill text-xs uppercase tracking-[0.26em] bg-wolf-emerald-soft text-wolf-emerald">
+                  {networkStatusLabel}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleNetworkPromptClick}
+                  className="wolf-pill text-xs uppercase tracking-[0.26em] bg-wolf-charcoal-70 text-wolf-text-subtle transition hover:bg-wolf-border hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
+                >
+                  {networkStatusLabel}
+                </button>
+              )
             ) : (
               <p className="max-w-[32ch] text-xs text-white/60">
                 {translate(

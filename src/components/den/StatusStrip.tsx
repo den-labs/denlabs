@@ -192,14 +192,10 @@ export function StatusStrip({
 
   const connectedWalletButtonLabel =
     walletInfoLabel ||
-    translateSpray(
-      "actions.connected",
-      "Wallet Connected",
-      {
-        address: address ? formatAddress(address) : "—",
-        network: connectedChainName,
-      },
-    );
+    translateSpray("actions.connected", "Wallet Connected", {
+      address: address ? formatAddress(address) : "—",
+      network: connectedChainName,
+    });
 
   return (
     <div
