@@ -1,5 +1,6 @@
 "use client";
 
+import { FlaskConical } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -120,8 +121,15 @@ export default function HomeLanding() {
               priority
             />
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/auth" className="den-button-primary font-bold">
-                Ship fast, play smart
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-3 rounded-xl border border-[#4ca22a] bg-[#89e24a] px-6 py-3 text-[0.85rem] font-semibold uppercase tracking-[0.22em] text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c]"
+              >
+                <FlaskConical
+                  className="h-4 w-4 text-[#0b1b09]"
+                  aria-hidden="true"
+                />
+                <span>Ship fast, play smart</span>
               </Link>
               <ConnectWalletButton />
             </div>
