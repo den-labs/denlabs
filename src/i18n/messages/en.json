@@ -58,7 +58,8 @@
       "subtitle": ""
     },
     "aria": {
-      "navigation": "Wolf Den navigation"
+      "navigation": "Wolf Den navigation",
+      "homeLink": "Go to Wolf Den home"
     },
     "statusBar": {
       "helper": ""

@@ -162,7 +162,11 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
   if (variant === "mobile") {
     return (
       <nav className="space-y-5 text-white" aria-label={t("aria.navigation")}>
-        <div className="flex items-center gap-3 border border-[#2a2f36] bg-[#11131a] px-4 py-3">
+        <Link
+          href="/"
+          aria-label={t("aria.homeLink")}
+          className={`flex items-center gap-3 border border-[#2a2f36] bg-[#11131a] px-4 py-3 transition hover:border-[rgba(186,255,92,0.35)] hover:text-white ${focusRing}`}
+        >
           <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-[#2f3440]">
             <Image
               src="/denlabs.png"
@@ -179,7 +183,7 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
               {t("branding.title")}
             </h1>
           </div>
-        </div>
+        </Link>
         {navGroups.map((group) => (
           <details
             key={group.key}
@@ -248,22 +252,28 @@ export function SidebarNav({ variant = "desktop" }: SidebarNavProps) {
       >
         <div className="flex flex-col gap-4 md:grid md:min-h-[52px] md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
           <div className="flex items-center gap-4">
-            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[#2f3440] bg-[#161821]">
-              <Image
-                src="/denlabs.png"
-                alt={t("branding.badgeAlt")}
-                fill
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col leading-snug">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#9ba3af]">
-                {t("branding.subtitle")}
-              </p>
-              <h1 className="text-[0.95rem] font-semibold uppercase tracking-[0.18em] text-white">
-                {t("branding.title")}
-              </h1>
-            </div>
+            <Link
+              href="/"
+              aria-label={t("aria.homeLink")}
+              className={`inline-flex items-center gap-4 rounded-md px-1 py-1 transition hover:text-white ${focusRing}`}
+            >
+              <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[#2f3440] bg-[#161821]">
+                <Image
+                  src="/denlabs.png"
+                  alt={t("branding.badgeAlt")}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="flex flex-col leading-snug">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-[#9ba3af]">
+                  {t("branding.subtitle")}
+                </p>
+                <h1 className="text-[0.95rem] font-semibold uppercase tracking-[0.18em] text-white">
+                  {t("branding.title")}
+                </h1>
+              </div>
+            </Link>
             <span
               className="hidden h-8 w-px bg-[rgba(255,255,255,0.08)] md:inline-block"
               aria-hidden="true"
