@@ -293,9 +293,6 @@ export default function HomeLanding() {
               Trigger Self Gate, load your roster, launch the prize pool.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/auth" className="den-button-primary">
-                launch
-              </Link>
               <button
                 type="button"
                 className="den-button-ghost"
