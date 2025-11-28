@@ -37,6 +37,26 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
         label: "Celo Colombian Peso (cCOP)",
         address: "0x8A567e2aE79CA692Bd748aB832081C45de4041eA",
       },
+      {
+        label: "GoodDollar (G$)",
+        address: "0x62b8b11039FCfE5ab0C56E502B1c372A3D2a9C7a",
+      },
+      {
+        label: "USD Coin (USDC)",
+        address: "0xceba9300F2b948710D2653dD7B07f33A8B32118c",
+      },
+      {
+        label: "Celo Dollar (cUSD)",
+        address: "0x765DE816845861E75A25fCA122bb6898B8B1282a",
+      },
+      {
+        label: "Celo Euro (cEUR)",
+        address: "0xd8763CBa276a3738e6DE85b4B3BF5Fded6d6CA73",
+      },
+      {
+        label: "Celo Brazilian Real (cREAL)",
+        address: "0xE8537A3d056DA446677B9E9d6C5dB704EaAb4787",
+      },
     ],
   },
   optimism: {
