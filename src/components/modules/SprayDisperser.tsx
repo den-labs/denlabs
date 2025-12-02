@@ -7,14 +7,19 @@ import {
   celo as celoNetwork,
   optimism as optimismNetwork,
 } from "@reown/appkit/networks";
-import { useAppKit, useAppKitNetwork } from "@reown/appkit/react";
-import type { BrowserProvider } from "ethers";
 import {
+  useAppKit,
+  useAppKitNetwork,
+  useAppKitProvider,
+} from "@reown/appkit/react";
+import {
+  BrowserProvider,
   Contract,
   formatEther,
   isAddress,
   parseEther,
   parseUnits,
+  type Eip1193Provider,
 } from "ethers";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +29,7 @@ import {
   type SprayNetworkConfig,
   SUPPORTED_SPRAY_NETWORKS,
 } from "@/lib/sprayNetworks";
+import { useDenUser } from "@/hooks/useDenUser";
 
 const SPRAY_ABI = [
   "function disperseNative(address[] _recipients, uint256[] _amounts) payable",
@@ -131,11 +137,33 @@ const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
   avalanche: avalancheNetwork,
 };
 
+function normalizeChainId(value: unknown): number | null {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === "string" && value.length > 0) {
+    if (value.startsWith("eip155:")) {
+      const [, raw] = value.split(":");
+      const parsed = Number.parseInt(raw ?? "", 10);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+    if (value.startsWith("0x")) {
+      const parsed = Number.parseInt(value, 16);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
 export default function SprayDisperser() {
   const t = useTranslations("SprayDisperser");
   const locale = useLocale();
   const { open } = useAppKit();
-  const { switchNetwork } = useAppKitNetwork();
+  const { switchNetwork, chainId: appKitChainId } = useAppKitNetwork();
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
+  const { walletAddress } = useDenUser();
   const translate = (
     key: string,
     fallback: string,
@@ -180,6 +208,23 @@ export default function SprayDisperser() {
     SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY];
   const trustedTokens = selectedNetwork.trustedTokens ?? [];
   const sprayAddress = selectedNetwork.sprayAddress;
+
+  useEffect(() => {
+    setSignerAddress(walletAddress ?? null);
+  }, [walletAddress]);
+
+  useEffect(() => {
+    const normalizedChainId = normalizeChainId(appKitChainId);
+    setChainId(normalizedChainId);
+  }, [appKitChainId]);
+
+  useEffect(() => {
+    if (!walletProvider) {
+      setProvider(null);
+      return;
+    }
+    setProvider(new BrowserProvider(walletProvider));
+  }, [walletProvider]);
 
   useEffect(() => {
     const ethereum = getEthereum();
