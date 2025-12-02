@@ -1095,7 +1095,7 @@ export default function SprayDisperser() {
                     <div
                       id="trusted-token-options"
                       role="listbox"
-                      className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
+                      className="absolute z-20 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
                     >
                       <button
                         type="button"
