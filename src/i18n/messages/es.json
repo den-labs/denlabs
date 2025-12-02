@@ -751,7 +751,7 @@
       "tokenPlaceholder": "Pega la dirección ERC20",
       "tokenLoading": "Cargando detalles del token...",
       "tokenResolved": "{symbol} detectado · {decimals} decimales",
-      "trustedTokenLabel": "Atajo de token (opcional)",
+      "trustedTokenLabel": "Pagar con",
       "trustedTokenPlaceholder": "Elige un token o usa personalizado",
       "useCustom": "Usar personalizado",
       "recipientLabel": "Wallet destinataria #{index}",

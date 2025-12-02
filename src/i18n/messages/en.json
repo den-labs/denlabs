@@ -753,7 +753,7 @@
       "tokenResolved": "{symbol} detected · {decimals} decimals",
       "receiveLabel": "Receive",
       "customTokenLabel": "Custom token",
-      "trustedTokenLabel": "Quick pick (optional)",
+      "trustedTokenLabel": "Pay with",
       "trustedTokenPlaceholder": "Choose a token or use custom",
       "useCustom": "Use custom",
       "recipientLabel": "Recipient wallet #{index}",

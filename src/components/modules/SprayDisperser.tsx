@@ -190,8 +190,9 @@ export default function SprayDisperser() {
   const [isApproving, setIsApproving] = useState(false);
   const [mode, setMode] = useState<"native" | "token">("native");
   const [tokenAddress, setTokenAddress] = useState("");
-  const [selectedTrustedToken, setSelectedTrustedToken] =
-    useState<string>(INITIAL_TRUSTED_TOKEN);
+  const [selectedTrustedToken, setSelectedTrustedToken] = useState<string>(
+    INITIAL_TRUSTED_TOKEN,
+  );
   const [isTrustedOpen, setIsTrustedOpen] = useState(false);
   const trustedDropdownRef = useRef<HTMLDivElement | null>(null);
   const [tokenInfo, setTokenInfo] = useState<{
@@ -284,6 +285,12 @@ export default function SprayDisperser() {
   useEffect(() => {
     if (!provider || mode !== "token") {
       setTokenInfo(null);
+      setIsFetchingTokenInfo(false);
+      return;
+    }
+    if (selectedTrustedToken !== "") {
+      setTokenInfo(null);
+      setIsFetchingTokenInfo(false);
       return;
     }
 
@@ -292,6 +299,7 @@ export default function SprayDisperser() {
     const normalized = tokenAddress.trim();
     if (!isAddress(normalized)) {
       setTokenInfo(null);
+      setIsFetchingTokenInfo(false);
       return;
     }
 
@@ -327,7 +335,7 @@ export default function SprayDisperser() {
     return () => {
       isCancelled = true;
     };
-  }, [provider, tokenAddress, mode, t]);
+  }, [provider, tokenAddress, mode, selectedTrustedToken, t]);
 
   // When the user selects a trusted token, keep the address input in sync
   useEffect(() => {
@@ -967,16 +975,14 @@ export default function SprayDisperser() {
                       htmlFor="trusted-token-select"
                       className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle"
                     >
-                      {translate(
-                        "form.trustedTokenLabel",
-                        "Trusted token (optional)",
-                      )}
+                      {translate("form.trustedTokenLabel", "Pay with")}
                     </label>
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedTrustedToken("");
                         setTokenAddress("");
+                        setTokenInfo(null);
                         setIsTrustedOpen(false);
                       }}
                       className="text-[11px] uppercase tracking-[0.28em] text-wolf-emerald hover:text-white"
@@ -1042,6 +1048,8 @@ export default function SprayDisperser() {
                           className="block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5"
                           onClick={() => {
                             setSelectedTrustedToken("");
+                            setTokenAddress("");
+                            setTokenInfo(null);
                             setIsTrustedOpen(false);
                           }}
                         >
@@ -1078,6 +1086,7 @@ export default function SprayDisperser() {
                             }`}
                             onClick={() => {
                               setSelectedTrustedToken(tok.address);
+                              setTokenInfo(null);
                               setIsTrustedOpen(false);
                             }}
                           >
@@ -1107,33 +1116,35 @@ export default function SprayDisperser() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label
-                    htmlFor="token-address-input"
-                    className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle"
-                  >
-                    {t("form.tokenLabel")}
-                  </label>
-                  <input
-                    id="token-address-input"
-                    value={tokenAddress}
-                    onChange={(event) => setTokenAddress(event.target.value)}
-                    placeholder={t("form.tokenPlaceholder")}
-                    className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
-                  />
-                  {isFetchingTokenInfo ? (
-                    <p className="text-xs text-wolf-text-subtle">
-                      {t("form.tokenLoading")}
-                    </p>
-                  ) : tokenInfo ? (
-                    <p className="text-xs text-wolf-text-subtle">
-                      {t("form.tokenResolved", {
-                        symbol: tokenInfo.symbol,
-                        decimals: tokenInfo.decimals,
-                      })}
-                    </p>
-                  ) : null}
-                </div>
+                {selectedTrustedToken === "" ? (
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="token-address-input"
+                      className="text-xs uppercase tracking-[0.32em] text-wolf-text-subtle"
+                    >
+                      {t("form.tokenLabel")}
+                    </label>
+                    <input
+                      id="token-address-input"
+                      value={tokenAddress}
+                      onChange={(event) => setTokenAddress(event.target.value)}
+                      placeholder={t("form.tokenPlaceholder")}
+                      className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
+                    />
+                    {isFetchingTokenInfo ? (
+                      <p className="text-xs text-wolf-text-subtle">
+                        {t("form.tokenLoading")}
+                      </p>
+                    ) : tokenInfo ? (
+                      <p className="text-xs text-wolf-text-subtle">
+                        {t("form.tokenResolved", {
+                          symbol: tokenInfo.symbol,
+                          decimals: tokenInfo.decimals,
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
