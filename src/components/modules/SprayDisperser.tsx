@@ -15,8 +15,10 @@ import {
 import {
   BrowserProvider,
   Contract,
+  JsonRpcProvider,
   type Eip1193Provider,
   formatEther,
+  formatUnits,
   isAddress,
   parseEther,
   parseUnits,
@@ -41,6 +43,7 @@ const SPRAY_ABI = [
 const ERC20_ABI = [
   'function approve(address spender, uint256 value) returns (bool)',
   'function allowance(address owner, address spender) view returns (uint256)',
+  'function balanceOf(address owner) view returns (uint256)',
   'function decimals() view returns (uint8)',
   'function symbol() view returns (string)',
 ]
@@ -103,6 +106,20 @@ function formatHash(hash: string) {
   return `${hash.slice(0, 6)}...${hash.slice(-5)}`
 }
 
+function formatTokenBalanceDisplay(value: string) {
+  const parsed = Number.parseFloat(value)
+  if (!Number.isFinite(parsed)) {
+    return value
+  }
+  if (parsed === 0) {
+    return '0'
+  }
+  if (parsed >= 1) {
+    return parsed.toLocaleString(undefined, { maximumFractionDigits: 4 })
+  }
+  return parsed.toPrecision(3)
+}
+
 function getExplorerTxUrl(networkKey: string, txHash: string) {
   const explorerBase =
     SPRAY_NETWORKS[networkKey]?.explorerUrls?.[0] ??
@@ -130,6 +147,21 @@ function isSuccessfulReceiptStatus(status: unknown) {
     return status === '0x1' || status === '1'
   }
   return false
+}
+
+function createReadOnlyProvider(config?: SprayNetworkConfig | null) {
+  if (!config?.rpcUrls?.length) {
+    return null
+  }
+  try {
+    return new JsonRpcProvider(config.rpcUrls[0], {
+      chainId: config.chainId,
+      name: config.name,
+    })
+  } catch (providerError) {
+    console.warn('Failed to create read-only provider', providerError)
+    return null
+  }
 }
 
 const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
@@ -181,7 +213,11 @@ export default function SprayDisperser() {
     values?: Record<string, string | number>,
   ) => {
     try {
-      return values ? t(key, values) : t(key)
+      const translated = values ? t(key, values) : t(key)
+      if (typeof translated === 'string' && translated === key) {
+        return fallback
+      }
+      return translated
     } catch {
       return fallback
     }
@@ -208,6 +244,10 @@ export default function SprayDisperser() {
     decimals: number
   } | null>(null)
   const [isFetchingTokenInfo, setIsFetchingTokenInfo] = useState(false)
+  const [trustedTokenBalances, setTrustedTokenBalances] = useState<
+    Record<string, string | null>
+  >({})
+  const [nativeBalance, setNativeBalance] = useState<string | null>(null)
   // Use a deterministic initial row to avoid SSR/CSR mismatch from Math.random/Date.now()
   const [rows, setRows] = useState<RecipientRow[]>([
     { id: 'initial', address: '', amount: '' },
@@ -259,8 +299,27 @@ export default function SprayDisperser() {
     'network.selectorLabel',
     'Choose a network',
   )
+  const walletBalanceConnectHint = translate(
+    'summary.walletBalanceConnect',
+    'Connect wallet to view balance',
+  )
+  const walletBalanceLoadingLabel = translate(
+    'summary.walletBalanceLoading',
+    'Fetching balance…',
+  )
+  const tokenSymbolPlaceholder = translate(
+    'summary.tokenPlaceholder',
+    'TOKEN',
+  )
   const selectedNetworkBadgeIcon =
     NATIVE_TOKEN_ICONS[selectedNetworkKey] ?? DEFAULT_TOKEN_ICON
+  const nativeBalanceDisplay = signerAddress
+    ? nativeBalance ?? walletBalanceLoadingLabel
+    : walletBalanceConnectHint
+  const readOnlyProvider = useMemo(
+    () => createReadOnlyProvider(selectedNetwork),
+    [selectedNetworkKey],
+  )
 
   useEffect(() => {
     setSignerAddress(walletAddress ?? null)
@@ -341,21 +400,20 @@ export default function SprayDisperser() {
       return
     }
 
-    if (!provider) {
+    const contractRunner = provider ?? readOnlyProvider
+    if (!contractRunner) {
       setTokenInfo(null)
       setIsFetchingTokenInfo(false)
       return
     }
 
-    const activeProvider = provider
     let isCancelled = false
 
-    async function fetchTokenDetails(targetProvider: BrowserProvider) {
+    async function fetchTokenDetails() {
       setIsFetchingTokenInfo(true)
       setError(null)
       try {
-        const signer = await targetProvider.getSigner()
-        const erc20 = new Contract(normalized, ERC20_ABI, signer)
+        const erc20 = new Contract(normalized, ERC20_ABI, contractRunner)
         const [symbol, decimals] = await Promise.all([
           erc20.symbol(),
           erc20.decimals(),
@@ -375,12 +433,113 @@ export default function SprayDisperser() {
       }
     }
 
-    fetchTokenDetails(activeProvider)
+    fetchTokenDetails()
 
     return () => {
       isCancelled = true
     }
-  }, [provider, tokenAddress, mode, trustedTokens, t])
+  }, [provider, readOnlyProvider, tokenAddress, mode, trustedTokens, t])
+
+  useEffect(() => {
+    if (!trustedTokens.length || !signerAddress) {
+      setTrustedTokenBalances({})
+      return
+    }
+
+    const balanceProvider = readOnlyProvider ?? provider
+    if (!balanceProvider) {
+      setTrustedTokenBalances({})
+      return
+    }
+
+    let isCancelled = false
+
+    async function fetchTrustedTokenBalances() {
+      try {
+        const entries = await Promise.all(
+          trustedTokens.map(async (token) => {
+            try {
+              const erc20 = new Contract(token.address, ERC20_ABI, balanceProvider)
+              const decimalsValue =
+                typeof token.decimals === 'number'
+                  ? token.decimals
+                  : await erc20.decimals()
+              const balance = await erc20.balanceOf(signerAddress)
+              const formattedValue = formatTokenBalanceDisplay(
+                formatUnits(balance, decimalsValue),
+              )
+              return [token.address.toLowerCase(), formattedValue]
+            } catch (balanceError) {
+              console.warn('Failed to fetch trusted token balance', {
+                token: token.label,
+                error: balanceError,
+              })
+              return [token.address.toLowerCase(), null]
+            }
+          }),
+        )
+        if (!isCancelled) {
+          setTrustedTokenBalances(Object.fromEntries(entries))
+        }
+      } catch (outerError) {
+        console.warn('Failed to prepare trusted token balances', outerError)
+        if (!isCancelled) {
+          setTrustedTokenBalances({})
+        }
+      }
+    }
+
+    fetchTrustedTokenBalances()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [provider, readOnlyProvider, signerAddress, trustedTokens])
+
+  useEffect(() => {
+    if (!signerAddress) {
+      setNativeBalance(null)
+      return
+    }
+
+    const providerForNative = readOnlyProvider ?? provider
+    if (!providerForNative) {
+      setNativeBalance(null)
+      return
+    }
+
+    let isCancelled = false
+
+    async function fetchNativeBalance() {
+      try {
+        const balance = await providerForNative.getBalance(signerAddress)
+        const decimals = selectedNetwork.nativeCurrency.decimals ?? 18
+        const formatted = formatTokenBalanceDisplay(
+          formatUnits(balance, decimals),
+        )
+        if (!isCancelled) {
+          setNativeBalance(formatted)
+        }
+      } catch (nativeBalanceError) {
+        console.warn('Failed to fetch native balance', nativeBalanceError)
+        if (!isCancelled) {
+          setNativeBalance('0')
+        }
+      }
+    }
+
+    fetchNativeBalance()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [
+    provider,
+    readOnlyProvider,
+    signerAddress,
+    selectedNetwork.nativeCurrency.decimals,
+    selectedNetworkKey,
+  ])
 
   // When the user selects a trusted token, keep the address input in sync
   useEffect(() => {
@@ -1288,54 +1447,78 @@ export default function SprayDisperser() {
                                   className="h-8 w-8 object-contain"
                                 />
                               </div>
-                              <div className="text-left leading-tight">
+                              <div className="text-left leading-tight w-full">
                                 <p className="text-sm font-semibold text-white">
                                   {nativeTokenLabel}
                                 </p>
-                                <p className="text-xs text-white/60">
-                                  {selectedNetwork.name}
-                                </p>
+                                <div className="flex items-center justify-between text-xs text-white/60">
+                                  <span>{selectedNetwork.nativeCurrency.symbol}</span>
+                                  <span>{nativeBalanceDisplay}</span>
+                                </div>
                               </div>
                             </div>
                           </button>
-                          {trustedTokens.map((tok) => (
-                            <button
-                              key={tok.address}
-                              type="button"
-                              role="option"
-                              aria-selected={
-                                selectedTrustedToken === tok.address
-                              }
-                              className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
-                                selectedTrustedToken === tok.address
-                                  ? 'bg-white/5'
-                                  : ''
-                              }`}
-                              onClick={() =>
-                                handleSelectTrustedToken(tok.address)
-                              }
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                                  <Image
-                                    src={tok.iconUrl ?? DEFAULT_TOKEN_ICON}
-                                    alt={`${tok.symbol ?? tok.label} icon`}
-                                    width={32}
-                                    height={32}
-                                    className="h-8 w-8 object-contain"
-                                  />
-                                </div>
-                                <div className="text-left leading-tight">
+                          {trustedTokens.map((tok) => {
+                            const balanceKey = tok.address.toLowerCase()
+                            const storedBalance =
+                              trustedTokenBalances[balanceKey]
+                            const hasBalanceEntry =
+                              Object.prototype.hasOwnProperty.call(
+                                trustedTokenBalances,
+                                balanceKey,
+                              )
+
+                            let walletBalanceValue: string
+                            if (storedBalance != null) {
+                              walletBalanceValue = storedBalance
+                            } else if (!signerAddress) {
+                              walletBalanceValue = walletBalanceConnectHint
+                            } else if (!hasBalanceEntry) {
+                              walletBalanceValue = walletBalanceLoadingLabel
+                            } else {
+                              walletBalanceValue = '0'
+                            }
+
+                            return (
+                              <button
+                                key={tok.address}
+                                type="button"
+                                role="option"
+                                aria-selected={
+                                  selectedTrustedToken === tok.address
+                                }
+                                className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
+                                  selectedTrustedToken === tok.address
+                                    ? 'bg-white/5'
+                                    : ''
+                                }`}
+                                onClick={() =>
+                                  handleSelectTrustedToken(tok.address)
+                                }
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                                    <Image
+                                      src={tok.iconUrl ?? DEFAULT_TOKEN_ICON}
+                                      alt={`${tok.symbol ?? tok.label} icon`}
+                                      width={32}
+                                      height={32}
+                                      className="h-8 w-8 object-contain"
+                                    />
+                                  </div>
+                                <div className="text-left leading-tight w-full">
                                   <p className="text-sm font-semibold text-white">
                                     {tok.label}
                                   </p>
-                                  <p className="font-mono text-xs text-white/60 break-all">
-                                    {tok.address}
-                                  </p>
+                                  <div className="flex items-center justify-between text-xs text-white/60">
+                                    <span>{tok.symbol ?? tokenSymbolPlaceholder}</span>
+                                    <span>{walletBalanceValue}</span>
+                                  </div>
                                 </div>
                               </div>
                             </button>
-                          ))}
+                          )
+                        })}
                           <button
                             type="button"
                             role="option"

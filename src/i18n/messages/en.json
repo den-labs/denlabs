@@ -771,7 +771,9 @@
       "recipients": "{count, plural, one {1 wallet} other {{count} wallets}}",
       "totalNative": "Total: {amount} {symbol}",
       "totalToken": "Total: {amount} {symbol}",
-      "tokenPlaceholder": "TOKEN"
+      "tokenPlaceholder": "TOKEN",
+      "walletBalanceConnect": "Connect wallet to view balance",
+      "walletBalanceLoading": "Fetching balance…"
     },
     "activity": {
       "title": "Latest sprays",
