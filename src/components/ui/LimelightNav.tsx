@@ -54,9 +54,11 @@ const DefaultBellIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+type NavItemIcon = ReactElement<{ className?: string }>;
+
 export type NavItem = {
   id: string | number;
-  icon: ReactElement;
+  icon: NavItemIcon;
   label?: string;
   onClick?: () => void;
 };

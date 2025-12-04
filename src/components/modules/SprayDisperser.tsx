@@ -1086,13 +1086,13 @@ export default function SprayDisperser() {
                     onClick={() => setIsNetworkDropdownOpen((prev) => !prev)}
                     className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                       <Image
                         src={selectedNetworkBadgeIcon}
                         alt={`${selectedNetwork.name} badge`}
                         width={32}
                         height={32}
-                        className="h-8 w-8"
+                        className="h-8 w-8 object-contain"
                       />
                     </div>
                     <div className="flex-1 text-left leading-tight">
@@ -1141,13 +1141,13 @@ export default function SprayDisperser() {
                                     : 'text-white/80 hover:bg-white/5'
                                 }`}
                               >
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
                                   <Image
                                     src={iconSrc}
                                     alt={`${network.name} icon`}
                                     width={24}
                                     height={24}
-                                    className="h-6 w-6"
+                                    className="h-6 w-6 object-contain"
                                   />
                                 </div>
                                 <div className="flex flex-col">
@@ -1183,13 +1183,13 @@ export default function SprayDisperser() {
                         title={tokenCardPrimaryLabel}
                         className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-3 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus:border-wolf-emerald focus:outline-none"
                       >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                           <Image
                             src={tokenCardIconSrc}
                             alt={`${tokenCardSymbol} token icon`}
                             width={32}
                             height={32}
-                            className="h-8 w-8"
+                            className="h-8 w-8 object-contain"
                           />
                         </div>
                         <div className="text-left leading-tight w-full">
@@ -1257,13 +1257,13 @@ export default function SprayDisperser() {
                             aria-label={translate('actions.paste', 'Paste')}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                                 <Image
                                   src={nativeTokenIconSrc}
                                   alt={`${selectedNetwork.nativeCurrency.symbol} icon`}
                                   width={32}
                                   height={32}
-                                  className="h-8 w-8"
+                                  className="h-8 w-8 object-contain"
                                 />
                               </div>
                               <div className="text-left leading-tight">
@@ -1286,13 +1286,13 @@ export default function SprayDisperser() {
                             onClick={handleSelectCustomToken}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                                 <Image
                                   src={CUSTOM_TOKEN_ICON}
                                   alt="Custom token icon"
                                   width={32}
                                   height={32}
-                                  className="h-8 w-8"
+                                  className="h-8 w-8 object-contain"
                                 />
                               </div>
                               <div className="text-left leading-tight">
@@ -1323,13 +1323,13 @@ export default function SprayDisperser() {
                               }
                             >
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
                                   <Image
                                     src={tok.iconUrl ?? DEFAULT_TOKEN_ICON}
                                     alt={`${tok.symbol ?? tok.label} icon`}
                                     width={32}
                                     height={32}
-                                    className="h-8 w-8"
+                                    className="h-8 w-8 object-contain"
                                   />
                                 </div>
                                 <div className="text-left leading-tight">
