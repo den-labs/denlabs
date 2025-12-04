@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 
 type RailSlotName = "left" | "right";
+type LayoutVariant = "desktop" | "mobile";
 
 type RailSlotTargets = Record<RailSlotName, HTMLElement | null>;
 type RailSlotActiveMap = Record<RailSlotName, boolean>;
@@ -24,6 +25,7 @@ type RailSlotsContextValue = {
 };
 
 const RailSlotsContext = createContext<RailSlotsContextValue | null>(null);
+const LayoutVariantContext = createContext<LayoutVariant>("desktop");
 
 export function DenRailSlotsProvider({ children }: PropsWithChildren) {
   const [targets, setTargets] = useState<RailSlotTargets>({
@@ -93,6 +95,25 @@ export function useRailSlotActive(slot: RailSlotName) {
   return active[slot];
 }
 
+type LayoutVariantProviderProps = PropsWithChildren<{
+  variant: LayoutVariant;
+}>;
+
+export function DenLayoutVariantProvider({
+  variant,
+  children,
+}: LayoutVariantProviderProps) {
+  return (
+    <LayoutVariantContext.Provider value={variant}>
+      {children}
+    </LayoutVariantContext.Provider>
+  );
+}
+
+function useLayoutVariant() {
+  return useContext(LayoutVariantContext);
+}
+
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -115,13 +136,18 @@ function useIsDesktop() {
 function createRailPortalSlot(slot: RailSlotName) {
   return function RailPortalSlot({ children }: PropsWithChildren) {
     const { targets, setActive } = useRailSlotsContext();
-    const isDesktop = useIsDesktop();
+    const variant = useLayoutVariant();
+    const isDesktopViewport = useIsDesktop();
+    const shouldPortal = variant === "desktop" && isDesktopViewport;
     useEffect(() => {
-      setActive(slot, isDesktop);
+      if (variant !== "desktop") {
+        return;
+      }
+      setActive(slot, shouldPortal);
       return () => setActive(slot, false);
-    }, [setActive, isDesktop, slot]);
+    }, [setActive, slot, shouldPortal, variant]);
     const target = targets[slot];
-    if (!target || !isDesktop) {
+    if (!target || !shouldPortal) {
       return <>{children}</>;
     }
     return createPortal(children, target);

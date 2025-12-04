@@ -5,6 +5,7 @@ import ActivityBottomSheet from "@/components/den/ActivityBottomSheet";
 import ActivityRail from "@/components/den/ActivityRail";
 import MobileDenLayout from "@/components/den/MobileDenLayout";
 import {
+  DenLayoutVariantProvider,
   DenRailSlotsProvider,
   useRailSlotActive,
   useRailSlotTarget,
@@ -14,13 +15,24 @@ import StatusStrip from "@/components/den/StatusStrip";
 import TopBar from "@/components/den/TopBar";
 
 export default function DenLayout({ children }: { children: ReactNode }) {
+  const desktopChildren = (
+    <DenLayoutVariantProvider variant="desktop">
+      {children}
+    </DenLayoutVariantProvider>
+  );
+  const mobileChildren = (
+    <DenLayoutVariantProvider variant="mobile">
+      {children}
+    </DenLayoutVariantProvider>
+  );
+
   return (
     <DenRailSlotsProvider>
       <div className="wolf-neon-backdrop text-wolf-foreground">
         <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-2 sm:px-6">
-          <DesktopLayout>{children}</DesktopLayout>
+          <DesktopLayout>{desktopChildren}</DesktopLayout>
           <ActivityBottomSheet />
-          <MobileLayout>{children}</MobileLayout>
+          <MobileLayout>{mobileChildren}</MobileLayout>
         </div>
       </div>
     </DenRailSlotsProvider>
