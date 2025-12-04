@@ -4,18 +4,20 @@ import { Home, LayoutGrid, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname } from "@/i18n/routing";
+import LimelightNav from "@/components/ui/LimelightNav";
 
 type MobilePanelKey = "main" | "menu" | "activity";
 
-type NavigationItem = {
+type NavigationItemConfig = {
   key: MobilePanelKey;
   icon: typeof Home;
+  labelKey: string;
 };
 
-const navigationItems: NavigationItem[] = [
-  { key: "main", icon: Home },
-  { key: "menu", icon: LayoutGrid },
-  { key: "activity", icon: Sparkles },
+const navigationItems: NavigationItemConfig[] = [
+  { key: "main", icon: Home, labelKey: "tabs.main" },
+  { key: "menu", icon: LayoutGrid, labelKey: "tabs.menu" },
+  { key: "activity", icon: Sparkles, labelKey: "tabs.activity" },
 ];
 
 type MobileDenLayoutProps = {
@@ -32,6 +34,16 @@ export function MobileDenLayout({
   const t = useTranslations("MobileDenLayout");
   const pathname = usePathname();
   const [activePanel, setActivePanel] = useState<MobilePanelKey>("main");
+  const navItems = useMemo(() => {
+    return navigationItems.map(({ key, icon: Icon, labelKey }) => ({
+      id: key,
+      icon: <Icon className="h-5 w-5" aria-hidden />,
+      label: t(labelKey),
+    }));
+  }, [t]);
+  const activeIndex = navigationItems.findIndex(
+    (item) => item.key === activePanel,
+  );
 
   useEffect(() => {
     if (!pathname) {
@@ -60,41 +72,22 @@ export function MobileDenLayout({
         </div>
       </div>
       <nav
-        aria-label={t("aria.navigation")}
         className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4"
       >
         <div className="pointer-events-auto w-full max-w-md">
-          <div className="wolf-card flex items-center justify-around gap-1 rounded-lg border border-wolf-border-soft bg-wolf-charcoal-80/90 px-3 py-2 shadow-[0_25px_65px_-35px_rgba(0,0,0,0.55)] backdrop-blur">
-            {navigationItems.map(({ key, icon: Icon }) => {
-              const isActive = key === activePanel;
-
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActivePanel(key)}
-                  className={`flex flex-1 flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs uppercase tracking-[0.18em] transition ${
-                    isActive
-                      ? "text-white"
-                      : "text-wolf-text-subtle hover:text-white"
-                  }`}
-                >
-                  <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-lg border transition ${
-                      isActive
-                        ? "border-wolf-border-xstrong bg-[linear-gradient(180deg,#c8ff64_0%,#8bea4e_55%,#3b572a_100%)] text-[#0b1407] shadow-[0_0_28px_rgba(186,255,92,0.45)]"
-                        : "border-transparent bg-wolf-charcoal-60 text-wolf-emerald"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <span className="text-[0.65rem] font-semibold">
-                    {t(`tabs.${key}`)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <LimelightNav
+            items={navItems}
+            activeIndex={activeIndex === -1 ? 0 : activeIndex}
+            onTabChange={(index) => {
+              const next = navigationItems[index];
+              if (next) {
+                setActivePanel(next.key);
+              }
+            }}
+            className="w-full"
+            iconContainerClassName="rounded-2xl"
+            aria-label={t("aria.navigation")}
+          />
         </div>
       </nav>
     </>
