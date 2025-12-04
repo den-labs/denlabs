@@ -3,9 +3,10 @@
 import {
   BarChart3,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Gamepad2,
   MapPinned,
-  Menu,
   ScanQrCode,
   Settings,
   ShieldCheck,
@@ -13,7 +14,6 @@ import {
   SprayCan,
   SquareStack,
   UsersRound,
-  X,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -90,6 +90,7 @@ export default function SidebarNav() {
   const pathname = usePathname();
   const { open, isMobile } = useSidebar();
   const collapsed = !open && !isMobile;
+  const footerCopy = t("footer.copy").replace(". ", ".\n");
 
   return (
     <Sidebar collapsible="icon" aria-label={t("aria.navigation")}>
@@ -97,7 +98,12 @@ export default function SidebarNav() {
         <Link
           href="/"
           aria-label={t("aria.homeLink")}
-          className="flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-2 py-2 transition hover:border-white/30"
+          className={cn(
+            "flex flex-1 items-center gap-3 rounded-xl px-2 py-2 transition",
+            collapsed
+              ? "h-11 w-11 justify-center gap-0 rounded-lg border-none bg-transparent px-0 py-0 hover:border-transparent"
+              : "border border-white/10 bg-white/5 hover:border-white/30",
+          )}
         >
           <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0f141d]">
             <Image
@@ -110,7 +116,7 @@ export default function SidebarNav() {
           <div
             className={cn(
               "flex flex-col leading-tight",
-              collapsed ? "hidden md:flex" : "flex",
+              collapsed ? "hidden" : "flex",
             )}
           >
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.32em] text-white/65">
@@ -121,20 +127,6 @@ export default function SidebarNav() {
             </h1>
           </div>
         </Link>
-        <SidebarTrigger
-          aria-label={t("aria.toggle")}
-          className="ml-2 hidden md:inline-flex"
-        >
-          <Menu className="h-4 w-4" aria-hidden />
-          <span className="sr-only">{t("aria.toggle")}</span>
-        </SidebarTrigger>
-        <SidebarTrigger
-          aria-label={t("aria.toggle")}
-          className="ml-2 inline-flex md:hidden"
-        >
-          <X className="h-4 w-4" aria-hidden />
-          <span className="sr-only">{t("aria.toggle")}</span>
-        </SidebarTrigger>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -142,7 +134,7 @@ export default function SidebarNav() {
             {navGroups.map((group) => {
               const Icon = group.icon;
               const collapsibleProps = collapsed
-                ? { open: true, disabled: true }
+                ? { open: false, disabled: true }
                 : { defaultOpen: true };
               return (
                 <Collapsible key={group.key} {...collapsibleProps}>
@@ -157,7 +149,7 @@ export default function SidebarNav() {
                           <span
                             className={cn(
                               "truncate text-[0.72rem]",
-                              collapsed ? "hidden md:inline" : "inline",
+                              collapsed ? "hidden" : "inline",
                             )}
                           >
                             {t(`sections.${group.key}.title`)}
@@ -172,51 +164,49 @@ export default function SidebarNav() {
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 data-[state=closed]:hidden">
-                      {collapsed ? null : (
-                        <SidebarMenuSub className="space-y-1">
-                          {group.items.map((item) => {
-                            const isActive =
-                              item.href === "/auth"
-                                ? pathname?.startsWith(item.href)
-                                : pathname === item.href ||
-                                  pathname?.startsWith(`${item.href}/`);
-                            const ItemIcon = navItemIcons[item.key];
-                            return (
-                              <SidebarMenuSubItem
-                                key={`${group.key}-${item.key}`}
+                      <SidebarMenuSub className="space-y-1">
+                        {group.items.map((item) => {
+                          const isActive =
+                            item.href === "/auth"
+                              ? pathname?.startsWith(item.href)
+                              : pathname === item.href ||
+                                pathname?.startsWith(`${item.href}/`);
+                          const ItemIcon = navItemIcons[item.key];
+                          return (
+                            <SidebarMenuSubItem
+                              key={`${group.key}-${item.key}`}
+                            >
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isActive}
                               >
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={isActive}
+                                <Link
+                                  href={item.href}
+                                  aria-current={
+                                    isActive ? "page" : undefined
+                                  }
+                                  className="flex w-full items-center gap-3"
                                 >
-                                  <Link
-                                    href={item.href}
-                                    aria-current={
-                                      isActive ? "page" : undefined
-                                    }
-                                    className="flex w-full items-center gap-3"
+                                  <ItemIcon
+                                    className="h-4 w-4 text-[#7df95a]"
+                                    aria-hidden
+                                  />
+                                  <span
+                                    className={cn(
+                                      "truncate text-[0.7rem]",
+                                      collapsed ? "hidden" : "block",
+                                    )}
                                   >
-                                    <ItemIcon
-                                      className="h-4 w-4 text-[#7df95a]"
-                                      aria-hidden
-                                    />
-                                    <span
-                                      className={cn(
-                                        "truncate text-[0.7rem]",
-                                        collapsed ? "hidden md:block" : "block",
-                                      )}
-                                    >
-                                      {t(
-                                        `sections.${group.key}.items.${item.key}`,
-                                      )}
-                                    </span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            );
-                          })}
-                        </SidebarMenuSub>
-                      )}
+                                    {t(
+                                      `sections.${group.key}.items.${item.key}`,
+                                    )}
+                                  </span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
@@ -225,7 +215,24 @@ export default function SidebarNav() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>{t("footer.copy")}</SidebarFooter>
+      <SidebarFooter className="flex items-center gap-3">
+        {collapsed ? null : (
+          <span className="whitespace-pre-line text-[0.62rem] uppercase tracking-[0.28em]">
+            {footerCopy}
+          </span>
+        )}
+        <SidebarTrigger
+          aria-label={t("aria.toggle")}
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-white/30 hover:bg-white/10"
+        >
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          ) : (
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          )}
+          <span className="sr-only">{t("aria.toggle")}</span>
+        </SidebarTrigger>
+      </SidebarFooter>
     </Sidebar>
   );
 }

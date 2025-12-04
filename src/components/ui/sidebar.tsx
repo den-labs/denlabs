@@ -4,9 +4,9 @@ import { Menu, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const SIDEBAR_WIDTH = 272;
-const SIDEBAR_COLLAPSED_WIDTH = 84;
-const SIDEBAR_MOBILE_WIDTH = 288;
+export const SIDEBAR_WIDTH = 272;
+export const SIDEBAR_COLLAPSED_WIDTH = 84;
+export const SIDEBAR_MOBILE_WIDTH = 288;
 
 type SidebarContextValue = {
   open: boolean;
