@@ -11,7 +11,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-type RailSlotName = "left" | "right";
+type RailSlotName = "right";
 type LayoutVariant = "desktop" | "mobile";
 
 type RailSlotTargets = Record<RailSlotName, HTMLElement | null>;
@@ -29,11 +29,9 @@ const LayoutVariantContext = createContext<LayoutVariant>("desktop");
 
 export function DenRailSlotsProvider({ children }: PropsWithChildren) {
   const [targets, setTargets] = useState<RailSlotTargets>({
-    left: null,
     right: null,
   });
   const [active, setActiveState] = useState<RailSlotActiveMap>({
-    left: false,
     right: false,
   });
 
@@ -158,5 +156,4 @@ export function DenMain({ children }: PropsWithChildren) {
   return <>{children}</>;
 }
 
-export const DenLeftRail = createRailPortalSlot("left");
 export const DenRightRail = createRailPortalSlot("right");

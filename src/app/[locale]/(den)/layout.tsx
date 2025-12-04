@@ -46,15 +46,8 @@ export default function DenLayout({ children }: { children: ReactNode }) {
 }
 
 function DesktopLayout({ children }: { children: ReactNode }) {
-  const attachLeft = useRailSlotTarget("left");
   const attachRight = useRailSlotTarget("right");
-  const leftActive = useRailSlotActive("left");
   const rightActive = useRailSlotActive("right");
-  const leftPlaceholder = (
-    <div className="flex h-full flex-col justify-center rounded-lg border border-dashed border-wolf-border-soft bg-wolf-charcoal-80/40 px-4 py-6 text-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/40">
-      Verified On-Chain Event Lab
-    </div>
-  );
   const rightPlaceholder = (
     <div className="flex h-full flex-col justify-center rounded-lg border border-dashed border-wolf-border-soft bg-wolf-charcoal-80/40 px-4 py-6 text-center text-[11px] font-semibold uppercase tracking-[0.4em] text-white/40">
       Right Rail
@@ -66,8 +59,7 @@ function DesktopLayout({ children }: { children: ReactNode }) {
       <StatusStrip className="justify-end" />
       <main className="rounded-lg border border-wolf-border-strong bg-[#14181f]/70 p-6 shadow-[0_40px_110px_-80px_rgba(0,0,0,0.75)]">
         <TopBar />
-        <section className="mt-6 grid grid-cols-[220px_minmax(0,1fr)_260px] gap-6">
-          <div ref={attachLeft}>{leftActive ? null : leftPlaceholder}</div>
+        <section className="mt-6 grid grid-cols-[minmax(0,1fr)_260px] gap-6">
           <div className="min-w-0">{children}</div>
           <div ref={attachRight}>{rightActive ? null : rightPlaceholder}</div>
         </section>

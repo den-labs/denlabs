@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  ChevronDown,
   Gamepad2,
   MapPinned,
   Menu,
@@ -19,16 +20,20 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -132,70 +137,93 @@ export default function SidebarNav() {
         </SidebarTrigger>
       </SidebarHeader>
       <SidebarContent>
-        {navGroups.map((group) => {
-          const Icon = group.icon;
-          return (
-            <SidebarGroup key={group.key}>
-              <SidebarGroupLabel>
-                <Icon className="h-4 w-4 text-[#8bea4e]" aria-hidden />
-                <span
-                  className={cn(
-                    "truncate",
-                    collapsed ? "hidden md:inline" : "inline",
-                  )}
-                >
-                  {t(`sections.${group.key}.title`)}
-                </span>
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <p
-                  className={cn(
-                    "block text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/40",
-                    collapsed ? "hidden md:block" : "block",
-                  )}
-                >
-                  {t(`sections.${group.key}.description`)}
-                </p>
-                <SidebarMenu>
-                  {group.items.map((item) => {
-                    const isActive =
-                      item.href === "/auth"
-                        ? pathname?.startsWith(item.href)
-                        : pathname === item.href ||
-                          pathname?.startsWith(`${item.href}/`);
-                    const ItemIcon = navItemIcons[item.key];
-                    return (
-                      <SidebarMenuItem key={`${group.key}-${item.key}`}>
-                        <SidebarMenuButton asChild isActive={isActive}>
-                          <Link
-                            href={item.href}
-                            aria-current={isActive ? "page" : undefined}
-                            className="flex items-center gap-3"
+        <SidebarGroup>
+          <SidebarMenu>
+            {navGroups.map((group) => {
+              const Icon = group.icon;
+              const collapsibleProps = collapsed
+                ? { open: true, disabled: true }
+                : { defaultOpen: true };
+              return (
+                <Collapsible key={group.key} {...collapsibleProps}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="justify-between">
+                        <span className="flex items-center gap-3">
+                          <Icon
+                            className="h-4 w-4 text-[#8bea4e]"
+                            aria-hidden
+                          />
+                          <span
+                            className={cn(
+                              "truncate text-[0.72rem]",
+                              collapsed ? "hidden md:inline" : "inline",
+                            )}
                           >
-                            <ItemIcon
-                              className="h-4 w-4 text-[#7df95a]"
-                              aria-hidden
-                            />
-                            <span
-                              className={cn(
-                                "block truncate text-[0.7rem]",
-                                collapsed ? "hidden md:block" : "block",
-                              )}
-                            >
-                              {t(
-                                `sections.${group.key}.items.${item.key}`,
-                              )}
-                            </span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          );
-        })}
+                            {t(`sections.${group.key}.title`)}
+                          </span>
+                        </span>
+                        {collapsed ? null : (
+                          <ChevronDown
+                            className="h-3 w-3 text-white/70 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180"
+                            aria-hidden
+                          />
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 data-[state=closed]:hidden">
+                      {collapsed ? null : (
+                        <SidebarMenuSub className="space-y-1">
+                          {group.items.map((item) => {
+                            const isActive =
+                              item.href === "/auth"
+                                ? pathname?.startsWith(item.href)
+                                : pathname === item.href ||
+                                  pathname?.startsWith(`${item.href}/`);
+                            const ItemIcon = navItemIcons[item.key];
+                            return (
+                              <SidebarMenuSubItem
+                                key={`${group.key}-${item.key}`}
+                              >
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isActive}
+                                >
+                                  <Link
+                                    href={item.href}
+                                    aria-current={
+                                      isActive ? "page" : undefined
+                                    }
+                                    className="flex w-full items-center gap-3"
+                                  >
+                                    <ItemIcon
+                                      className="h-4 w-4 text-[#7df95a]"
+                                      aria-hidden
+                                    />
+                                    <span
+                                      className={cn(
+                                        "truncate text-[0.7rem]",
+                                        collapsed ? "hidden md:block" : "block",
+                                      )}
+                                    >
+                                      {t(
+                                        `sections.${group.key}.items.${item.key}`,
+                                      )}
+                                    </span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      )}
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>{t("footer.copy")}</SidebarFooter>
     </Sidebar>

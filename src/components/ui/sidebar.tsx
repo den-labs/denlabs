@@ -212,13 +212,7 @@ export function SidebarGroup({
   ...props
 }: SidebarSectionProps) {
   return (
-    <div
-      className={cn(
-        "rounded-2xl border border-white/5 bg-white/5 p-3",
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn(className)} {...props} />
   );
 }
 
@@ -299,6 +293,70 @@ export function SidebarMenuButton({
   );
 }
 
+type SidebarMenuSubProps = React.HTMLAttributes<HTMLUListElement>;
+
+export function SidebarMenuSub({ className, ...props }: SidebarMenuSubProps) {
+  return (
+    <ul
+      className={cn(
+        "ml-2 mt-3 space-y-1 border-l border-white/10 pl-3",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+type SidebarMenuSubItemProps = React.LiHTMLAttributes<HTMLLIElement>;
+
+export function SidebarMenuSubItem({
+  className,
+  ...props
+}: SidebarMenuSubItemProps) {
+  return <li className={cn("list-none", className)} {...props} />;
+}
+
+type SidebarMenuSubButtonProps =
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    asChild?: boolean;
+    isActive?: boolean;
+  };
+
+export function SidebarMenuSubButton({
+  asChild,
+  className,
+  children,
+  isActive,
+  ...props
+}: SidebarMenuSubButtonProps) {
+  const { open, isMobile } = useSidebar();
+  const collapsed = !open && !isMobile;
+  const baseClasses = cn(
+    "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-[0.7rem] font-medium tracking-[0.08em] transition",
+    collapsed ? "justify-center" : "justify-start",
+    isActive
+      ? "bg-white/10 text-white"
+      : "text-white/70 hover:bg-white/5 hover:text-white",
+    className,
+  );
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      className: cn(
+        baseClasses,
+        (children.props as Record<string, unknown>)?.className ?? "",
+      ),
+      ...props,
+    });
+  }
+
+  return (
+    <button className={baseClasses} {...props}>
+      {children}
+    </button>
+  );
+}
+
 type SidebarInsetProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function SidebarInset({ className, ...props }: SidebarInsetProps) {
@@ -343,5 +401,158 @@ export function SidebarTrigger({
         </span>
       ) : null}
     </button>
+  );
+}
+
+type CollapsibleContextValue = {
+  open: boolean;
+  setOpen: (value: boolean | ((value: boolean) => boolean)) => void;
+  disabled?: boolean;
+};
+
+const CollapsibleContext = React.createContext<CollapsibleContextValue | null>(
+  null,
+);
+
+function useCollapsibleContext() {
+  const context = React.useContext(CollapsibleContext);
+  if (!context) {
+    throw new Error("Collapsible components must be used within Collapsible.");
+  }
+  return context;
+}
+
+type CollapsibleProps = React.HTMLAttributes<HTMLDivElement> & {
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
+};
+
+export function Collapsible({
+  defaultOpen = false,
+  open: openProp,
+  onOpenChange,
+  disabled = false,
+  className,
+  children,
+  ...props
+}: CollapsibleProps) {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const isControlled = openProp != null;
+  const open = isControlled ? Boolean(openProp) : internalOpen;
+
+  const setOpen = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      if (disabled) {
+        return;
+      }
+      const nextValue =
+        typeof value === "function" ? value(open) : Boolean(value);
+      if (!isControlled) {
+        setInternalOpen(nextValue);
+      }
+      onOpenChange?.(nextValue);
+    },
+    [disabled, isControlled, onOpenChange, open],
+  );
+
+  return (
+    <CollapsibleContext.Provider value={{ open, setOpen, disabled }}>
+      <div
+        data-state={open ? "open" : "closed"}
+        className={cn("group/collapsible", className)}
+        {...props}
+      >
+        {children}
+      </div>
+    </CollapsibleContext.Provider>
+  );
+}
+
+type CollapsibleTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  asChild?: boolean;
+};
+
+export function CollapsibleTrigger({
+  asChild,
+  className,
+  children,
+  ...props
+}: CollapsibleTriggerProps) {
+  const { open, setOpen, disabled } = useCollapsibleContext();
+  const { onClick, ...rest } = props;
+  const sharedProps = {
+    "aria-expanded": open,
+    "data-state": open ? "open" : "closed",
+    "data-disabled": disabled ? "true" : undefined,
+  };
+  const handleClick = (event: React.MouseEvent) => {
+    onClick?.(event);
+    if (!event.defaultPrevented) {
+      setOpen((prev) => !prev);
+    }
+  };
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      ...rest,
+      ...sharedProps,
+      className: cn(
+        (children.props as Record<string, unknown>)?.className ?? "",
+        className,
+      ),
+      disabled:
+        typeof (children.props as Record<string, unknown>)?.disabled ===
+        "boolean"
+          ? (children.props as Record<string, unknown>).disabled
+          : disabled,
+      onClick: (event: React.MouseEvent) => {
+        if ((children.props as Record<string, unknown>).onClick) {
+          (
+            (children.props as Record<string, unknown>)
+              .onClick as React.MouseEventHandler
+          )(event);
+        }
+        if (!disabled) {
+          handleClick(event);
+        }
+      },
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={cn(className)}
+      onClick={handleClick}
+      {...sharedProps}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
+
+type CollapsibleContentProps = React.HTMLAttributes<HTMLDivElement>;
+
+export function CollapsibleContent({
+  className,
+  children,
+  ...props
+}: CollapsibleContentProps) {
+  const { open } = useCollapsibleContext();
+  return (
+    <div
+      data-state={open ? "open" : "closed"}
+      className={cn(
+        "overflow-hidden transition-all duration-200 ease-out data-[state=closed]:max-h-0 data-[state=closed]:opacity-0 data-[state=open]:max-h-[800px] data-[state=open]:opacity-100",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
