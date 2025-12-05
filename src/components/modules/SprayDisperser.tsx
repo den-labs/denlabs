@@ -391,9 +391,13 @@ export default function SprayDisperser() {
     )
 
     if (trustedMetadata) {
+      const trustedDecimals =
+        typeof trustedMetadata.decimals === 'number'
+          ? trustedMetadata.decimals
+          : 18
       setTokenInfo({
         symbol: trustedMetadata.symbol ?? t('summary.tokenPlaceholder'),
-        decimals: trustedMetadata.decimals,
+        decimals: trustedDecimals,
       })
       setIsFetchingTokenInfo(false)
       setError(null)
@@ -507,12 +511,16 @@ export default function SprayDisperser() {
       setNativeBalance(null)
       return
     }
+    const address = signerAddress
 
     let isCancelled = false
 
-    async function fetchNativeBalance() {
+    async function fetchNativeBalance(
+      currentProvider: BrowserProvider | JsonRpcProvider,
+      addressToQuery: string,
+    ) {
       try {
-        const balance = await providerForNative.getBalance(signerAddress)
+        const balance = await currentProvider.getBalance(addressToQuery)
         const decimals = selectedNetwork.nativeCurrency.decimals ?? 18
         const formatted = formatTokenBalanceDisplay(
           formatUnits(balance, decimals),
@@ -528,7 +536,7 @@ export default function SprayDisperser() {
       }
     }
 
-    fetchNativeBalance()
+    fetchNativeBalance(providerForNative, address)
 
     return () => {
       isCancelled = true

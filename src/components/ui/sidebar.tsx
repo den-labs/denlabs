@@ -276,13 +276,14 @@ export function SidebarMenuButton({
     className,
   );
 
-  if (asChild && React.isValidElement(children)) {
+  if (asChild && React.isValidElement<Record<string, unknown>>(children)) {
+    const childProps = children.props as { className?: string };
     return React.cloneElement(children, {
+      ...props,
       className: cn(
         baseClasses,
-        (children.props as Record<string, unknown>)?.className ?? "",
+        typeof childProps.className === "string" ? childProps.className : "",
       ),
-      ...props,
     });
   }
 
