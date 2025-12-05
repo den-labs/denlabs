@@ -484,6 +484,99 @@
       "• If it fails, refresh the QR and try again."
     ]
   },
+  "AccessGate": {
+    "eyebrow": "Access gate",
+    "title": "Welcome to Den Labs",
+    "subtitle": "Complete these steps to get started.",
+    "loading": "Loading access details…",
+    "errors": {
+      "generic": "Something went wrong. Please try again."
+    },
+    "status": {
+      "profileSaved": "Profile saved. You can continue whenever you’re ready.",
+      "walletConnected": "Wallet connected."
+    },
+    "profile": {
+      "title": "1. Create your profile",
+      "copy": "Tell us who you are so we can personalize your lab experience.",
+      "nameLabel": "Handle",
+      "namePlaceholder": "ex: imbuilder",
+      "handleHint": "Use 3–24 characters: letters, numbers, . _ -",
+      "handleInvalid": "Handles must be 3–24 letters, numbers, . _ - (no spaces).",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Choose a role",
+      "roles": {
+        "organizer": "Organizer",
+        "player": "Player",
+        "sponsor": "Sponsor"
+      },
+      "saveCta": "Continue",
+      "saving": "Saving…"
+    },
+    "wallet": {
+      "optional": {
+        "title": "2. Connect your wallet (optional)",
+        "copy": "Optional. Needed for payouts and rewards."
+      },
+      "required": {
+        "title": "2. Connect your wallet to continue",
+        "copy": "Spray needs a wallet to send on-chain rewards.",
+        "blocker": "Connect a wallet to continue to Spray."
+      },
+      "statusLabel": "Status",
+      "messages": {
+        "profileFirst": "Save your profile before connecting a wallet.",
+        "connecting": "Linking wallet…",
+        "connected": "Connected:",
+        "notConnected": "No wallet connected yet."
+      },
+      "connectCta": "Connect wallet",
+      "changeCta": "Change wallet",
+      "skipCta": "I’ll do this later",
+      "skip": "No rush — you can connect a wallet anytime from Settings.",
+      "skipMessage": "You can skip this step and connect your wallet later."
+    },
+    "self": {
+      "title": "3. Boost trust score",
+      "copy": "Optional. Verify with Self.xyz for more perks.",
+      "requireWallet": "Connect a wallet first to link your Self profile.",
+      "cta": "Verify with Self",
+      "skipCta": "Skip for now",
+      "skip": "All good — come back when you’re ready to verify."
+    },
+    "steps": {
+      "profile": "Create your profile",
+      "walletOptional": "Connect wallet",
+      "walletRequired": "Connect wallet to continue",
+      "self": "Boost trust score",
+      "stepLabel": "Step {step}"
+    },
+    "navigation": {
+      "next": "Continue",
+      "back": "Back",
+      "skip": "Skip this step",
+      "skipAndEnter": "Skip and enter",
+      "help": "Need help?",
+      "contact": "Contact support"
+    },
+    "continue": {
+      "title": "Enter Lab",
+      "hintProfile": "Save your profile to enter the lab.",
+      "hintWallet": "Connect a wallet to continue to Spray.",
+      "hintReady": "All set. Enter the lab.",
+      "loading": "Loading…",
+      "cta": "Enter Lab"
+    }
+  },
+  "LabPage": {
+    "eyebrow": "Lab HQ",
+    "title": "Welcome back, {name}",
+    "subtitle": "This is your Den Labs home. Missions, Spray, Taberna, and insights plug in here as we wire them up.",
+    "next": {
+      "label": "Next",
+      "value": "Pick a module to start"
+    }
+  },
   "MindGamesPage": {
     "intro": {
       "title": "Mines",

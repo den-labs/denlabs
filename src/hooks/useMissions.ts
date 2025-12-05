@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MissionStatus } from '@/lib/runs';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { MissionStatus } from "@/lib/runs";
 
-const STORAGE_PREFIX = 'denlabs:missions';
-const DEFAULT_STATUS: MissionStatus = 'available';
+const STORAGE_PREFIX = "denlabs:missions";
+const DEFAULT_STATUS: MissionStatus = "available";
 
 type MissionStatusMap = Record<string, MissionStatus>;
 
@@ -12,16 +12,16 @@ const memoryCache = new Map<string, MissionStatusMap>();
 
 function isMissionStatus(value: unknown): value is MissionStatus {
   return (
-    value === 'locked' ||
-    value === 'available' ||
-    value === 'in_progress' ||
-    value === 'completed' ||
-    value === 'eligible_for_reward'
+    value === "locked" ||
+    value === "available" ||
+    value === "in_progress" ||
+    value === "completed" ||
+    value === "eligible_for_reward"
   );
 }
 
 function normalizeWallet(walletAddress?: string | null) {
-  if (typeof walletAddress === 'string' && walletAddress.trim().length > 0) {
+  if (typeof walletAddress === "string" && walletAddress.trim().length > 0) {
     return walletAddress.toLowerCase();
   }
   return null;
@@ -42,18 +42,18 @@ function readStatuses(key: string | null): MissionStatusMap {
     return memoryCache.get(key) ?? {};
   }
 
-  if (typeof window === 'undefined') return {};
+  if (typeof window === "undefined") return {};
 
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return {};
 
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    if (!parsed || typeof parsed !== 'object') return {};
+    if (!parsed || typeof parsed !== "object") return {};
 
     const safeEntries: MissionStatusMap = {};
     for (const [missionId, status] of Object.entries(parsed)) {
-      if (typeof missionId !== 'string') continue;
+      if (typeof missionId !== "string") continue;
       if (isMissionStatus(status)) {
         safeEntries[missionId] = status;
       }
@@ -62,7 +62,7 @@ function readStatuses(key: string | null): MissionStatusMap {
     memoryCache.set(key, safeEntries);
     return safeEntries;
   } catch (error) {
-    console.warn('Unable to read mission progress', error);
+    console.warn("Unable to read mission progress", error);
     return {};
   }
 }
@@ -70,12 +70,12 @@ function readStatuses(key: string | null): MissionStatusMap {
 function writeStatuses(key: string | null, map: MissionStatusMap) {
   if (!key) return;
   memoryCache.set(key, map);
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     window.localStorage.setItem(key, JSON.stringify(map));
   } catch (error) {
-    console.warn('Unable to persist mission progress', error);
+    console.warn("Unable to persist mission progress", error);
   }
 }
 

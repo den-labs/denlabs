@@ -484,6 +484,99 @@
       "• Si falla, refresca el QR e inténtalo de nuevo."
     ]
   },
+  "AccessGate": {
+    "eyebrow": "Control de acceso",
+    "title": "Bienvenido a Den Labs",
+    "subtitle": "Completa estos pasos para comenzar.",
+    "loading": "Cargando acceso…",
+    "errors": {
+      "generic": "Algo salió mal. Intenta de nuevo."
+    },
+    "status": {
+      "profileSaved": "Perfil guardado. Puedes continuar cuando quieras.",
+      "walletConnected": "Wallet conectada."
+    },
+    "profile": {
+      "title": "1. Crea tu perfil",
+      "copy": "Cuéntanos quién eres para personalizar tu experiencia en el lab.",
+      "nameLabel": "Handle",
+      "namePlaceholder": "ej: imbuilder",
+      "handleHint": "Usa 3–24 caracteres: letras, números, . _ -",
+      "handleInvalid": "El handle debe tener 3–24 letras, números, . _ - (sin espacios).",
+      "roleLabel": "Rol",
+      "rolePlaceholder": "Elige un rol",
+      "roles": {
+        "organizer": "Organizador",
+        "player": "Jugador",
+        "sponsor": "Patrocinador"
+      },
+      "saveCta": "Continuar",
+      "saving": "Guardando…"
+    },
+    "wallet": {
+      "optional": {
+        "title": "2. Conecta tu wallet (opcional)",
+        "copy": "Opcional. Necesaria para payouts y rewards."
+      },
+      "required": {
+        "title": "2. Conecta tu wallet para continuar",
+        "copy": "Spray necesita una wallet para enviar rewards on-chain.",
+        "blocker": "Conecta una wallet para continuar hacia Spray."
+      },
+      "statusLabel": "Estado",
+      "messages": {
+        "profileFirst": "Guarda tu perfil antes de conectar la wallet.",
+        "connecting": "Conectando wallet…",
+        "connected": "Conectada:",
+        "notConnected": "Aún no conectas una wallet."
+      },
+      "connectCta": "Conectar wallet",
+      "changeCta": "Cambiar wallet",
+      "skipCta": "Lo haré luego",
+      "skip": "Todo bien — puedes conectar una wallet cuando quieras desde Settings.",
+      "skipMessage": "Puedes saltar este paso y conectar la wallet más tarde."
+    },
+    "self": {
+      "title": "3. Refuerza tu score de confianza",
+      "copy": "Opcional. Verifica con Self.xyz para más perks.",
+      "requireWallet": "Conecta primero una wallet para enlazar tu perfil de Self.",
+      "cta": "Verificar con Self",
+      "skipCta": "Saltar por ahora",
+      "skip": "Sin prisa — vuelve cuando quieras verificar."
+    },
+    "steps": {
+      "profile": "Crea tu perfil",
+      "walletOptional": "Conecta una wallet",
+      "walletRequired": "Conecta una wallet para continuar",
+      "self": "Refuerza tu score",
+      "stepLabel": "Paso {step}"
+    },
+    "navigation": {
+      "next": "Continuar",
+      "back": "Atrás",
+      "skip": "Saltar este paso",
+      "skipAndEnter": "Saltar e ingresar",
+      "help": "¿Necesitas ayuda?",
+      "contact": "Contacta soporte"
+    },
+    "continue": {
+      "title": "Entrar al Lab",
+      "hintProfile": "Guarda tu perfil para entrar al lab.",
+      "hintWallet": "Conecta una wallet para continuar a Spray.",
+      "hintReady": "Listo. Entra al lab.",
+      "loading": "Cargando…",
+      "cta": "Entrar al Lab"
+    }
+  },
+  "LabPage": {
+    "eyebrow": "HQ del Lab",
+    "title": "Hola de nuevo, {name}",
+    "subtitle": "Este es tu home en Den Labs. Aquí se enchufan misiones, Spray, Taberna e insights a medida que los activamos.",
+    "next": {
+      "label": "Siguiente",
+      "value": "Elige un módulo para comenzar"
+    }
+  },
   "MindGamesPage": {
     "intro": {
       "title": "Mines",

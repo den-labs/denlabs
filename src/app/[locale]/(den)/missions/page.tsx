@@ -14,6 +14,10 @@ export default function MissionsPage() {
   const user = useDenUser();
   const run = getActiveRun();
   const walletConnected = Boolean(user.walletAddress);
+  const missionsState = useMissions({
+    runId: run?.id ?? "no-active-run",
+    walletAddress: user.walletAddress,
+  });
 
   if (!run) {
     return (
@@ -23,10 +27,7 @@ export default function MissionsPage() {
     );
   }
 
-  const { getStatus, setStatus } = useMissions({
-    runId: run.id,
-    walletAddress: user.walletAddress,
-  });
+  const { getStatus, setStatus } = missionsState;
 
   const bannerCopy = !walletConnected
     ? "Connect your wallet to see and track your missions."

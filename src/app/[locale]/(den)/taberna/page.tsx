@@ -1,3 +1,5 @@
+import { requireProfile } from "@/lib/accessGuards";
+
 const DEFAULT_TABERNA_URL = "https://wolf-labs.vercel.app";
 
 function normalizeUrl(rawUrl: string) {
@@ -9,7 +11,13 @@ function normalizeUrl(rawUrl: string) {
   return `https://${sanitized}`;
 }
 
-export default function TabernaPage() {
+export default async function TabernaPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  requireProfile({ locale, nextPath: "/taberna" });
   const configuredUrl = process.env.NEXT_PUBLIC_TABERNA_URL ?? "";
   const tabernaUrl = normalizeUrl(configuredUrl || DEFAULT_TABERNA_URL);
   let iframeAllow = "camera; microphone; fullscreen";
