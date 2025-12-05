@@ -17,7 +17,7 @@ export default async function TabernaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  requireProfile({ locale, nextPath: "/taberna" });
+  await requireProfile({ locale, nextPath: "/taberna" });
   const configuredUrl = process.env.NEXT_PUBLIC_TABERNA_URL ?? "";
   const tabernaUrl = normalizeUrl(configuredUrl || DEFAULT_TABERNA_URL);
   let iframeAllow = "camera; microphone; fullscreen";

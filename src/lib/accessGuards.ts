@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getStoredUserProfile, type UserProfile } from "@/lib/userProfile";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getStoredLabUserId, type LabUserProfile } from "@/lib/userProfile";
 
 type GuardOptions = {
   locale: string;
@@ -28,20 +29,31 @@ function buildAccessUrl({
   return `/${locale}/access?${params.toString()}`;
 }
 
-export function requireProfile({
+export async function requireProfile({
   locale,
   nextPath,
-}: GuardOptions): UserProfile {
-  const profile = getStoredUserProfile();
-  if (!profile) {
+}: GuardOptions): Promise<LabUserProfile> {
+  const id = getStoredLabUserId();
+  if (!id) {
     redirect(buildAccessUrl({ locale, nextPath }));
   }
-  return profile;
+  const { data, error } = await supabaseAdmin
+    .from("lab_users")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error || !data) {
+    redirect(buildAccessUrl({ locale, nextPath }));
+  }
+  return data as LabUserProfile;
 }
 
-export function requireWallet({ locale, nextPath }: GuardOptions): UserProfile {
-  const profile = requireProfile({ locale, nextPath });
-  if (!profile.wallet) {
+export async function requireWallet({
+  locale,
+  nextPath,
+}: GuardOptions): Promise<LabUserProfile> {
+  const profile = await requireProfile({ locale, nextPath });
+  if (!profile.wallet_address) {
     redirect(buildAccessUrl({ locale, nextPath, walletRequired: true }));
   }
   return profile;

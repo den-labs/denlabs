@@ -7,7 +7,7 @@ export default async function LabPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const profile = requireProfile({ locale, nextPath: "/lab" });
+  const profile = await requireProfile({ locale, nextPath: "/lab" });
   const t = useTranslations("LabPage");
 
   return (

@@ -7,6 +7,6 @@ export default async function SprayPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  requireWallet({ locale, nextPath: "/spray" });
+  await requireWallet({ locale, nextPath: "/spray" });
   return <SprayDisperser />;
 }

@@ -1,15 +1,18 @@
 import type {
-  CreateUserPayload,
-  UpdateUserPayload,
-  UserProfile,
+  CreateLabUserPayload,
+  LabUserProfile,
+  SelfUpdatePayload,
+  WalletUpdatePayload,
 } from "@/lib/userProfile";
 
 type UserResponse = {
-  user: UserProfile | null;
+  user: LabUserProfile | null;
   error?: string;
 };
 
-async function handleResponse(response: Response): Promise<UserProfile | null> {
+async function handleResponse(
+  response: Response,
+): Promise<LabUserProfile | null> {
   const data = (await response.json()) as UserResponse;
   if (!response.ok) {
     const message = data?.error ?? "Request failed";
@@ -19,7 +22,7 @@ async function handleResponse(response: Response): Promise<UserProfile | null> {
 }
 
 export async function fetchUserProfile() {
-  const response = await fetch("/api/user", {
+  const response = await fetch("/api/lab-user", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -29,8 +32,8 @@ export async function fetchUserProfile() {
   return handleResponse(response);
 }
 
-export async function createUserProfile(payload: CreateUserPayload) {
-  const response = await fetch("/api/user", {
+export async function saveUserProfile(payload: CreateLabUserPayload) {
+  const response = await fetch("/api/lab-user", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -40,8 +43,19 @@ export async function createUserProfile(payload: CreateUserPayload) {
   return handleResponse(response);
 }
 
-export async function updateUserProfile(payload: UpdateUserPayload) {
-  const response = await fetch("/api/user", {
+export async function updateUserWallet(payload: WalletUpdatePayload) {
+  const response = await fetch("/api/lab-user/wallet", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+}
+
+export async function markUserSelfVerified(payload: SelfUpdatePayload) {
+  const response = await fetch("/api/lab-user/self", {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

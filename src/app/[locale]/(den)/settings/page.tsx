@@ -9,7 +9,7 @@ export default async function SettingsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  requireProfile({ locale, nextPath: "/settings" });
+  await requireProfile({ locale, nextPath: "/settings" });
   const t = useTranslations("SettingsPage");
   const privacyItems = t.raw("privacy.items") as Array<{
     label: string;

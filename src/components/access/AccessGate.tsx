@@ -22,11 +22,11 @@ import {
 import ConnectWalletButton from "@/components/ui/ConnectWalletButton";
 import { useRouter } from "@/i18n/routing";
 import {
-  createUserProfile,
   fetchUserProfile,
-  updateUserProfile,
+  saveUserProfile,
+  updateUserWallet,
 } from "@/lib/userClient";
-import type { UserProfile, UserRole } from "@/lib/userProfile";
+import type { LabUserProfile, UserRole } from "@/lib/userProfile";
 import { cn } from "@/lib/utils";
 
 type AccessGateProps = {
@@ -34,7 +34,7 @@ type AccessGateProps = {
   nextPath?: string;
 };
 
-const ROLE_VALUES: UserRole[] = ["Organizer", "Player", "Sponsor"];
+const ROLE_VALUES: UserRole[] = ["organizer", "player", "sponsor"];
 const HANDLE_REGEX = /^[a-zA-Z0-9_.-]{3,24}$/;
 type StepKey = 1 | 2 | 3;
 
@@ -52,9 +52,9 @@ export default function AccessGate({
   const t = useTranslations("AccessGate");
   const router = useRouter();
   const { address } = useAppKitAccount();
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<LabUserProfile | null>(null);
   const [nameInput, setNameInput] = useState("");
-  const [roleInput, setRoleInput] = useState<UserRole | "Player">("Player");
+  const [roleInput, setRoleInput] = useState<UserRole | "player">("player");
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSyncingWallet, setIsSyncingWallet] = useState(false);
@@ -66,7 +66,7 @@ export default function AccessGate({
   const [handleError, setHandleError] = useState<string | null>(null);
 
   const profileComplete = Boolean(user);
-  const hasWallet = Boolean(user?.wallet);
+  const hasWallet = Boolean(user?.wallet_address);
   const walletStepRequired = walletRequired && !hasWallet;
   const continueDisabled =
     !profileComplete || walletStepRequired || isContinuing;
@@ -80,9 +80,9 @@ export default function AccessGate({
       setUser(existing);
       if (existing && !didPrefill) {
         setNameInput(existing.name);
-        setRoleInput(existing.role ?? "Player");
+        setRoleInput(existing.role ?? "player");
         setDidPrefill(true);
-        setCurrentStep(existing.wallet ? 3 : 2);
+        setCurrentStep(existing.wallet_address ? 3 : 2);
       } else if (!existing && !didPrefill) {
         setCurrentStep(1);
       }
@@ -100,13 +100,13 @@ export default function AccessGate({
   }, [loadProfile]);
 
   useEffect(() => {
-    if (!user || !address || user.wallet === address) {
+    if (!user || !address || user.wallet_address === address) {
       return;
     }
     let aborted = false;
     setIsSyncingWallet(true);
     setStatusMessage(null);
-    updateUserProfile({ wallet: address })
+    updateUserWallet({ id: user.id, walletAddress: address })
       .then((updated) => {
         if (!aborted && updated) {
           setUser(updated);
@@ -140,15 +140,16 @@ export default function AccessGate({
     setStatusMessage(null);
     setErrorMessage(null);
     try {
-      const saved = await createUserProfile({
+      const saved = await saveUserProfile({
+        id: user?.id,
         name: nameInput,
-        role: roleInput || null,
+        role: roleInput || "player",
       });
       if (saved) {
         setUser(saved);
         setDidPrefill(true);
         setStatusMessage(t("status.profileSaved"));
-        setCurrentStep(2);
+        setCurrentStep(saved.wallet_address ? 3 : 2);
         setHandleError(null);
         return true;
       }
@@ -161,7 +162,7 @@ export default function AccessGate({
     } finally {
       setIsSavingProfile(false);
     }
-  }, [nameInput, roleInput, t]);
+  }, [nameInput, roleInput, t, user?.id]);
 
   const handleContinue = useCallback(async () => {
     if (continueDisabled) {
@@ -183,13 +184,15 @@ export default function AccessGate({
     if (isSyncingWallet) {
       return t("wallet.messages.connecting");
     }
-    if (user?.wallet) {
-      return `${t("wallet.messages.connected")} ${formatAddress(user.wallet)}`;
+    if (user?.wallet_address) {
+      return `${t("wallet.messages.connected")} ${formatAddress(
+        user.wallet_address as `0x${string}`,
+      )}`;
     }
     return t("wallet.messages.notConnected");
-  }, [profileComplete, isSyncingWallet, t, user?.wallet]);
+  }, [profileComplete, isSyncingWallet, t, user?.wallet_address]);
 
-  const showBlockedSelfCard = !user?.wallet;
+  const showBlockedSelfCard = !user?.wallet_address;
   const isHandleValid = HANDLE_REGEX.test(nameInput);
   const continueHint = !profileComplete
     ? t("continue.hintProfile")
@@ -228,7 +231,7 @@ export default function AccessGate({
       id: 3 as StepKey,
       icon: Shield,
       label: t("steps.self"),
-      completed: Boolean(user?.selfVerified),
+      completed: Boolean(user?.self_verified),
     },
   ];
 
@@ -381,7 +384,7 @@ export default function AccessGate({
                   <select
                     value={roleInput}
                     onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                      setRoleInput(event.target.value as UserRole | "Player")
+                      setRoleInput(event.target.value as UserRole | "player")
                     }
                     className="w-full appearance-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 pr-10 text-sm text-white focus:border-white/40 focus:outline-none"
                   >

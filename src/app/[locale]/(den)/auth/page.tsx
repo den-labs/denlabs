@@ -8,7 +8,7 @@ export default async function AuthPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  requireWallet({ locale, nextPath: "/auth" });
+  await requireWallet({ locale, nextPath: "/auth" });
   const t = useTranslations("AuthPage");
   const tips = t.raw("tips") as string[];
 
