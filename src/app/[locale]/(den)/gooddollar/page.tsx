@@ -1,12 +1,15 @@
 "use client";
 
 import { useAppKitAccount } from "@reown/appkit/react";
+import { Grid3X3, Search, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { DenMain, DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
 import { useGoodDollar } from "@/hooks/useGoodDollar";
 import { useGoodDollarInvite } from "@/hooks/useGoodDollarInvite";
+import { usePathname } from "@/i18n/routing";
 import { checkEligibility, claimReward } from "@/lib/gooddollar";
 
 type State =
@@ -92,11 +95,13 @@ export default function GoodDollarPage() {
   };
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6 py-10">
-      <section>
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="mt-2 text-sm text-zinc-400">{t("subtitle")}</p>
-      </section>
+    <>
+      <DenMain>
+        <main className="mx-auto max-w-2xl space-y-6 py-10">
+          <section>
+            <h1 className="text-2xl font-semibold">{t("title")}</h1>
+            <p className="mt-2 text-sm text-zinc-400">{t("subtitle")}</p>
+          </section>
 
       {state === "noWallet" && (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
@@ -194,14 +199,106 @@ export default function GoodDollarPage() {
         </div>
       )}
 
-      <section className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-xs text-zinc-400">
-        <p className="mb-2 font-medium text-zinc-300">{t("faq.title")}</p>
-        <ul className="list-inside list-disc space-y-1">
-          <li>{t("faq.item1")}</li>
-          <li>{t("faq.item2")}</li>
-          <li>{t("faq.item3")}</li>
-        </ul>
+          <section className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-xs text-zinc-400">
+            <p className="mb-2 font-medium text-zinc-300">{t("faq.title")}</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>{t("faq.item1")}</li>
+              <li>{t("faq.item2")}</li>
+              <li>{t("faq.item3")}</li>
+            </ul>
+          </section>
+        </main>
+      </DenMain>
+      <DenRightRail>
+        <GoodDollarRightSidebar />
+      </DenRightRail>
+    </>
+  );
+}
+
+type ShortcutApp = {
+  id: string;
+  label: string;
+  href: string;
+  icon: typeof ShieldCheck;
+};
+
+const SHORTCUT_APPS: ShortcutApp[] = [
+  {
+    id: "auth",
+    label: "Self.xyz Auth",
+    href: "/auth",
+    icon: ShieldCheck,
+  },
+];
+
+function GoodDollarRightSidebar() {
+  const pathname = usePathname();
+  const locale = pathname?.split("/")[1] || "en";
+  const localePrefix = `/${locale}`;
+
+  return (
+    <aside className="hidden flex-col gap-6 lg:flex text-wolf-foreground">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+        <input
+          type="text"
+          placeholder="Search experiments"
+          className="w-full rounded-full border border-wolf-border bg-wolf-panel/80 py-2.5 pl-10 pr-14 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
+        />
+        <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-wolf-border bg-wolf-panel px-2 py-0.5 text-[10px] text-white/60">
+          ⌘K
+        </kbd>
+      </div>
+      <section className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-5">
+        <div className="mb-1 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-white">Shortcuts</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className="rounded-md p-1.5 text-white/60 hover:bg-white/10"
+            >
+              <Grid3X3 className="h-4 w-4" aria-hidden />
+              <span className="sr-only">Open apps grid</span>
+            </button>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {SHORTCUT_APPS.map((app) => {
+            const Icon = app.icon;
+            return (
+              <Link
+                key={app.id}
+                href={`${localePrefix}${app.href}`}
+                className="flex flex-col items-center gap-2 rounded-xl border border-wolf-border-soft bg-wolf-panel/60 p-3 text-center text-xs text-white transition hover:bg-wolf-panel"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-wolf-neutral-soft">
+                  <Icon className="h-5 w-5 text-[#89e24a]" />
+                </div>
+                <span className="leading-tight">{app.label}</span>
+                <span className="rounded-full bg-[#89e24a]/20 px-2 py-0.5 text-[10px] font-semibold text-[#89e24a]">
+                  LIVE
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
-    </main>
+      <div className="mt-auto flex flex-wrap gap-2 text-[11px] text-white/50">
+        <Link href="#" className="hover:text-white">
+          Support
+        </Link>
+        <span>•</span>
+        <Link href="#" className="hover:text-white">
+          Privacy
+        </Link>
+        <span>•</span>
+        <Link href="#" className="hover:text-white">
+          Terms
+        </Link>
+      </div>
+    </aside>
   );
 }
