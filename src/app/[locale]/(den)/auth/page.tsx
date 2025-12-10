@@ -1,6 +1,6 @@
 import { Coins, Droplets, Grid3X3, Search } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
 import SelfAuth from "@/components/SelfAuth";
 import { requireWallet } from "@/lib/accessGuards";

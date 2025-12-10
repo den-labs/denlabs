@@ -27,7 +27,7 @@ export const checkEligibility = async (
 export const claimReward = async (
   rewards: EngagementRewardsSDK,
   appAddress: `0x${string}`,
-  userAddress: `0x${string}`,
+  _userAddress: `0x${string}`,
   inviter: `0x${string}`,
 ) => {
   // Get current block number to set validUntilBlock

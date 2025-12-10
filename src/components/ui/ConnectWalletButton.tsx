@@ -2,7 +2,7 @@
 
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import clsx from "clsx";
-import { useCallback, type ReactNode } from "react";
+import { type ReactNode, useCallback } from "react";
 
 type ConnectWalletButtonProps = {
   className?: string;

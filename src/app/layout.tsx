@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Geist_Mono, Inter } from "next/font/google";
-import AppKitProvider from "@/providers/AppKitProvider";
 import ThemeInitializer from "@/components/ThemeInitializer";
+import AppKitProvider from "@/providers/AppKitProvider";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",

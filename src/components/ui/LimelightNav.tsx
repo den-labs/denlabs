@@ -1,12 +1,12 @@
 "use client";
 
-import React, {
+import {
   cloneElement,
+  type ReactElement,
+  type SVGProps,
   useLayoutEffect,
   useRef,
   useState,
-  type ReactElement,
-  type SVGProps,
 } from "react";
 import { cn } from "@/lib/utils";
 

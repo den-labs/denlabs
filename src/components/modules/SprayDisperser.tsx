@@ -15,11 +15,11 @@ import {
 import {
   BrowserProvider,
   Contract,
-  JsonRpcProvider,
   type Eip1193Provider,
   formatEther,
   formatUnits,
   isAddress,
+  JsonRpcProvider,
   parseEther,
   parseUnits,
 } from "ethers";
@@ -1484,11 +1484,10 @@ export default function SprayDisperser() {
                             const balanceKey = tok.address.toLowerCase();
                             const storedBalance =
                               trustedTokenBalances[balanceKey];
-                            const hasBalanceEntry =
-                              Object.prototype.hasOwnProperty.call(
-                                trustedTokenBalances,
-                                balanceKey,
-                              );
+                            const hasBalanceEntry = Object.hasOwn(
+                              trustedTokenBalances,
+                              balanceKey,
+                            );
 
                             let walletBalanceValue: string;
                             if (storedBalance != null) {

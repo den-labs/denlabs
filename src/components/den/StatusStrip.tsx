@@ -5,10 +5,10 @@ import {
   useAppKitProvider,
   useAppKitState,
 } from "@reown/appkit/react";
+import { BrowserProvider, type Eip1193Provider, JsonRpcProvider } from "ethers";
 import { Wallet } from "lucide-react";
-import { BrowserProvider, JsonRpcProvider, type Eip1193Provider } from "ethers";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import ConnectWalletButton from "@/components/ui/ConnectWalletButton";
 import HowlBadge from "@/components/ui/HowlBadge";
 import SelfBadge from "@/components/ui/SelfBadge";

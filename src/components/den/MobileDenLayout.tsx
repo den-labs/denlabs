@@ -3,8 +3,8 @@
 import { ShieldCheck, SprayCan, UserCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
-import { usePathname, useRouter } from "@/i18n/routing";
 import LimelightNav from "@/components/ui/LimelightNav";
+import { usePathname, useRouter } from "@/i18n/routing";
 
 type NavigationItemKey = "profile" | "spray" | "self";
 

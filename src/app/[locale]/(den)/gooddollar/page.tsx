@@ -58,7 +58,7 @@ export default function GoodDollarPage() {
         const { can, appInfo } = await checkEligibility(
           rewards,
           appAddress,
-          address,
+          address as `0x${string}`,
         );
         setAppInfo(appInfo);
         setState(can ? "eligible" : "ineligible");
@@ -82,8 +82,8 @@ export default function GoodDollarPage() {
       const hash = await claimReward(
         rewards,
         appAddress,
-        address,
-        inviter || "0x0000000000000000000000000000000000000000",
+        address as `0x${string}`,
+        (inviter || "0x0000000000000000000000000000000000000000") as `0x${string}`,
       );
       setTxHash(hash);
       setState("claimed");
@@ -103,101 +103,105 @@ export default function GoodDollarPage() {
             <p className="mt-2 text-sm text-zinc-400">{t("subtitle")}</p>
           </section>
 
-      {state === "noWallet" && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-sm text-zinc-400">{t("states.noWallet")}</p>
-        </div>
-      )}
-
-      {state === "noSelf" && (
-        <div className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-sm">{t("states.noSelf.description")}</p>
-          <Link
-            href="/access"
-            className="inline-block rounded-lg bg-[--den-lime] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[--den-lime]/90"
-          >
-            {t("actions.verifyWithSelf")}
-          </Link>
-        </div>
-      )}
-
-      {state === "checking" && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-sm text-zinc-400">{t("states.checking")}</p>
-        </div>
-      )}
-
-      {state === "eligible" && (
-        <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
-          {appInfo && (
-            <p className="text-sm text-zinc-400">
-              {t("appInfo.distribution", {
-                user: appInfo.userPercentage,
-                inviter: appInfo.inviterPercentage,
-              })}
-            </p>
-          )}
-
-          <button
-            type="button"
-            onClick={handleClaim}
-            className="w-full rounded-lg bg-[--den-lime] px-4 py-3 font-medium text-black transition-colors hover:bg-[--den-lime]/90"
-          >
-            {t("actions.claim")}
-          </button>
-
-          <p className="text-xs text-zinc-500">{t("notes.limits")}</p>
-        </div>
-      )}
-
-      {state === "ineligible" && (
-        <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-sm">{t("states.ineligible.description")}</p>
-          <p className="text-xs text-zinc-500">{t("states.ineligible.hint")}</p>
-        </div>
-      )}
-
-      {state === "claiming" && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-sm text-zinc-400">{t("states.claiming")}</p>
-        </div>
-      )}
-
-      {state === "claimed" && (
-        <div className="space-y-4 rounded-lg border border-emerald-800/50 bg-emerald-900/20 p-6">
-          <p className="text-sm font-medium text-emerald-400">
-            {t("states.claimed.success")}
-          </p>
-          {txHash && (
-            <a
-              href={`https://celoscan.io/tx/${txHash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block text-sm text-[--den-lime] underline hover:no-underline"
-            >
-              {t("states.claimed.viewTx")}
-            </a>
-          )}
-
-          {address && (
-            <div className="mt-4 space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-              <p className="text-sm font-medium">{t("invite.title")}</p>
-              <p className="text-xs text-zinc-400">{t("invite.description")}</p>
-              <pre className="mt-2 overflow-x-auto rounded bg-zinc-950 p-3 text-xs text-zinc-300">
-                {typeof window !== "undefined"
-                  ? `${window.location.origin}/gooddollar?invite=${address}`
-                  : `https://denlabs.vercel.app/en/gooddollar?invite=${address}`}
-              </pre>
+          {state === "noWallet" && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-sm text-zinc-400">{t("states.noWallet")}</p>
             </div>
           )}
-        </div>
-      )}
 
-      {state === "error" && errorMsg && (
-        <div className="rounded-lg border border-red-800/50 bg-red-900/20 p-4">
-          <p className="text-sm text-red-400">{errorMsg}</p>
-        </div>
-      )}
+          {state === "noSelf" && (
+            <div className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-sm">{t("states.noSelf.description")}</p>
+              <Link
+                href="/access"
+                className="inline-block rounded-lg bg-[--den-lime] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[--den-lime]/90"
+              >
+                {t("actions.verifyWithSelf")}
+              </Link>
+            </div>
+          )}
+
+          {state === "checking" && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-sm text-zinc-400">{t("states.checking")}</p>
+            </div>
+          )}
+
+          {state === "eligible" && (
+            <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
+              {appInfo && (
+                <p className="text-sm text-zinc-400">
+                  {t("appInfo.distribution", {
+                    user: appInfo.userPercentage,
+                    inviter: appInfo.inviterPercentage,
+                  })}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleClaim}
+                className="w-full rounded-lg bg-[--den-lime] px-4 py-3 font-medium text-black transition-colors hover:bg-[--den-lime]/90"
+              >
+                {t("actions.claim")}
+              </button>
+
+              <p className="text-xs text-zinc-500">{t("notes.limits")}</p>
+            </div>
+          )}
+
+          {state === "ineligible" && (
+            <div className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-sm">{t("states.ineligible.description")}</p>
+              <p className="text-xs text-zinc-500">
+                {t("states.ineligible.hint")}
+              </p>
+            </div>
+          )}
+
+          {state === "claiming" && (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-sm text-zinc-400">{t("states.claiming")}</p>
+            </div>
+          )}
+
+          {state === "claimed" && (
+            <div className="space-y-4 rounded-lg border border-emerald-800/50 bg-emerald-900/20 p-6">
+              <p className="text-sm font-medium text-emerald-400">
+                {t("states.claimed.success")}
+              </p>
+              {txHash && (
+                <a
+                  href={`https://celoscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-block text-sm text-[--den-lime] underline hover:no-underline"
+                >
+                  {t("states.claimed.viewTx")}
+                </a>
+              )}
+
+              {address && (
+                <div className="mt-4 space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+                  <p className="text-sm font-medium">{t("invite.title")}</p>
+                  <p className="text-xs text-zinc-400">
+                    {t("invite.description")}
+                  </p>
+                  <pre className="mt-2 overflow-x-auto rounded bg-zinc-950 p-3 text-xs text-zinc-300">
+                    {typeof window !== "undefined"
+                      ? `${window.location.origin}/gooddollar?invite=${address}`
+                      : `https://denlabs.vercel.app/en/gooddollar?invite=${address}`}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+
+          {state === "error" && errorMsg && (
+            <div className="rounded-lg border border-red-800/50 bg-red-900/20 p-4">
+              <p className="text-sm text-red-400">{errorMsg}</p>
+            </div>
+          )}
 
           <section className="space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-xs text-zinc-400">
             <p className="mb-2 font-medium text-zinc-300">{t("faq.title")}</p>
