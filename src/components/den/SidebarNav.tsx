@@ -59,6 +59,9 @@ const settingsNavItem = {
   icon: Settings,
 } as const;
 
+// Temporary flag to hide experiments navigation until the module is ready.
+const SHOW_EXPERIMENTS = false;
+
 export default function SidebarNav() {
   const t = useTranslations("SidebarNav");
   const pathname = usePathname();
@@ -145,43 +148,45 @@ export default function SidebarNav() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel
-            className={cn("justify-between", collapsed ? "hidden" : "flex")}
-          >
-            <span>{t("sections.experiments.title")}</span>
-            <span className="rounded-full border border-white/15 px-2 py-0.5 text-[0.6rem] tracking-[0.3em] text-white/70">
-              {t("sections.experiments.badge")}
-            </span>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {experimentsNavigation.map((item) => {
-                const ItemIcon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.key}>
-                    <SidebarMenuButton
-                      type="button"
-                      disabled
-                      className="cursor-not-allowed text-white/50"
-                    >
-                      <ItemIcon className="h-4 w-4" aria-hidden />
-                      <span
-                        className={cn(
-                          "truncate text-[0.7rem]",
-                          collapsed ? "hidden" : "inline",
-                        )}
+        {SHOW_EXPERIMENTS ? (
+          <SidebarGroup>
+            <SidebarGroupLabel
+              className={cn("justify-between", collapsed ? "hidden" : "flex")}
+            >
+              <span>{t("sections.experiments.title")}</span>
+              <span className="rounded-full border border-white/15 px-2 py-0.5 text-[0.6rem] tracking-[0.3em] text-white/70">
+                {t("sections.experiments.badge")}
+              </span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {experimentsNavigation.map((item) => {
+                  const ItemIcon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.key}>
+                      <SidebarMenuButton
+                        type="button"
+                        disabled
+                        className="cursor-not-allowed text-white/50"
                       >
-                        {t(`sections.experiments.items.${item.key}`)}
-                      </span>
-                      <Lock className="ml-auto h-3.5 w-3.5" aria-hidden />
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                        <ItemIcon className="h-4 w-4" aria-hidden />
+                        <span
+                          className={cn(
+                            "truncate text-[0.7rem]",
+                            collapsed ? "hidden" : "inline",
+                          )}
+                        >
+                          {t(`sections.experiments.items.${item.key}`)}
+                        </span>
+                        <Lock className="ml-auto h-3.5 w-3.5" aria-hidden />
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
         <SidebarGroup className="border-t border-white/5 pt-4">
           <SidebarGroupContent>
             <SidebarMenu>
