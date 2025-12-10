@@ -219,33 +219,39 @@ export function StatusStrip({ className = "" }: StatusStripProps) {
     <div
       className={`flex flex-wrap items-center gap-2 md:gap-4 bg-[#14181f]/70 rounded-lg p-2 ${className}`}
     >
-      <div className="order-1 sm:order-2 flex items-center gap-2">
+      <div className="order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto">
         <ConnectWalletButton
-          className="inline-flex items-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex w-full items-center justify-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.18em] transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
           connectLabel={walletButtonLabel}
           connectedLabel={connectedWalletButtonLabel}
           disabled={loading}
         />
       </div>
-      <div className="order-2 sm:order-1 flex items-center gap-3">
-        <HowlBadge score={holdScore} />
-        <SelfBadge status={isSelfVerified ? "verified" : "unverified"} />
-      </div>
-      <div className="order-3 flex items-center gap-2">
-        {socialLinks.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-wolf-border bg-wolf-charcoal-70 text-wolf-foreground transition hover:border-wolf-border-xstrong hover:text-wolf-emerald"
-            aria-label={link.label}
-            title={link.label}
-          >
-            {link.icon}
-            <span className="sr-only">{link.label}</span>
-          </a>
-        ))}
+      <div className="order-2 w-full sm:order-1 sm:w-auto">
+        <div className="grid grid-cols-4 gap-2 sm:flex sm:items-center sm:gap-3">
+          <HowlBadge
+            score={holdScore}
+            className="w-full justify-center sm:w-auto sm:justify-start"
+          />
+          <SelfBadge
+            status={isSelfVerified ? "verified" : "unverified"}
+            className="w-full justify-center sm:w-auto sm:justify-start"
+          />
+          {socialLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 w-full items-center justify-center rounded-lg border border-wolf-border bg-wolf-charcoal-70 text-wolf-foreground transition hover:border-wolf-border-xstrong hover:text-wolf-emerald sm:w-9"
+              aria-label={link.label}
+              title={link.label}
+            >
+              {link.icon}
+              <span className="sr-only">{link.label}</span>
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   );
