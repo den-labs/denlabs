@@ -57,12 +57,15 @@ function DesktopLayout({ children }: { children: ReactNode }) {
     <div className="hidden md:flex md:flex-1 md:flex-col">
       <div className="rounded-2xl border border-[#232a36] bg-[#05090f]/95 p-6 text-white shadow-[0_45px_120px_-80px_rgba(7,11,20,0.85)] backdrop-blur-xl">
         <section className="space-y-6">
-          <header className="flex flex-col gap-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-6">
-            <div className="min-w-0">
+          <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+            <div className="min-w-0 flex-1">
               <TopBar />
             </div>
-            <div className="md:col-start-2 md:justify-self-end">
-              <StatusStrip className="justify-start md:justify-end" />
+            <div className="hidden md:flex lg:hidden">
+              <StatusStrip variant="icons-only" className="justify-end" />
+            </div>
+            <div className="hidden lg:block lg:justify-self-end">
+              <StatusStrip className="justify-end" />
             </div>
           </header>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -83,8 +86,12 @@ function MobileLayout({ children }: { children: ReactNode }) {
       <MobileDenLayout
         main={
           <>
-            <TopBar />
-            <StatusStrip className="mt-4 justify-end" />
+            <header className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <TopBar />
+              </div>
+              <StatusStrip variant="wallet-only" className="shrink-0" />
+            </header>
             <section className="mt-6 space-y-6">{children}</section>
           </>
         }

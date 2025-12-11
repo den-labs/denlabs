@@ -6,16 +6,18 @@ import {
   useAppKitState,
 } from "@reown/appkit/react";
 import { BrowserProvider, type Eip1193Provider, JsonRpcProvider } from "ethers";
-import { Wallet } from "lucide-react";
+import { MoonStar, ShieldCheck, ShieldQuestion, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import ConnectWalletButton from "@/components/ui/ConnectWalletButton";
 import HowlBadge from "@/components/ui/HowlBadge";
 import SelfBadge from "@/components/ui/SelfBadge";
 import { useDenUser } from "@/hooks/useDenUser";
+import { cn } from "@/lib/utils";
 
 type StatusStripProps = {
   className?: string;
+  variant?: "full" | "wallet-only" | "icons-only";
 };
 
 type WalletBroadcastDetail = {
@@ -41,7 +43,10 @@ const broadcastWalletState = (detail: WalletBroadcastDetail) => {
   window.setTimeout(dispatch, 0);
 };
 
-export function StatusStrip({ className = "" }: StatusStripProps) {
+export function StatusStrip({
+  className = "",
+  variant = "full",
+}: StatusStripProps) {
   const tSpray = useTranslations("SprayDisperser");
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [ensName, setEnsName] = useState<string | null>(null);
@@ -54,6 +59,9 @@ export function StatusStrip({ className = "" }: StatusStripProps) {
   const isSelfVerified = user.selfVerified;
   const isConnected = user.isBuilder;
   const holdScore = user.holdScore;
+  const isWalletOnly = variant === "wallet-only";
+  const isIconsOnly = variant === "icons-only";
+  const isCompactWallet = isWalletOnly || isIconsOnly;
 
   const socialLinks = [
     {
@@ -191,21 +199,21 @@ export function StatusStrip({ className = "" }: StatusStripProps) {
     };
   }, []);
 
-  const walletButtonLabel: ReactNode = loading
+  const defaultWalletButtonLabel: ReactNode = loading
     ? "Connecting..."
     : translateSpray("actions.connect", "Connect Wallet");
 
   const connectedChainName = caipNetwork?.name ?? "Wallet";
   const walletIcon = (
-    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-white/10">
-      <Wallet className="h-3.5 w-3.5 text-white/80" aria-hidden />
-    </span>
+    <Wallet className="h-4 w-4 text-white/80" aria-hidden />
   );
 
-  const connectedWalletButtonLabel: ReactNode =
+  const defaultConnectedWalletButtonLabel: ReactNode =
     walletAddress != null ? (
       <span className="flex items-center gap-2">
-        {walletIcon}
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-white/10">
+          {walletIcon}
+        </span>
         <span>{ensName ?? formatAddress(walletAddress)}</span>
       </span>
     ) : (
@@ -215,44 +223,128 @@ export function StatusStrip({ className = "" }: StatusStripProps) {
       })
     );
 
-  return (
-    <div
-      className={`flex flex-wrap items-center gap-2 md:gap-4 bg-[#14181f]/70 rounded-lg p-2 ${className}`}
-    >
-      <div className="order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto">
+  const iconOnlyLabel = (text: string) => (
+    <>
+      <span className="sr-only">{text}</span>
+      <Wallet className="h-4 w-4 text-white/80" aria-hidden />
+    </>
+  );
+
+  const walletButtonLabel = isCompactWallet
+    ? iconOnlyLabel("Connect wallet")
+    : defaultWalletButtonLabel;
+
+  const connectedWalletButtonLabel = isCompactWallet
+    ? iconOnlyLabel(
+        walletAddress != null
+          ? `Connected wallet ${ensName ?? formatAddress(walletAddress)}`
+          : "Wallet connected",
+      )
+    : defaultConnectedWalletButtonLabel;
+
+  if (isIconsOnly) {
+    const iconCircleClass =
+      "inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white/80";
+    const selfIcon = isSelfVerified ? (
+      <ShieldCheck className="h-5 w-5 text-[#89e24a]" aria-hidden />
+    ) : (
+      <ShieldQuestion className="h-5 w-5 text-[#8a94a1]" aria-hidden />
+    );
+    return (
+      <div
+        className={cn(
+          "flex items-center gap-2 rounded-lg bg-[#14181f]/70 p-2",
+          className,
+        )}
+      >
+        <span className={iconCircleClass} aria-label="Howl score">
+          <MoonStar className="h-5 w-5 text-[#89e24a]" aria-hidden />
+        </span>
+        <span
+          className={iconCircleClass}
+          aria-label={isSelfVerified ? "Self verified" : "Self not verified"}
+        >
+          {selfIcon}
+        </span>
+        {socialLinks.map((link) => (
+          <a
+            key={link.href}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={iconCircleClass}
+            aria-label={link.label}
+            title={link.label}
+          >
+            {link.icon}
+          </a>
+        ))}
         <ConnectWalletButton
-          className="inline-flex w-full items-center justify-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+          className={cn(
+            "inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-[#14181f] text-white/80 transition hover:border-white/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-70",
+          )}
           connectLabel={walletButtonLabel}
           connectedLabel={connectedWalletButtonLabel}
           disabled={loading}
         />
       </div>
-      <div className="order-2 w-full sm:order-1 sm:w-auto">
-        <div className="grid grid-cols-4 gap-2 sm:flex sm:items-center sm:gap-3">
-          <HowlBadge
-            score={holdScore}
-            className="w-full justify-center sm:w-auto sm:justify-start"
-          />
-          <SelfBadge
-            status={isSelfVerified ? "verified" : "unverified"}
-            className="w-full justify-center sm:w-auto sm:justify-start"
-          />
-          {socialLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-9 w-full items-center justify-center rounded-lg border border-wolf-border bg-wolf-charcoal-70 text-wolf-foreground transition hover:border-wolf-border-xstrong hover:text-wolf-emerald sm:w-9"
-              aria-label={link.label}
-              title={link.label}
-            >
-              {link.icon}
-              <span className="sr-only">{link.label}</span>
-            </a>
-          ))}
-        </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-2 rounded-lg",
+        isWalletOnly ? "bg-transparent p-0" : "bg-[#14181f]/70 p-2 md:gap-4",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto",
+          isWalletOnly && "w-auto",
+        )}
+      >
+        <ConnectWalletButton
+          className={cn(
+            "inline-flex items-center justify-center gap-3 rounded-md border px-3 py-1 text-[0.75rem] font-semibold uppercase transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70",
+            isCompactWallet &&
+              "h-12 w-12 rounded-full border-white/25 bg-transparent p-0 uppercase",
+            !isWalletOnly && "w-full sm:w-auto",
+          )}
+          connectLabel={walletButtonLabel}
+          connectedLabel={connectedWalletButtonLabel}
+          disabled={loading}
+        />
       </div>
+      {isWalletOnly ? null : (
+        <div className="order-2 w-full sm:order-1 sm:w-auto">
+          <div className="grid grid-cols-4 gap-2 sm:flex sm:items-center sm:gap-3">
+            <HowlBadge
+              score={holdScore}
+              className="w-full justify-center sm:w-auto sm:justify-start"
+            />
+            <SelfBadge
+              status={isSelfVerified ? "verified" : "unverified"}
+              className="w-full justify-center sm:w-auto sm:justify-start"
+            />
+            {socialLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-9 w-full items-center justify-center rounded-lg border border-wolf-border bg-wolf-charcoal-70 text-wolf-foreground transition hover:border-wolf-border-xstrong hover:text-wolf-emerald sm:w-9"
+                aria-label={link.label}
+                title={link.label}
+              >
+                {link.icon}
+                <span className="sr-only">{link.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
