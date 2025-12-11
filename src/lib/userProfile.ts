@@ -11,6 +11,7 @@ export type LabUserProfile = {
   wallet_address: string | null;
   self_verified: boolean;
   hold_score: number;
+  avatar_url?: string | null;
   created_at: string;
   updated_at: string;
 };

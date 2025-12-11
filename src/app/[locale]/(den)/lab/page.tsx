@@ -1,7 +1,7 @@
 import {
   Award,
-  BadgeCheck,
   BarChart3,
+  Check,
   Droplets,
   Gamepad2,
   Grid3X3,
@@ -10,10 +10,12 @@ import {
   Puzzle,
   Search,
   ShieldCheck,
+  ShieldQuestion,
   Store,
   Trophy,
   UserCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
@@ -156,20 +158,19 @@ function LabMain({ locale, profile }: LabMainProps) {
   const liveMiniApps = MINI_APPS.filter(
     (app) => app.status === "LIVE" && app.id !== "self",
   );
+  const avatarSrc = profile.avatar_url ?? "/avatar.png";
 
   return (
     <div className="space-y-6 text-wolf-foreground">
       <section className="wolf-card rounded-3xl border border-wolf-border p-6 text-white">
         <div className="flex flex-col gap-6 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#89e24a]/40 to-[#56f0d5]/30 text-3xl">
-              🐺
-            </div>
+            <ProfileAvatar
+              src={avatarSrc}
+              verified={Boolean(profile.self_verified)}
+            />
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-semibold">{displayName}</h1>
-                <BadgeCheck className="h-5 w-5 text-[#89e24a]" aria-hidden />
-              </div>
+              <h1 className="text-2xl font-semibold">{displayName}</h1>
               <p className="text-sm text-white/70">{handle}</p>
             </div>
           </div>
@@ -225,6 +226,46 @@ function LabMain({ locale, profile }: LabMainProps) {
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+type ProfileAvatarProps = {
+  src?: string | null;
+  verified: boolean;
+};
+
+function ProfileAvatar({ src, verified }: ProfileAvatarProps) {
+  const imageSrc =
+    typeof src === "string" && src.trim().length > 0 ? src : "/avatar.png";
+  const badgeClasses = verified
+    ? "bg-[#37d67a] text-[#05090f]"
+    : "bg-[#2d3240] text-white/70";
+  const badgeIcon = verified ? (
+    <Check className="h-3.5 w-3.5" aria-hidden />
+  ) : (
+    <ShieldQuestion className="h-3.5 w-3.5" aria-hidden />
+  );
+
+  return (
+    <div className="relative h-24 w-24 shrink-0">
+      <div className="h-full w-full rounded-[32px] bg-white/95 p-1 shadow-[0_18px_50px_rgba(6,8,18,0.45)]">
+        <div className="h-full w-full overflow-hidden rounded-[28px] bg-[#0f1626]">
+          <Image
+            src={imageSrc}
+            alt="Profile avatar"
+            width={160}
+            height={160}
+            className="h-full w-full object-cover"
+            priority
+          />
+        </div>
+      </div>
+      <div
+        className={`absolute -bottom-1 -right-1 rounded-full border-4 border-[#05090f] ${badgeClasses} p-1 shadow-xl`}
+      >
+        {badgeIcon}
+      </div>
     </div>
   );
 }
