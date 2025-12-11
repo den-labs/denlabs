@@ -50,7 +50,7 @@ export function TopBar() {
       };
 
   return (
-    <header className="flex flex-col gap-4 text-wolf-foreground">
+    <div className="flex w-full flex-col gap-4 text-wolf-foreground">
       <div className="flex items-center gap-4">
         <Link
           href="/"
@@ -58,14 +58,14 @@ export function TopBar() {
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
         </Link>
-        <div>
+        <div className="text-left">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-white">{meta.title}</h1>
           </div>
           <p className="text-sm text-wolf-text-subtle">{meta.description}</p>
         </div>
       </div>
-    </header>
+    </div>
   );
 }
 

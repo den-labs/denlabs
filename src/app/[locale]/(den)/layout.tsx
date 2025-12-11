@@ -56,12 +56,20 @@ function DesktopLayout({ children }: { children: ReactNode }) {
   return (
     <div className="hidden md:flex md:flex-1 md:flex-col">
       <div className="rounded-2xl border border-[#232a36] bg-[#05090f]/95 p-6 text-white shadow-[0_45px_120px_-80px_rgba(7,11,20,0.85)] backdrop-blur-xl">
-        <TopBar />
-        <StatusStrip className="mt-4 justify-end" />
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="min-w-0">{children}</div>
-          <div ref={attachRight} className="hidden lg:block">
-            {rightActive ? null : rightPlaceholder}
+        <section className="space-y-6">
+          <header className="flex flex-col gap-4 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-6">
+            <div className="min-w-0">
+              <TopBar />
+            </div>
+            <div className="md:col-start-2 md:justify-self-end">
+              <StatusStrip className="justify-start md:justify-end" />
+            </div>
+          </header>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="min-w-0">{children}</div>
+            <div ref={attachRight} className="hidden lg:block">
+              {rightActive ? null : rightPlaceholder}
+            </div>
           </div>
         </section>
       </div>
