@@ -2,14 +2,13 @@
 
 import { useAppKitAccount } from "@reown/appkit/react";
 import { Grid3X3, Search, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
+import { Link } from "@/i18n/routing";
 import { useDenUser } from "@/hooks/useDenUser";
 import { useGoodDollar } from "@/hooks/useGoodDollar";
 import { useGoodDollarInvite } from "@/hooks/useGoodDollarInvite";
-import { usePathname } from "@/i18n/routing";
 import { checkEligibility, claimReward } from "@/lib/gooddollar";
 
 type State =
@@ -237,10 +236,6 @@ const SHORTCUT_APPS: ShortcutApp[] = [
 ];
 
 function GoodDollarRightSidebar() {
-  const pathname = usePathname();
-  const locale = pathname?.split("/")[1] || "en";
-  const localePrefix = `/${locale}`;
-
   return (
     <aside className="hidden flex-col gap-6 lg:flex text-wolf-foreground">
       <div className="relative">
@@ -275,7 +270,7 @@ function GoodDollarRightSidebar() {
             return (
               <Link
                 key={app.id}
-                href={`${localePrefix}${app.href}`}
+                href={app.href}
                 className="flex flex-col items-center gap-2 rounded-xl border border-wolf-border-soft bg-wolf-panel/60 p-3 text-center text-xs text-white transition hover:bg-wolf-panel"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-wolf-neutral-soft">
