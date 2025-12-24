@@ -126,6 +126,18 @@ test.describe
           pageErrors.push(`navigation-error: ${message}`);
         }
 
+        // Validate status code - must be successful (2xx) or redirect (3xx)
+        if (status !== null) {
+          expect(
+            status,
+            `Unexpected status for ${path}: ${status}`,
+          ).toBeGreaterThanOrEqual(200);
+          expect(
+            status,
+            `Unexpected status for ${path}: ${status}`,
+          ).toBeLessThan(400);
+        }
+
         const h = responseHeaders;
         expect(
           h["x-frame-options"],
