@@ -35,6 +35,25 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+
+          // CSP Report-Only: monitor violations without blocking
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com https://*.self.xyz",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com wss://*.walletconnect.com https://*.self.xyz https://rpc.walletconnect.com wss://relay.walletconnect.com https://*.celo-testnet.org https://*.celo.org",
+              "frame-src 'self' https://*.self.xyz https://*.walletconnect.com",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "upgrade-insecure-requests",
+            ].join("; "),
+          },
         ],
       },
     ];
