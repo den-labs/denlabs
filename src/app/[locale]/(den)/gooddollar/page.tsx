@@ -82,7 +82,8 @@ export default function GoodDollarPage() {
         rewards,
         appAddress,
         address as `0x${string}`,
-        (inviter || "0x0000000000000000000000000000000000000000") as `0x${string}`,
+        (inviter ||
+          "0x0000000000000000000000000000000000000000") as `0x${string}`,
       );
       setTxHash(hash);
       setState("claimed");

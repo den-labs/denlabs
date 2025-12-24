@@ -45,12 +45,7 @@
     rgba(186, 255, 92, 0.25),
     rgba(0, 0, 0, 0) 60%
   );
-  --den-font-sans: var(
-    --font-den-sans,
-    "Quicksand",
-    system-ui,
-    sans-serif
-  );
+  --den-font-sans: var(--font-den-sans, "Quicksand", system-ui, sans-serif);
   --wolf-panel: var(--den-surface-strong);
   --wolf-panel-muted: var(--den-surface-glass);
   --wolf-soft: rgba(20, 23, 28, 0.88);

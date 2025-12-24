@@ -204,9 +204,7 @@ export function StatusStrip({
     : translateSpray("actions.connect", "Connect Wallet");
 
   const connectedChainName = caipNetwork?.name ?? "Wallet";
-  const walletIcon = (
-    <Wallet className="h-4 w-4 text-white/80" aria-hidden />
-  );
+  const walletIcon = <Wallet className="h-4 w-4 text-white/80" aria-hidden />;
 
   const defaultConnectedWalletButtonLabel: ReactNode =
     walletAddress != null ? (

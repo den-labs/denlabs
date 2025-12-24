@@ -1,7 +1,6 @@
 import {
   Award,
   BarChart3,
-  Check,
   Droplets,
   Gamepad2,
   Grid3X3,
@@ -239,10 +238,10 @@ function ProfileAvatar({ src, verified }: ProfileAvatarProps) {
   const imageSrc =
     typeof src === "string" && src.trim().length > 0 ? src : "/avatar.png";
   const badgeClasses = verified
-    ? "bg-[#37d67a] text-[#05090f]"
+    ? "bg-[#12230f] text-[#89e24a]"
     : "bg-[#2d3240] text-white/70";
   const badgeIcon = verified ? (
-    <Check className="h-3.5 w-3.5" aria-hidden />
+    <ShieldCheck className="h-3.5 w-3.5 text-[#89e24a]" aria-hidden />
   ) : (
     <ShieldQuestion className="h-3.5 w-3.5" aria-hidden />
   );

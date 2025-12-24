@@ -27,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <body className={`${quicksand.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${quicksand.variable} ${geistMono.variable} antialiased`}
+      >
         <ThemeInitializer />
         <AppKitProvider>{children}</AppKitProvider>
       </body>

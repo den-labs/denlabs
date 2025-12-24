@@ -38,9 +38,7 @@ export default function MissionsPage() {
   return (
     <div className="space-y-8 text-wolf-foreground">
       <header className="space-y-3">
-        <p className="text-xs uppercase text-wolf-text-subtle">
-          Builder Home
-        </p>
+        <p className="text-xs uppercase text-wolf-text-subtle">Builder Home</p>
         <div>
           <h1 className="text-2xl font-semibold text-white/90">{run.title}</h1>
           <p className="mt-2 text-sm text-white/70">
