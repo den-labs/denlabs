@@ -36,30 +36,81 @@ function execCommand(command) {
   }
 }
 
+// Find denlabs-docs repo location
+function findDocsRepo() {
+  // 1. Check environment variable first
+  if (process.env.DENLABS_DOCS_PATH) {
+    const envPath = path.resolve(process.env.DENLABS_DOCS_PATH);
+    if (fs.existsSync(path.join(envPath, "docs/CHANGELOG.md"))) {
+      return envPath;
+    }
+    log(`⚠️  DENLABS_DOCS_PATH apunta a ${envPath} pero no se encontró docs/CHANGELOG.md`, "yellow");
+  }
+
+  // 2. Try fallback locations
+  const fallbackPaths = [
+    path.join(process.cwd(), "../denlabs-docs"),
+    path.join(process.cwd(), "../../denlabs-docs"),
+    path.join(process.cwd(), "./denlabs-docs"),
+  ];
+
+  for (const docsPath of fallbackPaths) {
+    if (fs.existsSync(path.join(docsPath, "docs/CHANGELOG.md"))) {
+      return docsPath;
+    }
+  }
+
+  return null;
+}
+
+// Read or write local snapshot cache
+function getLocalSnapshot() {
+  const snapshotFile = path.join(process.cwd(), "docs/LAST_SNAPSHOT.txt");
+  if (fs.existsSync(snapshotFile)) {
+    return fs.readFileSync(snapshotFile, "utf-8").trim();
+  }
+  return null;
+}
+
+function saveLocalSnapshot(hash) {
+  const snapshotFile = path.join(process.cwd(), "docs/LAST_SNAPSHOT.txt");
+  fs.writeFileSync(snapshotFile, hash, "utf-8");
+}
+
 // Read last snapshot from CHANGELOG.md (now in denlabs-docs repo)
+// Returns: { hash, source } where source is "changelog" | "local" | "unknown"
 function getLastSnapshot() {
-  // Try to read from denlabs-docs repo if it exists in parent directory
-  const docsRepoPath = path.join(process.cwd(), "../denlabs-docs/docs/CHANGELOG.md");
-  const changelogPath = fs.existsSync(docsRepoPath)
-    ? docsRepoPath
-    : path.join(process.cwd(), "docs/CHANGELOG.md");
+  const docsRepoPath = findDocsRepo();
 
-  if (!fs.existsSync(changelogPath)) {
-    log("❌ CHANGELOG.md no encontrado en denlabs-docs ni en docs/", "red");
-    log("   Asegúrate de que el repo denlabs-docs esté clonado en ../denlabs-docs", "yellow");
-    process.exit(1);
+  // Try to read from denlabs-docs CHANGELOG
+  if (docsRepoPath) {
+    const changelogPath = path.join(docsRepoPath, "docs/CHANGELOG.md");
+    try {
+      const changelog = fs.readFileSync(changelogPath, "utf-8");
+      const snapshotMatch = changelog.match(/## Snapshot: ([a-f0-9]{7})/);
+
+      if (snapshotMatch) {
+        const hash = snapshotMatch[1];
+        // Update local cache when we can read from changelog
+        saveLocalSnapshot(hash);
+        return { hash, source: "changelog" };
+      }
+    } catch (error) {
+      log(`⚠️  Error leyendo CHANGELOG desde ${changelogPath}`, "yellow");
+    }
   }
 
-  const changelog = fs.readFileSync(changelogPath, "utf-8");
-  const snapshotMatch = changelog.match(/## Snapshot: ([a-f0-9]{7})/);
-
-  if (!snapshotMatch) {
-    log("❌ No se encontró snapshot en CHANGELOG.md", "red");
-    log("   Formato esperado: ## Snapshot: <hash> (<date>)", "yellow");
-    process.exit(1);
+  // Fallback to local snapshot cache
+  const localSnapshot = getLocalSnapshot();
+  if (localSnapshot) {
+    log("⚠️  No se encontró denlabs-docs, usando snapshot local cacheado", "yellow");
+    return { hash: localSnapshot, source: "local" };
   }
 
-  return snapshotMatch[1];
+  // Ultimate fallback: use current HEAD and warn
+  log("⚠️  No se encontró denlabs-docs ni snapshot local", "yellow");
+  log("   Usando HEAD actual como referencia (delta puede no ser preciso)", "yellow");
+  return { hash: getCurrentHead(), source: "unknown" };
 }
 
 // Get current HEAD hash
@@ -101,18 +152,35 @@ function loadDocTargets() {
 }
 
 // Generate delta report for inclusion in PR
-function generateDeltaReport(snapshot, head, analysis) {
-  const date = new Date().toISOString().split("T")[0];
+function generateDeltaReport(snapshotInfo, head, analysis, docsRepoFound) {
+  const date = new Date().toISOString();
+  const { hash: snapshot, source } = snapshotInfo;
+
+  let snapshotSourceText = "";
+  if (source === "changelog") {
+    snapshotSourceText = "from denlabs-docs changelog";
+  } else if (source === "local") {
+    snapshotSourceText = "from local cache (docs/LAST_SNAPSHOT.txt)";
+  } else {
+    snapshotSourceText = "unknown (using current HEAD)";
+  }
 
   let report = `# Documentation Delta Report
 
 **Generated:** ${date}
-**Snapshot:** ${snapshot}
 **Current HEAD:** ${head}
+**Last Snapshot:** ${snapshot} (${snapshotSourceText})
+**Docs Repo Found:** ${docsRepoFound ? "Yes" : "No"}
 
 ## Summary
 
 `;
+
+  if (!docsRepoFound) {
+    report += `⚠️ **Warning:** Private repo \`denlabs-docs\` not found.\n`;
+    report += `- Set \`DENLABS_DOCS_PATH\` environment variable, or\n`;
+    report += `- Clone \`denlabs-docs\` to \`../denlabs-docs\`, \`../../denlabs-docs\`, or \`./denlabs-docs\`\n\n`;
+  }
 
   if (analysis.hasFunctionalChanges) {
     report += `⚠️ **Functional changes detected** - Documentation update required in private repo \`denlabs-docs\`\n\n`;
@@ -138,6 +206,15 @@ function generateDeltaReport(snapshot, head, analysis) {
   }
 
   report += `## Action Required\n\n`;
+
+  if (!docsRepoFound) {
+    report += `### Setup Documentation Repository\n\n`;
+    report += `1. Clone the private \`denlabs-docs\` repository\n`;
+    report += `2. Place it at \`../denlabs-docs\` (recommended) or set \`DENLABS_DOCS_PATH\`\n`;
+    report += `3. Re-run \`pnpm doc:delta\` to get accurate snapshot comparison\n\n`;
+    report += `### OR\n\n`;
+  }
+
   report += `1. Create a PR in the private \`denlabs-docs\` repository\n`;
   report += `2. Update the documentation targets listed above\n`;
   report += `3. Add an entry to \`docs/CHANGELOG.md\` § [Unreleased]\n`;
@@ -204,22 +281,56 @@ function main() {
   log("\n🔍 Doc Delta Checker", "bold");
   log("━".repeat(60), "cyan");
 
-  const lastSnapshot = getLastSnapshot();
+  const docsRepoPath = findDocsRepo();
+  const docsRepoFound = docsRepoPath !== null;
+
+  if (!docsRepoFound) {
+    log("\n⚠️  Repo privado denlabs-docs no encontrado", "yellow");
+    log("   Buscado en: ../denlabs-docs, ../../denlabs-docs, ./denlabs-docs", "yellow");
+    log("   Set DENLABS_DOCS_PATH para especificar ubicación custom", "yellow");
+    log("   Usando snapshot local cacheado si existe\n", "yellow");
+  }
+
+  const snapshotInfo = getLastSnapshot();
   const currentHead = getCurrentHead();
 
-  log(`\n📸 Último snapshot: ${lastSnapshot}`, "cyan");
+  log(`\n📸 Último snapshot: ${snapshotInfo.hash} (${snapshotInfo.source})`, "cyan");
   log(`🎯 HEAD actual:     ${currentHead}`, "cyan");
 
-  if (lastSnapshot === currentHead) {
+  if (snapshotInfo.hash === currentHead) {
     log("\n✅ No hay delta. Docs sincronizados con HEAD.", "green");
-    log("\n💡 Este es el estado documentado en docs/CHANGELOG.md", "blue");
+    if (snapshotInfo.source === "changelog") {
+      log("💡 Este es el estado documentado en denlabs-docs/docs/CHANGELOG.md", "blue");
+    }
+
+    // Still generate report even with no delta
+    const reportPath = path.join(process.cwd(), "docs/DOC_DELTA_REPORT.md");
+    const report = generateDeltaReport(
+      snapshotInfo,
+      currentHead,
+      { targets: [], matchedFiles: [], hasFunctionalChanges: false },
+      docsRepoFound
+    );
+    fs.writeFileSync(reportPath, report, "utf-8");
+    log("📄 Reporte generado: docs/DOC_DELTA_REPORT.md\n", "green");
     process.exit(0);
   }
 
-  const diffStat = checkDelta(lastSnapshot, currentHead);
+  const diffStat = checkDelta(snapshotInfo.hash, currentHead);
 
   if (!diffStat) {
     log("\n✅ No hay delta. Docs sincronizados.", "green");
+
+    // Still generate report
+    const reportPath = path.join(process.cwd(), "docs/DOC_DELTA_REPORT.md");
+    const report = generateDeltaReport(
+      snapshotInfo,
+      currentHead,
+      { targets: [], matchedFiles: [], hasFunctionalChanges: false },
+      docsRepoFound
+    );
+    fs.writeFileSync(reportPath, report, "utf-8");
+    log("📄 Reporte generado: docs/DOC_DELTA_REPORT.md\n", "green");
     process.exit(0);
   }
 
@@ -227,7 +338,7 @@ function main() {
   log("━".repeat(60), "yellow");
   console.log(diffStat);
 
-  const changedFiles = getChangedFiles(lastSnapshot, currentHead);
+  const changedFiles = getChangedFiles(snapshotInfo.hash, currentHead);
   const docTargets = loadDocTargets();
   const analysis = analyzeChanges(changedFiles, docTargets);
 
@@ -249,7 +360,7 @@ function main() {
 
   // Generate DOC_DELTA_REPORT.md
   const reportPath = path.join(process.cwd(), "docs/DOC_DELTA_REPORT.md");
-  const report = generateDeltaReport(lastSnapshot, currentHead, analysis);
+  const report = generateDeltaReport(snapshotInfo, currentHead, analysis, docsRepoFound);
   fs.writeFileSync(reportPath, report, "utf-8");
   log(`\n📄 Reporte generado: docs/DOC_DELTA_REPORT.md`, "green");
 
@@ -266,6 +377,13 @@ function main() {
 
   log("\n📝 PRÓXIMOS PASOS:", "bold");
   log("━".repeat(60), "cyan");
+
+  if (!docsRepoFound) {
+    log("   1. Clona denlabs-docs o set DENLABS_DOCS_PATH", "yellow");
+    log("   2. Re-corre pnpm doc:delta para snapshot preciso", "yellow");
+    log("   3. Luego sigue los pasos normales abajo:", "yellow");
+  }
+
   log("   1. Revisa docs/DOC_DELTA_REPORT.md para detalles", "reset");
   log("   2. Abre PR en repo privado denlabs-docs con actualizaciones", "reset");
   log("   3. Actualiza STATUS.md, CHANGELOG.md en denlabs-docs", "reset");
