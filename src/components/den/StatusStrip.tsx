@@ -255,15 +255,10 @@ export function StatusStrip({
           className,
         )}
       >
-        <span className={iconCircleClass} aria-label="Howl score">
+        <span className={iconCircleClass}>
           <MoonStar className="h-5 w-5 text-[#89e24a]" aria-hidden />
         </span>
-        <span
-          className={iconCircleClass}
-          aria-label={isSelfVerified ? "Self verified" : "Self not verified"}
-        >
-          {selfIcon}
-        </span>
+        <span className={iconCircleClass}>{selfIcon}</span>
         {socialLinks.map((link) => (
           <a
             key={link.href}

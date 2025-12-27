@@ -19,6 +19,8 @@ const DefaultHomeIcon = (props: SVGProps<SVGSVGElement>) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    role="img"
+    aria-label="Home"
   >
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
   </svg>
@@ -33,6 +35,8 @@ const DefaultCompassIcon = (props: SVGProps<SVGSVGElement>) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    role="img"
+    aria-label="Compass"
   >
     <circle cx="12" cy="12" r="10" />
     <path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" />
@@ -48,6 +52,8 @@ const DefaultBellIcon = (props: SVGProps<SVGSVGElement>) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    role="img"
+    aria-label="Bell"
   >
     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />

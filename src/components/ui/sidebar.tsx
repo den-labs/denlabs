@@ -144,12 +144,14 @@ export const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           {children}
         </aside>
         {isMobile ? (
-          <div
+          <button
+            type="button"
             className={cn(
               "fixed inset-0 z-30 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
               openMobile ? "opacity-100" : "pointer-events-none opacity-0",
             )}
             onClick={() => setOpenMobile(false)}
+            aria-label="Close sidebar"
           />
         ) : null}
       </>
