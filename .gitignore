@@ -43,3 +43,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code local config
+.claude/
+
+# generated doc reports
+docs/DOC_DELTA_REPORT.md
