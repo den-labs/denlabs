@@ -1,4 +1,8 @@
 import type { EventType } from "./eventLabs";
+import {
+  getSurfaceLabel,
+  isObservedSurface,
+} from "./labMode";
 
 // =====================================================
 // CLIENT-SIDE EVENT INSTRUMENTATION
@@ -10,30 +14,55 @@ export interface EventPayload {
   metadata?: Record<string, unknown>;
 }
 
+export interface EnrichedEventPayload extends EventPayload {
+  lab_slug: string;
+  is_observed_surface?: boolean;
+  surface_label?: string;
+  locale?: string;
+  referrer?: string;
+}
+
 export class EventLabInstrumentation {
   private labSlug: string;
-  private eventQueue: EventPayload[] = [];
+  private surfaces: string[];
+  private eventQueue: EnrichedEventPayload[] = [];
   private batchInterval: ReturnType<typeof setInterval> | null = null;
   private readonly BATCH_INTERVAL_MS = 30000; // 30 seconds
   private readonly MAX_QUEUE_SIZE = 50;
   private isShuttingDown = false;
 
-  constructor(labSlug: string) {
+  constructor(labSlug: string, surfaces: string[] = []) {
     this.labSlug = labSlug;
+    this.surfaces = surfaces;
     this.startBatching();
     this.registerUnloadHandler();
   }
 
   /**
-   * Track a custom event
+   * Track a custom event with Lab Mode enrichment
    */
   track(event: EventPayload): void {
     if (this.isShuttingDown) return;
 
-    this.eventQueue.push({
+    const route = event.route || window.location.pathname;
+    const referrer = document.referrer || undefined;
+
+    // Extract locale from pathname (e.g., /en/labs -> "en")
+    const localeMatch = route.match(/^\/([a-z]{2})\//);
+    const locale = localeMatch?.[1];
+
+    // Enrich event with Lab Mode context
+    const enrichedEvent: EnrichedEventPayload = {
       ...event,
-      route: event.route || window.location.pathname,
-    });
+      lab_slug: this.labSlug,
+      route,
+      is_observed_surface: isObservedSurface(route, this.surfaces),
+      surface_label: getSurfaceLabel(route, this.surfaces),
+      locale,
+      referrer,
+    };
+
+    this.eventQueue.push(enrichedEvent);
 
     // Send immediately if queue is full
     if (this.eventQueue.length >= this.MAX_QUEUE_SIZE) {

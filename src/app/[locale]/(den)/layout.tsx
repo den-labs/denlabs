@@ -13,6 +13,7 @@ import SidebarNav from "@/components/den/SidebarNav";
 import StatusStrip from "@/components/den/StatusStrip";
 import TopBar from "@/components/den/TopBar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { EventLabInstrumentationProvider } from "@/providers/EventLabInstrumentationProvider";
 
 export default function DenLayout({ children }: { children: ReactNode }) {
   const desktopChildren = (
@@ -27,20 +28,22 @@ export default function DenLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <SidebarProvider>
-      <DenRailSlotsProvider>
-        <div className="bg-sidebar text-sidebar-foreground">
-          <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-4 px-4 py-4 md:flex-row">
-            <SidebarNav />
-            <div className="flex w-full flex-col gap-4">
-              <DesktopLayout>{desktopChildren}</DesktopLayout>
-              <ActivityBottomSheet />
-              <MobileLayout>{mobileChildren}</MobileLayout>
+    <EventLabInstrumentationProvider labSlug={null}>
+      <SidebarProvider>
+        <DenRailSlotsProvider>
+          <div className="bg-sidebar text-sidebar-foreground">
+            <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-4 px-4 py-4 md:flex-row">
+              <SidebarNav />
+              <div className="flex w-full flex-col gap-4">
+                <DesktopLayout>{desktopChildren}</DesktopLayout>
+                <ActivityBottomSheet />
+                <MobileLayout>{mobileChildren}</MobileLayout>
+              </div>
             </div>
           </div>
-        </div>
-      </DenRailSlotsProvider>
-    </SidebarProvider>
+        </DenRailSlotsProvider>
+      </SidebarProvider>
+    </EventLabInstrumentationProvider>
   );
 }
 

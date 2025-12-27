@@ -8,12 +8,14 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import {
   attachClickTracking,
   attachErrorTracking,
   EventLabInstrumentation,
 } from "@/lib/instrumentation";
+import { getActiveLabSlugClient } from "@/lib/labMode";
 
 // =====================================================
 // CONTEXT
@@ -56,11 +58,39 @@ export function EventLabInstrumentationProvider({
   const pathname = usePathname();
   const instrumentationRef = useRef<EventLabInstrumentation | null>(null);
   const hasAttachedHandlers = useRef(false);
+  const [surfaces, setSurfaces] = useState<string[]>([]);
 
-  // Initialize instrumentation if labSlug is provided
+  // Detect Lab Mode from cookie or prop
+  const activeLabSlug = labSlug || getActiveLabSlugClient();
+
+  // Fetch surfaces when Lab Mode is activated
   useEffect(() => {
-    if (!labSlug) {
-      // Clean up if labSlug is removed
+    if (!activeLabSlug) {
+      setSurfaces([]);
+      return;
+    }
+
+    // Fetch lab details to get surfaces_to_observe
+    async function fetchLabSurfaces() {
+      try {
+        const response = await fetch(`/api/labs/${activeLabSlug}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSurfaces(data.lab?.surfaces_to_observe || []);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch lab surfaces", error);
+        setSurfaces([]);
+      }
+    }
+
+    fetchLabSurfaces();
+  }, [activeLabSlug]);
+
+  // Initialize instrumentation if Lab Mode is active
+  useEffect(() => {
+    if (!activeLabSlug) {
+      // Clean up if Lab Mode is deactivated
       if (instrumentationRef.current) {
         instrumentationRef.current.destroy();
         instrumentationRef.current = null;
@@ -68,9 +98,12 @@ export function EventLabInstrumentationProvider({
       return;
     }
 
-    // Create instrumentation instance
+    // Create instrumentation instance with surfaces
     if (!instrumentationRef.current) {
-      instrumentationRef.current = new EventLabInstrumentation(labSlug);
+      instrumentationRef.current = new EventLabInstrumentation(
+        activeLabSlug,
+        surfaces,
+      );
 
       // Attach global handlers (only once)
       if (!hasAttachedHandlers.current) {
@@ -87,7 +120,7 @@ export function EventLabInstrumentationProvider({
         instrumentationRef.current = null;
       }
     };
-  }, [labSlug]);
+  }, [activeLabSlug, surfaces]);
 
   // Track route changes
   useEffect(() => {
