@@ -1,28 +1,50 @@
-# DenLabs: Feedback & Proof Lab
+# DenLabs - Event Feedback Ops
 
-**DenLabs** is a Feedback & Proof Lab where builders ship work, get actionable feedback, run experiments, and generate verifiable proofs of their capabilities.
+> Trust-native feedback platform for events, demos, and launches. Capture signals, track interactions, and ship improvements faster.
 
-**Core Promise:** "Ship. Get feedback. Prove it."
+## What is Event Feedback Ops?
 
-Instead of building in isolation, DenLabs provides structured feedback loops, experimental features to test hypotheses, and onchain proof generation to build reputation.
+DenLabs helps you run **Event Labs**—feedback collection sessions for your events and demos. Share a public link, participants submit feedback (no account required), and you get:
 
----
+- **Trust-scored feedback** - Every submission gets a 0-100 trust score based on self-verification, wallet connection, and behavioral signals
+- **Automatic event tracking** - Page views, clicks, and errors captured in real-time
+- **Hybrid visibility** - Participants see their own feedback + top issues; you see everything
+- **Retro Pack export** - Auto-generated markdown summary with P0/P1/P2 issues, drop-offs, and recommendations
 
-## Modules
+## Core Components
 
-### **Feedback** (Coming Soon)
-Submit projects, designs, or code for structured feedback from peers, mentors, and AI systems. Iterate based on critiques and build reputation through demonstrated improvement.
+### Event Labs
+Create feedback labs for events and demos. Define objectives, share public links, and collect trust-scored feedback.
 
-### **8004 Scan**
-Trust verification scanner for addresses and identifiers. Check reputation scores, verify credentials, and assess trustworthiness before collaborating.
+**Key Features:**
+- Public participation (no auth required)
+- Real-time event tracking with instrumentation
+- Trust scoring (0-100) based on verification signals
+- Hybrid visibility model (creators vs participants)
+- Retro pack generation with markdown export
 
-### **x402 Premium**
-Experimental HTTP 402 payment layer for premium access. Test pay-per-use models for advanced analytics, deeper feedback, and priority processing.
+**Routes:**
+- `/labs` - List all your labs
+- `/labs/create` - Create new lab
+- `/labs/[slug]` - Lab detail (creator view)
+- `/labs/[slug]/retro` - Retro pack view
+- `/lab/[slug]` - Public participation page
 
-### **A2A (Agent-to-Agent)**
-Discover and expose agent capabilities for interoperability. Enable AI agents to find and interact with DenLabs services programmatically.
+### 8004 Trust Scoring
+Middleware that scores feedback (0-100) based on:
+- Self-verification (+30 points)
+- Wallet connection (+20 points)
+- Rate limiting (-50 if >10 submissions per session)
 
-### **Existing Features**
+Trust scores help filter spam automatically and prioritize high-quality signals.
+
+### Premium Access (x402) - *Mock*
+Experimental HTTP 402 payment layer for gating premium labs. Not yet implemented.
+
+### Agent Interoperability (A2A) - *Mock*
+Agent-to-agent protocol for querying labs and exporting feedback data. Static capability discovery only.
+
+### Existing Features
 - **Lab** - Builder profile and command center
 - **Missions** - Challenges and quests with rewards
 - **Spray** - Bulk CELO/ERC20 payouts and airdrops
@@ -68,6 +90,47 @@ npm run dev  # or pnpm dev
 ```
 
 The middleware will redirect to `/en` by default for English locale.
+
+### Quick Start for Event Labs
+
+1. **Run database migration**
+   ```bash
+   # Navigate to Supabase Dashboard → SQL Editor
+   # Copy contents of database/migrations/001_event_feedback_ops.sql
+   # Execute in SQL Editor
+   # See database/migrations/README.md for details
+   ```
+
+2. **Create your first lab**
+   - Navigate to `/labs/create`
+   - Fill in lab details (name, objective, dates)
+   - Share the public link with participants
+
+3. **Public participation**
+   - Participants visit `/lab/[your-slug]`
+   - No account required to submit feedback
+   - Automatic event tracking and trust scoring
+
+4. **Generate retro pack**
+   - Visit `/labs/[your-slug]/retro`
+   - Export markdown summary with top issues and recommendations
+
+## Key Principles
+
+### Trust-First
+Every feedback item is scored 0-100. Filter spam automatically and prioritize high-quality signals.
+
+### Hybrid Visibility
+Balance transparency with privacy:
+- **Creators** see all feedback
+- **Participants** see their own + top P0/P1 issues
+- **Anonymous visitors** see top issues only
+
+### Retro-Ready
+Export markdown retro packs with one click. Share with your team and ship improvements faster.
+
+### Session Cookies
+Anonymous participation enabled via `denlabs-lab-session` cookie. No account required to submit feedback.
 
 ---
 
@@ -131,6 +194,10 @@ src/
   app/
     [locale]/
       (den)/              # Main app: lab, missions, spray, experiments
+        labs/             # Event Labs (creator view)
+          page.tsx        # Labs list
+          create/         # Create new lab
+          [slug]/         # Lab detail + retro
         8004-scan/        # Trust verification scanner
         x402/             # Premium layer experiments
         a2a/              # Agent capabilities
@@ -140,9 +207,18 @@ src/
         gooddollar/       # Engagement rewards
         taberna/          # Live sessions
         settings/         # User preferences
+      lab/
+        [slug]/           # Public participation page (no auth)
       page.tsx            # Landing page
       access/             # Wallet connection + onboarding
     api/
+      labs/               # Event Labs API
+        route.ts          # List + Create labs
+        [slug]/
+          route.ts        # Get + Update + Delete lab
+          feedback/       # Feedback endpoints
+          events/         # Event tracking
+          retro/          # Retro pack generation
       scan/8004/          # 8004 scan API endpoint
       x402/demo/          # x402 demo endpoint
       a2a/capabilities/   # A2A capabilities endpoint
@@ -154,10 +230,29 @@ src/
   components/
     home/                 # Landing page components
     den/                  # Shell (SidebarNav, TopBar, StatusStrip)
-    modules/              # Feature modules
+    modules/
+      labs/               # Event Labs components
+        LabCard.tsx       # Lab summary card
+        LabForm.tsx       # Create/edit lab form
+        FeedbackForm.tsx  # Submit feedback
+        FeedbackItem.tsx  # Feedback item with trust indicator
+        FeedbackList.tsx  # Feedback list with filters
+        RetroPackView.tsx # Retro pack display + export
     ui/                   # Reusable UI components
+      TrustIndicator.tsx  # Trust score badge
   hooks/                  # Custom React hooks
   lib/                    # Utilities and helpers
+    eventLabs.ts          # Event Labs types + utilities
+    eventLabsClient.ts    # Client-side fetch helpers
+    trustScoring.ts       # Trust score calculation
+    retroPack.ts          # Retro pack generation
+    instrumentation.ts    # Event tracking library
+  providers/
+    EventLabInstrumentationProvider.tsx  # Event tracking context
+  database/
+    migrations/           # Database migration scripts
+      001_event_feedback_ops.sql         # Event Labs schema
+      README.md           # Migration instructions
   i18n/
     messages/             # Translation files (en.json, es.json)
     routing.ts            # next-intl configuration

@@ -39,6 +39,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 const labNavigation = [
+  { key: "eventLabs", href: "/labs", icon: FlaskConical },
   { key: "labHome", href: "/lab", icon: FlaskConical },
   { key: "trustIdentity", href: "/auth", icon: ShieldCheck },
   { key: "spray", href: "/spray", icon: Droplets },

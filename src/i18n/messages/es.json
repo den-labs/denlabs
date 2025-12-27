@@ -73,6 +73,7 @@
       "lab": {
         "title": "Lab",
         "items": {
+          "eventLabs": "Event Labs",
           "labHome": "Perfil",
           "taberna": "Espacio de mentores",
           "spray": "Recompensas Spray",
@@ -631,9 +632,9 @@
     "navbar": {
       "logo": "DenLabs",
       "links": {
-        "experiments": "Experimentos",
-        "howItWorks": "Experimentos Activos",
-        "faq": "FAQ",
+        "experiments": "Componentes",
+        "howItWorks": "Cómo Funciona",
+        "faq": "Preguntas Frecuentes",
         "enterLab": "Entrar al Lab"
       },
       "aria": {
@@ -642,64 +643,64 @@
       }
     },
     "hero": {
-      "title": "Laboratorio de Feedback y Pruebas",
-      "subtitle": "Envía más rápido. Prueba mejor.",
-      "description": "Transforma tus proyectos en prueba verificable. Obtén feedback estructurado, prueba hipótesis con datos reales y construye reputación onchain que los sponsors confían.",
+      "title": "Event Feedback Ops",
+      "subtitle": "Captura señales. Genera insights. Envía más rápido.",
+      "description": "Ejecuta labs de feedback para tus eventos, demos y lanzamientos. Captura señales en tiempo real de los participantes, rastrea interacciones automáticamente y exporta retros accionables. Construido para builders que envían.",
       "trustRow": {
         "label": "Impulsado por"
       },
       "primaryCta": {
-        "label": "Entrar al Lab",
-        "href": "/access"
+        "label": "Crea Tu Lab",
+        "href": "/labs/create"
       },
       "secondaryCta": {
-        "label": "Explorar Experimentos",
-        "href": "#experiments"
+        "label": "Ver Lab de Demo",
+        "href": "/lab/demo-event"
       }
     },
     "howItWorks": {
-      "label": "Experimentos Activos",
-      "title": "Tres pasos hacia prueba verificable",
+      "label": "Cómo funciona",
+      "title": "Envía Mejores Eventos",
       "steps": [
         {
-          "title": "Envía tu proyecto",
-          "description": "Comparte tu trabajo y obtén feedback estructurado de la comunidad de builders."
+          "title": "Crea Lab",
+          "description": "Configura un lab de feedback para tu evento o demo. Define qué estás probando y qué señales importan."
         },
         {
-          "title": "Ejecuta experimentos",
-          "description": "Prueba funcionalidades con usuarios reales usando 8004 Scan, x402 y capacidades A2A."
+          "title": "Captura Señales",
+          "description": "Comparte un enlace público con participantes. Feedback e interacciones se capturan automáticamente con scoring de confianza."
         },
         {
-          "title": "Genera prueba",
-          "description": "Construye reputación onchain con outputs verificables que los sponsors reconocen."
+          "title": "Exporta Retro",
+          "description": "Genera un retro pack en markdown con issues priorizados, puntos de abandono y recomendaciones accionables. Envía mejoras más rápido."
         }
       ]
     },
     "experiments": {
-      "label": "Experimentos Activos",
-      "title": "Prueba, Aprende, Demuestra",
-      "description": "Ejecuta experimentos con usuarios reales y datos onchain.",
+      "label": "Componentes Core",
+      "title": "Plataforma de Feedback Trust-Native",
+      "description": "Event Labs combina verificación de confianza, control de acceso premium e interoperabilidad de agentes para crear una plataforma de feedback confiable.",
       "items": [
         {
           "id": "scan-8004",
-          "title": "8004 Scan",
-          "description": "Verifica puntajes de confianza y reputación antes de colaborar con cualquier dirección",
+          "title": "8004 Trust Scoring",
+          "description": "Cada item de feedback obtiene un trust score basado en auto-verificación, conexión de wallet y señales de comportamiento. Filtra spam automáticamente.",
           "href": "/scan-8004",
-          "cta": "Explorar"
+          "cta": "Ver Trust Scanner"
         },
         {
           "id": "x402",
-          "title": "x402 Premium",
-          "description": "Prueba funcionalidades con acceso de pago y experimentos de micropagos",
+          "title": "Acceso Premium (402)",
+          "description": "Protege tus labs de feedback más valiosos detrás de micropagos. Asegura participantes comprometidos y reduce ruido.",
           "href": "/x402",
-          "cta": "Explorar"
+          "cta": "Explorar Protocolo 402"
         },
         {
           "id": "a2a",
-          "title": "A2A",
-          "description": "Habilita descubrimiento e interoperabilidad entre agentes",
+          "title": "Interoperabilidad de Agentes",
+          "description": "Exporta datos de feedback a tus herramientas favoritas. Agentes IA pueden consultar labs, analizar retros y sugerir mejoras.",
           "href": "/a2a",
-          "cta": "Explorar"
+          "cta": "Ver Capacidades de Agentes"
         }
       ]
     },
@@ -730,60 +731,64 @@
       }
     },
     "faq": {
-      "label": "FAQ",
-      "title": "Preguntas frecuentes",
+      "label": "Preguntas Frecuentes",
+      "title": "Preguntas Frecuentes",
       "items": [
         {
-          "question": "¿Qué es DenLabs?",
-          "answer": "DenLabs es un laboratorio de feedback y pruebas donde builders prueban funcionalidades, obtienen feedback estructurado y generan reputación onchain verificable."
+          "question": "¿Qué es un Event Lab?",
+          "answer": "Un Event Lab es una sesión de recolección de feedback para tu evento, demo o lanzamiento de producto. Defines qué estás probando, compartes un enlace público y los participantes envían feedback mientras las interacciones se rastrean automáticamente."
         },
         {
-          "question": "¿Cómo funcionan los experimentos?",
-          "answer": "Elige un experimento (8004 Scan, x402 o A2A), ejecuta pruebas con usuarios reales y recolecta datos. Cada experimento genera prueba que construye tu reputación."
+          "question": "¿Cómo funciona el trust scoring?",
+          "answer": "Cada item de feedback recibe un trust score (0-100) basado en: estado de auto-verificación (+30), conexión de wallet (+20) y verificaciones de límite de tasa. Esto te ayuda a filtrar spam y priorizar feedback de alta calidad."
         },
         {
-          "question": "¿Qué es prueba onchain?",
-          "answer": "Prueba onchain es evidencia criptográfica de tu actividad que vive en la blockchain. Es verificable, inmutable y reconocida por sponsors y colaboradores."
+          "question": "¿Qué es un Retro Pack?",
+          "answer": "Un Retro Pack es un resumen en markdown generado automáticamente de los resultados de tu lab. Incluye top issues P0/P1/P2, puntos de abandono donde usuarios tuvieron problemas y recomendaciones accionables. Expórtalo y compártelo con tu equipo."
         },
         {
-          "question": "¿Necesito una wallet para empezar?",
-          "answer": "Puedes explorar DenLabs sin wallet, pero necesitarás una para ejecutar experimentos, recibir feedback y generar prueba onchain."
+          "question": "¿Pueden los participantes ver el feedback de otros?",
+          "answer": "Depende. Los creadores de labs ven todo el feedback. Los participantes ven sus propias submisiones más issues de alta prioridad (P0/P1). Esto balancea transparencia con privacidad."
         },
         {
-          "question": "¿Cómo funciona la verificación Self.xyz?",
-          "answer": "Self.xyz proporciona verificación de identidad que mantiene los experimentos resistentes a sybil. Usuarios verificados obtienen acceso a funciones premium y puntajes de confianza más altos."
+          "question": "¿Esto es solo para eventos de DenLabs?",
+          "answer": "Para el MVP, sí. El rastreo de eventos solo funciona dentro de rutas de DenLabs. Rastreo de eventos externos (SDK) está planeado para un lanzamiento futuro."
         },
         {
-          "question": "¿Pueden los sponsors verificar mi trabajo?",
-          "answer": "Sí. Toda la prueba generada en DenLabs es públicamente verificable. Los sponsors pueden confirmar independientemente tus contribuciones, resultados de pruebas y puntajes de reputación."
-        },
-        {
-          "question": "¿Cómo envío feedback?",
-          "answer": "Conecta tu wallet, entra al lab y navega a la sección de feedback. Comparte tu proyecto y la comunidad proporcionará información estructurada."
+          "question": "¿Cómo empiezo?",
+          "answer": "Conecta tu wallet, crea tu primer lab y comparte el enlace público. Los participantes no necesitan cuentas para enviar feedback—solo tú necesitas estar autenticado como creador."
         }
       ]
     },
     "finalCta": {
-      "title": "¿Listo para construir prueba verificable?",
-      "description": "Únete a la comunidad de builders. Ejecuta experimentos. Genera reputación onchain.",
+      "title": "¿Listo para Enviar Mejores Eventos?",
+      "description": "Únete a builders usando Event Feedback Ops para capturar señales, hacer triage de feedback con trust scoring y enviar mejoras más rápido.",
       "cta": {
-        "label": "Entrar al Lab",
-        "href": "/access"
+        "label": "Crea Tu Primer Lab",
+        "href": "/labs/create"
       }
     },
     "footer": {
-      "tagline": "Envía rápido. Prueba mejor.",
+      "tagline": "Event Feedback Ops para builders que envían.",
       "sections": {
         "product": {
           "title": "Producto",
           "links": [
             {
-              "label": "Experimentos",
-              "href": "#experiments"
+              "label": "Event Labs",
+              "href": "/labs"
             },
             {
-              "label": "Cómo funciona",
-              "href": "#how-it-works"
+              "label": "Trust Scoring",
+              "href": "/scan-8004"
+            },
+            {
+              "label": "Acceso Premium",
+              "href": "/x402"
+            },
+            {
+              "label": "Capacidades de Agentes",
+              "href": "/a2a"
             }
           ]
         },
@@ -791,12 +796,16 @@
           "title": "Recursos",
           "links": [
             {
-              "label": "FAQ",
-              "href": "#faq"
+              "label": "Documentación",
+              "href": "https://github.com/denlabs/docs"
             },
             {
-              "label": "Documentación",
-              "href": "/docs"
+              "label": "Guía de Migración",
+              "href": "/database/migrations/README.md"
+            },
+            {
+              "label": "Referencia API",
+              "href": "/api-docs"
             }
           ]
         },
@@ -804,20 +813,25 @@
           "title": "Comunidad",
           "links": [
             {
-              "label": "Twitter",
-              "href": "https://twitter.com/denlabs",
+              "label": "GitHub",
+              "href": "https://github.com/denlabs",
               "external": true
             },
             {
-              "label": "GitHub",
-              "href": "https://github.com/denlabs",
+              "label": "Discord",
+              "href": "https://discord.gg/denlabs",
+              "external": true
+            },
+            {
+              "label": "Twitter",
+              "href": "https://x.com/denlabs",
               "external": true
             }
           ]
         }
       },
       "legal": {
-        "copyright": "© 2025 DenLabs. Todos los derechos reservados."
+        "copyright": "© 2025 DenLabs. Construido para builders."
       }
     },
     "highlights": {
@@ -996,6 +1010,148 @@
           "description": "Empaqueta activaciones, payouts y reacciones en narrativas que los sponsors pueden soltar directo en sus canales."
         }
       ]
+    }
+  },
+  "Labs": {
+    "list": {
+      "title": "Tus Event Labs",
+      "description": "Crea labs de feedback para eventos, demos y lanzamientos.",
+      "createButton": "Crear Nuevo Lab",
+      "empty": {
+        "title": "Sin labs aún",
+        "description": "Crea tu primer lab de feedback para comenzar a capturar señales.",
+        "cta": "Crear Lab"
+      },
+      "filters": {
+        "all": "Todos",
+        "active": "Activos",
+        "paused": "Pausados",
+        "completed": "Completados"
+      }
+    },
+    "create": {
+      "title": "Crear Event Lab",
+      "description": "Configura una nueva sesión de recolección de feedback.",
+      "form": {
+        "name": {
+          "label": "Nombre del Lab",
+          "placeholder": "ej., DenLabs Demo Day Q1",
+          "help": "Un nombre claro para tu evento o demo."
+        },
+        "objective": {
+          "label": "Objetivo (Opcional)",
+          "placeholder": "ej., Probar flujo de onboarding para nuevos usuarios",
+          "help": "¿Qué intentas aprender de este lab?"
+        },
+        "slug": {
+          "label": "Slug (Opcional)",
+          "placeholder": "Auto-generado del nombre",
+          "help": "Usado en enlace público: denlabs.com/lab/{slug}"
+        },
+        "surfaces": {
+          "label": "Superficies a Observar (Opcional)",
+          "placeholder": "ej., /onboarding, /checkout",
+          "help": "Rutas o funcionalidades específicas a rastrear."
+        },
+        "startDate": {
+          "label": "Fecha de Inicio",
+          "help": "¿Cuándo comienza este lab?"
+        },
+        "endDate": {
+          "label": "Fecha de Fin (Opcional)",
+          "help": "¿Cuándo cierra este lab? Dejar vacío para continuo."
+        },
+        "submit": "Crear Lab",
+        "cancel": "Cancelar"
+      }
+    },
+    "detail": {
+      "tabs": {
+        "feedback": "Feedback",
+        "events": "Eventos",
+        "retro": "Retro Pack"
+      },
+      "publicLink": {
+        "label": "Enlace Público",
+        "copy": "Copiar Enlace",
+        "copied": "¡Copiado!"
+      },
+      "stats": {
+        "totalFeedback": "Feedback Total",
+        "trustedFeedback": "Confiable",
+        "events": "Eventos Rastreados",
+        "participants": "Participantes"
+      }
+    },
+    "feedback": {
+      "filters": {
+        "status": {
+          "label": "Estado",
+          "all": "Todos",
+          "new": "Nuevo",
+          "triaged": "Triado",
+          "done": "Hecho",
+          "spam": "Spam"
+        },
+        "priority": {
+          "label": "Prioridad",
+          "all": "Todos",
+          "p0": "P0",
+          "p1": "P1",
+          "p2": "P2",
+          "p3": "P3"
+        },
+        "trust": {
+          "label": "Confianza",
+          "all": "Todos",
+          "trusted": "Confiable (80+)",
+          "unverified": "No Verificado (40-79)",
+          "risk": "Riesgo (<40)"
+        }
+      },
+      "submit": {
+        "title": "Comparte Tu Feedback",
+        "placeholder": "Describe lo que experimentaste...",
+        "button": "Enviar Feedback",
+        "success": "¡Feedback enviado! Gracias.",
+        "error": "Falló el envío. Por favor intenta de nuevo."
+      },
+      "item": {
+        "you": "Tú",
+        "anonymous": "Anónimo",
+        "priority": "Prioridad:",
+        "route": "Ruta:",
+        "actions": {
+          "triage": "Triar",
+          "markDone": "Marcar Hecho",
+          "markSpam": "Marcar Spam"
+        }
+      }
+    },
+    "retro": {
+      "title": "Retro Pack",
+      "description": "Resumen generado automáticamente de resultados del lab.",
+      "export": "Descargar Markdown",
+      "copy": "Copiar al Portapapeles",
+      "sections": {
+        "summary": "Resumen",
+        "topIssues": "Top Issues",
+        "dropoffs": "Puntos de Abandono",
+        "recommendations": "Recomendaciones"
+      }
+    }
+  },
+  "Trust": {
+    "indicator": {
+      "trusted": "Confiable",
+      "unverified": "No Verificado",
+      "risk": "Riesgo",
+      "tooltip": {
+        "score": "Trust Score:",
+        "selfVerified": "Auto-verificado",
+        "hasWallet": "Wallet conectado",
+        "rateLimited": "Límite de tasa"
+      }
     }
   },
   "SprayDisperser": {

@@ -20,6 +20,10 @@ export async function GET() {
       version: "1.0.0",
       status: "mvp-static",
       capabilities: [
+        "Event Feedback Labs",
+        "Real-time Signal Capture",
+        "Trust-Scored Feedback",
+        "Retro Pack Generation (Markdown)",
         "Trust Verification (8004 scan)",
         "Premium Access Management (x402)",
         "Feedback Collection and Analysis",
