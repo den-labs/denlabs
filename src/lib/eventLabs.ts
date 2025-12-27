@@ -201,3 +201,56 @@ export function sanitizeSurfaces(value: unknown): string[] {
     .filter((surface) => surface.length > 0)
     .slice(0, 20); // Max 20 surfaces
 }
+
+// =====================================================
+// TELEMETRY TYPES
+// =====================================================
+
+export type TelemetryData = {
+  participation: ParticipationMetrics;
+  quality: QualityMetrics;
+  funnels: FunnelMetrics;
+  ops: OpsMetrics;
+};
+
+export type ParticipationMetrics = {
+  sessions_total: number;
+  sessions_last_24h: number;
+  feedback_total: number;
+  feedback_per_session_avg: number;
+};
+
+export type QualityMetrics = {
+  trust_distribution: {
+    trusted: number; // 80-100
+    unverified: number; // 40-79
+    risk: number; // 0-39
+  };
+  self_verified_percent: number;
+  spam_rate: number;
+};
+
+export type FunnelMetrics = {
+  top_routes: Array<{
+    route: string;
+    page_views: number;
+  }>;
+  top_errors: Array<{
+    route: string;
+    error_count: number;
+  }>;
+  surface_breakdown: {
+    observed: number;
+    other: number;
+  };
+};
+
+export type OpsMetrics = {
+  p0_count: number;
+  p1_count: number;
+  open_count: number;
+  top_tags: Array<{
+    tag: string;
+    count: number;
+  }>;
+};

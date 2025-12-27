@@ -4,6 +4,7 @@ import type {
   EventLab,
   EventTrackingPayload,
   FeedbackItem,
+  TelemetryData,
   UpdateEventLabPayload,
   UpdateFeedbackPayload,
 } from "./eventLabs";
@@ -197,4 +198,20 @@ export async function exportRetroMarkdown(slug: string): Promise<string> {
   }
 
   return response.text();
+}
+
+// =====================================================
+// TELEMETRY API CALLS
+// =====================================================
+
+export async function getTelemetry(slug: string): Promise<TelemetryData> {
+  const response = await fetch(`/api/labs/${slug}/telemetry`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch telemetry");
+  }
+
+  const data = await response.json();
+  return data.telemetry;
 }
