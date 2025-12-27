@@ -995,5 +995,41 @@
       "title": "About 8004 Scan",
       "description": "8004 scan helps you verify trust scores and reputation before engaging with addresses or entities. This MVP version provides the foundation for onchain trust verification."
     }
+  },
+  "X402": {
+    "title": "x402 Premium",
+    "description": "Experimental HTTP 402 payment layer for premium access. Test pay-per-use models for advanced analytics, deeper feedback, and priority processing.",
+    "concept": {
+      "title": "What is x402?",
+      "description": "x402 explores HTTP 402 (Payment Required) as a payment layer for premium content and services. Instead of traditional subscriptions, users pay per request for enhanced features.",
+      "item1": "Pay-per-use model: Only pay for what you consume",
+      "item2": "Micropayments: Small amounts for individual requests",
+      "item3": "Transparent pricing: Know the cost upfront for each premium feature"
+    },
+    "demo": {
+      "title": "Try the Demo",
+      "description": "Test the x402 endpoint to see current status and available premium features.",
+      "tryDemo": "Try Demo",
+      "testing": "Testing...",
+      "endpoints": "Available Endpoints"
+    },
+    "statuses": {
+      "active": "Active",
+      "demo": "Demo",
+      "experimental": "Experimental",
+      "inactive": "Inactive"
+    },
+    "example": {
+      "title": "Code Example",
+      "description": "How to use x402 in your application (conceptual):",
+      "code": "// Request premium feature with x402\nconst response = await fetch('/api/x402/analytics', {\n  headers: {\n    'X-Payment-Token': 'your-payment-token',\n    'X-Payment-Amount': '0.001' // cost in currency\n  }\n});\n\nif (response.status === 402) {\n  // Payment required - show payment UI\n  console.log('Premium feature requires payment');\n} else if (response.ok) {\n  // Payment accepted, feature unlocked\n  const data = await response.json();\n}"
+    },
+    "errors": {
+      "network": "Network error. Please try again."
+    },
+    "info": {
+      "title": "About x402",
+      "description": "x402 is an experimental feature exploring micropayments for premium access. This MVP demonstrates the concept without real payment processing."
+    }
   }
 }

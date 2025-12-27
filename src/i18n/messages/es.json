@@ -994,5 +994,41 @@
       "title": "Acerca del Escaneo 8004",
       "description": "El escaneo 8004 te ayuda a verificar puntuaciones de confianza y reputación antes de interactuar con direcciones o entidades. Esta versión MVP proporciona la base para la verificación de confianza onchain."
     }
+  },
+  "X402": {
+    "title": "x402 Premium",
+    "description": "Capa experimental de pago HTTP 402 para acceso premium. Prueba modelos de pago por uso para analíticas avanzadas, feedback profundo y procesamiento prioritario.",
+    "concept": {
+      "title": "¿Qué es x402?",
+      "description": "x402 explora HTTP 402 (Pago Requerido) como capa de pago para contenido y servicios premium. En lugar de suscripciones tradicionales, los usuarios pagan por solicitud para características mejoradas.",
+      "item1": "Modelo de pago por uso: Solo pagas por lo que consumes",
+      "item2": "Micropagos: Cantidades pequeñas por solicitudes individuales",
+      "item3": "Precios transparentes: Conoce el costo por adelantado para cada característica premium"
+    },
+    "demo": {
+      "title": "Prueba la Demo",
+      "description": "Prueba el endpoint x402 para ver el estado actual y características premium disponibles.",
+      "tryDemo": "Probar Demo",
+      "testing": "Probando...",
+      "endpoints": "Endpoints Disponibles"
+    },
+    "statuses": {
+      "active": "Activo",
+      "demo": "Demo",
+      "experimental": "Experimental",
+      "inactive": "Inactivo"
+    },
+    "example": {
+      "title": "Ejemplo de Código",
+      "description": "Cómo usar x402 en tu aplicación (conceptual):",
+      "code": "// Solicitar característica premium con x402\nconst response = await fetch('/api/x402/analytics', {\n  headers: {\n    'X-Payment-Token': 'tu-token-de-pago',\n    'X-Payment-Amount': '0.001' // costo en moneda\n  }\n});\n\nif (response.status === 402) {\n  // Pago requerido - mostrar UI de pago\n  console.log('La característica premium requiere pago');\n} else if (response.ok) {\n  // Pago aceptado, característica desbloqueada\n  const data = await response.json();\n}"
+    },
+    "errors": {
+      "network": "Error de red. Por favor intenta de nuevo."
+    },
+    "info": {
+      "title": "Acerca de x402",
+      "description": "x402 es una característica experimental que explora micropagos para acceso premium. Este MVP demuestra el concepto sin procesamiento real de pagos."
+    }
   }
 }
