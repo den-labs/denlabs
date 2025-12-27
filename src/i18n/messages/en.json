@@ -621,21 +621,42 @@
   },
   "HomeLanding": {
     "hero": {
-      "tagline": "On-chain events without the guesswork",
-      "title": "Run verified experiences your sponsors can trust",
-      "subtitle": "Import attendees, trigger instant payouts, and narrate every win from one control lab.",
-      "description": "Wolf Den Labs is the operations hub for Web3 organizers: launch ruleta and race engines, push crypto rewards in real time, and keep the story flowing to the blog with Self.xyz-verified humans. No more spreadsheets, manual payouts, or dubious wallets.",
+      "title": "DenLabs: Feedback & Proof Lab",
+      "subtitle": "Ship. Get feedback. Prove it.",
+      "description": "Instead of building in isolation, DenLabs provides structured feedback loops, experimental features to test hypotheses, and onchain proof generation to build reputation.",
       "primaryCta": {
-        "label": "Launch Your Event",
-        "href": "/auth"
+        "label": "Submit for Feedback",
+        "href": "/feedback"
       },
       "secondaryCta": {
-        "label": "Talk with the Team",
-        "href": "/taberna"
-      },
-      "visionLabel": "Product Vision",
-      "visionQuote": "\"Auto payouts, sponsor analytics, and verified humans in the same loop — that’s the Wolf Den Labs promise.\"",
-      "visionSource": "Wolf Den PRD v0.2"
+        "label": "Explore Experiments",
+        "href": "#experiments"
+      }
+    },
+    "experiments": {
+      "label": "Active Experiments",
+      "title": "Test, Learn, Prove",
+      "description": "Run experiments with real users and onchain data.",
+      "items": [
+        {
+          "id": "8004-scan",
+          "title": "8004 Scan",
+          "description": "Verify trust scores before collaborating",
+          "href": "/8004-scan"
+        },
+        {
+          "id": "x402",
+          "title": "x402 Premium",
+          "description": "Premium access experiments",
+          "href": "/x402"
+        },
+        {
+          "id": "a2a",
+          "title": "A2A",
+          "description": "Agent capabilities discovery",
+          "href": "/a2a"
+        }
+      ]
     },
     "highlights": {
       "label": "Why organizers pick the lab",

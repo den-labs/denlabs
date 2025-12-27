@@ -621,21 +621,42 @@
   },
   "HomeLanding": {
     "hero": {
-      "tagline": "Eventos on-chain sin conjeturas",
-      "title": "Corre experiencias verificadas que tus sponsors confíen",
-      "subtitle": "Importa asistentes, dispara payouts instantáneos y narra cada logro desde un solo laboratorio.",
-      "description": "Wolf Den Labs es el hub operativo para organizadores Web3: lanza ruleta y carreras, libera recompensas cripto en tiempo real y alimenta el blog con historias de humanos verificados con Self.xyz. Se acabaron las hojas de cálculo, los payouts manuales y las wallets dudosas.",
+      "title": "DenLabs: Laboratorio de Feedback y Pruebas",
+      "subtitle": "Envía. Recibe feedback. Demuéstralo.",
+      "description": "En lugar de construir en aislamiento, DenLabs proporciona loops de feedback estructurados, características experimentales para probar hipótesis y generación de pruebas onchain para construir reputación.",
       "primaryCta": {
-        "label": "Lanza tu evento",
-        "href": "/auth"
+        "label": "Enviar para Feedback",
+        "href": "/feedback"
       },
       "secondaryCta": {
-        "label": "Habla con el equipo",
-        "href": "/taberna"
-      },
-      "visionLabel": "Visión de producto",
-      "visionQuote": "\"Payouts automáticos, analítica para patrocinadores e identidades verificadas en el mismo loop: esa es la promesa de Wolf Den Labs.\"",
-      "visionSource": "Wolf Den PRD v0.2"
+        "label": "Explorar Experimentos",
+        "href": "#experiments"
+      }
+    },
+    "experiments": {
+      "label": "Experimentos Activos",
+      "title": "Prueba, Aprende, Demuestra",
+      "description": "Ejecuta experimentos con usuarios reales y datos onchain.",
+      "items": [
+        {
+          "id": "8004-scan",
+          "title": "Escaneo 8004",
+          "description": "Verifica puntuaciones de confianza antes de colaborar",
+          "href": "/8004-scan"
+        },
+        {
+          "id": "x402",
+          "title": "x402 Premium",
+          "description": "Experimentos de acceso premium",
+          "href": "/x402"
+        },
+        {
+          "id": "a2a",
+          "title": "A2A",
+          "description": "Descubrimiento de capacidades de agentes",
+          "href": "/a2a"
+        }
+      ]
     },
     "highlights": {
       "label": "Por qué nos eligen",
