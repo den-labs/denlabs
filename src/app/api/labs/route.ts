@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   type CreateEventLabPayload,
   type EventLab,
@@ -9,6 +8,7 @@ import {
   sanitizeLabName,
   sanitizeSurfaces,
 } from "@/lib/eventLabs";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // =====================================================
 // GET /api/labs - List all labs

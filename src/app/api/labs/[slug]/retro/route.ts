@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { exportRetroPackAsMarkdown, generateRetroPack } from "@/lib/retroPack";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // =====================================================
 // GET /api/labs/:slug/retro - Generate retro pack

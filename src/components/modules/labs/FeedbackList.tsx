@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Filter, Loader2 } from "lucide-react";
-import type { FeedbackItem as FeedbackItemType } from "@/lib/eventLabs";
-import { listFeedback } from "@/lib/eventLabsClient";
-import { FeedbackItem } from "./FeedbackItem";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -13,6 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { FeedbackItem as FeedbackItemType } from "@/lib/eventLabs";
+import { listFeedback } from "@/lib/eventLabsClient";
+import { FeedbackItem } from "./FeedbackItem";
 
 interface FeedbackListProps {
   labSlug: string;
@@ -57,7 +57,7 @@ export function FeedbackList({
 
   useEffect(() => {
     fetchFeedback();
-  }, [labSlug, filters]);
+  }, [fetchFeedback]);
 
   if (isLoading) {
     return (

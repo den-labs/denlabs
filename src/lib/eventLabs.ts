@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 // Re-export utilities from userProfile for convenience
-export { readJsonBody, getStoredLabUserId } from "./userProfile";
+export { getStoredLabUserId, readJsonBody } from "./userProfile";
 
 // =====================================================
 // EVENT LAB TYPES

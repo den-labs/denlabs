@@ -1,19 +1,19 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
 import {
-  FlaskConical,
-  Copy,
   Check,
+  Copy,
   ExternalLink,
   FileText,
+  FlaskConical,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import type { EventLab } from "@/lib/eventLabs";
-import { getEventLab } from "@/lib/eventLabsClient";
+import { use, useEffect, useState } from "react";
 import { FeedbackList } from "@/components/modules/labs/FeedbackList";
 import { Button } from "@/components/ui/button";
+import type { EventLab } from "@/lib/eventLabs";
+import { getEventLab } from "@/lib/eventLabsClient";
 
 export default function LabDetailPage({
   params,

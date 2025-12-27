@@ -1,14 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Flag, MapPin, MoreVertical, Tag } from "lucide-react";
-import type {
-  FeedbackItem as FeedbackItemType,
-  FeedbackPriority,
-  FeedbackStatus,
-} from "@/lib/eventLabs";
-import { updateFeedback } from "@/lib/eventLabsClient";
-import { TrustIndicator } from "@/components/ui/TrustIndicator";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TrustIndicator } from "@/components/ui/TrustIndicator";
+import type {
+  FeedbackItem as FeedbackItemType,
+  FeedbackPriority,
+  FeedbackStatus,
+} from "@/lib/eventLabs";
+import { updateFeedback } from "@/lib/eventLabsClient";
 
 interface FeedbackItemProps {
   feedback: FeedbackItemType;
@@ -211,19 +211,17 @@ export function FeedbackItem({
           <div className={`text-xs font-medium ${statusConfig.className}`}>
             {statusConfig.label}
           </div>
-          {feedback.tags && feedback.tags.length > 0 && (
-            <>
-              {feedback.tags.map((tag, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60"
-                >
-                  <Tag className="h-3 w-3" aria-hidden="true" />
-                  <span>{tag}</span>
-                </div>
-              ))}
-            </>
-          )}
+          {feedback.tags &&
+            feedback.tags.length > 0 &&
+            feedback.tags.map((tag, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1 rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60"
+              >
+                <Tag className="h-3 w-3" aria-hidden="true" />
+                <span>{tag}</span>
+              </div>
+            ))}
         </div>
       </div>
     </div>

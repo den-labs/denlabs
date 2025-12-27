@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Calendar, FlaskConical, Target } from "lucide-react";
+import Link from "next/link";
 import type { EventLab } from "@/lib/eventLabs";
 
 interface LabCardProps {

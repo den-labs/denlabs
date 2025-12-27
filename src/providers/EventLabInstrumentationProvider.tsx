@@ -4,15 +4,15 @@ import { usePathname } from "next/navigation";
 import {
   Component,
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useRef,
-  type ReactNode,
 } from "react";
 import {
-  EventLabInstrumentation,
   attachClickTracking,
   attachErrorTracking,
+  EventLabInstrumentation,
 } from "@/lib/instrumentation";
 
 // =====================================================

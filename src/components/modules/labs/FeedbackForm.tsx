@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { Loader2, Send } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { TrustIndicator } from "@/components/ui/TrustIndicator";
+import { Textarea } from "@/components/ui/textarea";
 import type { CreateFeedbackPayload } from "@/lib/eventLabs";
 import { createFeedback } from "@/lib/eventLabsClient";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { TrustIndicator } from "@/components/ui/TrustIndicator";
 
 interface FeedbackFormProps {
   labSlug: string;

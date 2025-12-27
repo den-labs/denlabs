@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { CreateEventLabPayload, EventLabStatus } from "@/lib/eventLabs";
-import { createEventLab, updateEventLab } from "@/lib/eventLabsClient";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { CreateEventLabPayload, EventLabStatus } from "@/lib/eventLabs";
+import { createEventLab, updateEventLab } from "@/lib/eventLabsClient";
 
 interface LabFormProps {
   mode: "create" | "edit";
@@ -243,8 +243,10 @@ export function LabForm({
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {mode === "create" ? "Creating..." : "Saving..."}
             </>
+          ) : mode === "create" ? (
+            "Create Lab"
           ) : (
-            <>{mode === "create" ? "Create Lab" : "Save Changes"}</>
+            "Save Changes"
           )}
         </Button>
 

@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   type FeedbackItem,
-  type UpdateFeedbackPayload,
   readJsonBody,
   sanitizeFeedbackStatus,
   sanitizePriority,
   sanitizeTags,
+  type UpdateFeedbackPayload,
 } from "@/lib/eventLabs";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // =====================================================
 // PATCH /api/labs/:slug/feedback/:id - Update feedback item (triage)

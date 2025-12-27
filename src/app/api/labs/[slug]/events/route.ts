@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   type EventTrackingPayload,
   generateSessionId,
@@ -8,6 +7,7 @@ import {
   persistLabSessionId,
   readJsonBody,
 } from "@/lib/eventLabs";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // =====================================================
 // POST /api/labs/:slug/events - Track event

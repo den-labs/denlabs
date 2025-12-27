@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   type CreateFeedbackPayload,
   type FeedbackItem,
@@ -9,6 +8,7 @@ import {
   persistLabSessionId,
   readJsonBody,
 } from "@/lib/eventLabs";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { calculateTrustScore } from "@/lib/trustScoring";
 
 // =====================================================

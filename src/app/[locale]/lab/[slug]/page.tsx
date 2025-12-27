@@ -1,11 +1,11 @@
 "use client";
 
+import { FlaskConical, MessageSquare } from "lucide-react";
 import { use, useEffect, useState } from "react";
-import { FlaskConical, Loader2, MessageSquare } from "lucide-react";
-import type { EventLab } from "@/lib/eventLabs";
-import { getEventLab } from "@/lib/eventLabsClient";
 import { FeedbackForm } from "@/components/modules/labs/FeedbackForm";
 import { FeedbackList } from "@/components/modules/labs/FeedbackList";
+import type { EventLab } from "@/lib/eventLabs";
+import { getEventLab } from "@/lib/eventLabsClient";
 import { EventLabInstrumentationProvider } from "@/providers/EventLabInstrumentationProvider";
 
 export default function PublicLabPage({

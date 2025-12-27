@@ -1,11 +1,11 @@
 import { Shield, ShieldAlert, ShieldCheck } from "lucide-react";
-import type { TrustScore } from "@/lib/eventLabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { TrustScore } from "@/lib/eventLabs";
 
 interface TrustIndicatorProps {
   trustScore: TrustScore;

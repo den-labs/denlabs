@@ -1,11 +1,11 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
-import type { RetroPack } from "@/lib/retroPack";
-import { generateRetro } from "@/lib/eventLabsClient";
+import { use, useEffect, useState } from "react";
 import { RetroPackView } from "@/components/modules/labs/RetroPackView";
+import { generateRetro } from "@/lib/eventLabsClient";
+import type { RetroPack } from "@/lib/retroPack";
 
 export default function RetroPackPage({
   params,

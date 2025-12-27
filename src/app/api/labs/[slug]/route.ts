@@ -1,20 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   type EventLab,
-  type UpdateEventLabPayload,
   getStoredLabUserId,
   readJsonBody,
   sanitizeLabName,
   sanitizeSurfaces,
+  type UpdateEventLabPayload,
 } from "@/lib/eventLabs";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // =====================================================
 // GET /api/labs/:slug - Get lab by slug
 // =====================================================
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
@@ -163,7 +163,7 @@ export async function PATCH(
 // =====================================================
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;

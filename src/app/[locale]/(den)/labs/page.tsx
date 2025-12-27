@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { FlaskConical, Plus, Loader2 } from "lucide-react";
+import { FlaskConical, Loader2, Plus } from "lucide-react";
 import Link from "next/link";
-import type { EventLab } from "@/lib/eventLabs";
-import { listEventLabs } from "@/lib/eventLabsClient";
+import { useEffect, useState } from "react";
 import { LabCard } from "@/components/modules/labs/LabCard";
 import { Button } from "@/components/ui/button";
+import type { EventLab } from "@/lib/eventLabs";
+import { listEventLabs } from "@/lib/eventLabsClient";
 
 export default function LabsPage() {
   const [labs, setLabs] = useState<EventLab[]>([]);
