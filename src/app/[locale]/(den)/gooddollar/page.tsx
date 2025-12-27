@@ -5,10 +5,10 @@ import { Grid3X3, Search, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
-import { Link } from "@/i18n/routing";
 import { useDenUser } from "@/hooks/useDenUser";
 import { useGoodDollar } from "@/hooks/useGoodDollar";
 import { useGoodDollarInvite } from "@/hooks/useGoodDollarInvite";
+import { Link } from "@/i18n/routing";
 import { checkEligibility, claimReward } from "@/lib/gooddollar";
 
 type State =
