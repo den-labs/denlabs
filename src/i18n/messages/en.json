@@ -628,18 +628,52 @@
     "dark": "Dark"
   },
   "HomeLanding": {
+    "navbar": {
+      "logo": "DenLabs",
+      "links": {
+        "experiments": "Experiments",
+        "howItWorks": "Active Experiments",
+        "faq": "FAQ",
+        "enterLab": "Enter Lab"
+      },
+      "aria": {
+        "navigation": "Main navigation",
+        "toggleMenu": "Toggle menu"
+      }
+    },
     "hero": {
-      "title": "DenLabs: Feedback & Proof Lab",
-      "subtitle": "Ship. Get feedback. Prove it.",
-      "description": "Instead of building in isolation, DenLabs provides structured feedback loops, experimental features to test hypotheses, and onchain proof generation to build reputation.",
+      "title": "Feedback & Proof Lab",
+      "subtitle": "Ship faster. Prove smarter.",
+      "description": "Transform your projects into verifiable proof. Get structured feedback, test hypotheses with real data, and build onchain reputation that sponsors trust.",
+      "trustRow": {
+        "label": "Powered by"
+      },
       "primaryCta": {
-        "label": "Submit for Feedback",
-        "href": "/feedback"
+        "label": "Enter Lab",
+        "href": "/access"
       },
       "secondaryCta": {
         "label": "Explore Experiments",
         "href": "#experiments"
       }
+    },
+    "howItWorks": {
+      "label": "Active Experiments",
+      "title": "Three steps to verifiable proof",
+      "steps": [
+        {
+          "title": "Submit your project",
+          "description": "Share your work and get structured feedback from the builder community."
+        },
+        {
+          "title": "Run experiments",
+          "description": "Test features with real users using 8004 Scan, x402, and A2A capabilities."
+        },
+        {
+          "title": "Generate proof",
+          "description": "Build onchain reputation with verifiable outputs that sponsors recognize."
+        }
+      ]
     },
     "experiments": {
       "label": "Active Experiments",
@@ -649,22 +683,142 @@
         {
           "id": "scan-8004",
           "title": "8004 Scan",
-          "description": "Verify trust scores before collaborating",
-          "href": "/scan-8004"
+          "description": "Verify trust scores and reputation before collaborating with any address",
+          "href": "/scan-8004",
+          "cta": "Explore"
         },
         {
           "id": "x402",
           "title": "x402 Premium",
-          "description": "Premium access experiments",
-          "href": "/x402"
+          "description": "Test payment-gated features and micropayment experiments",
+          "href": "/x402",
+          "cta": "Explore"
         },
         {
           "id": "a2a",
           "title": "A2A",
-          "description": "Agent capabilities discovery",
-          "href": "/a2a"
+          "description": "Enable agent-to-agent discovery and interoperability",
+          "href": "/a2a",
+          "cta": "Explore"
         }
       ]
+    },
+    "proof": {
+      "label": "Proof & Reputation",
+      "title": "Build verifiable onchain reputation",
+      "description": "Every action in DenLabs generates cryptographic proof that establishes your credibility.",
+      "outputs": {
+        "title": "What you get",
+        "items": [
+          {
+            "title": "Trust scores",
+            "description": "Verifiable reputation metrics based on Self.xyz identity and onchain activity"
+          },
+          {
+            "title": "Experiment results",
+            "description": "Documented outcomes from every test, feedback session, and collaboration"
+          },
+          {
+            "title": "Onchain certificates",
+            "description": "Immutable proof of participation, achievements, and contributions"
+          },
+          {
+            "title": "Sponsor reports",
+            "description": "Analytics and engagement data that sponsors can verify independently"
+          }
+        ]
+      }
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "question": "What is DenLabs?",
+          "answer": "DenLabs is a feedback and proof laboratory where builders test features, get structured feedback, and generate verifiable onchain reputation."
+        },
+        {
+          "question": "How do experiments work?",
+          "answer": "Choose an experiment (8004 Scan, x402, or A2A), run tests with real users, and collect data. Every experiment generates proof that builds your reputation."
+        },
+        {
+          "question": "What is onchain proof?",
+          "answer": "Onchain proof is cryptographic evidence of your activity that lives on the blockchain. It's verifiable, immutable, and recognized by sponsors and collaborators."
+        },
+        {
+          "question": "Do I need a wallet to start?",
+          "answer": "You can explore DenLabs without a wallet, but you'll need one to run experiments, receive feedback, and generate onchain proof."
+        },
+        {
+          "question": "How does Self.xyz verification work?",
+          "answer": "Self.xyz provides identity verification that keeps experiments sybil-resistant. Verified users get access to premium features and higher trust scores."
+        },
+        {
+          "question": "Can sponsors verify my work?",
+          "answer": "Yes. All proof generated in DenLabs is publicly verifiable. Sponsors can independently confirm your contributions, test results, and reputation scores."
+        },
+        {
+          "question": "How do I submit feedback?",
+          "answer": "Connect your wallet, enter the lab, and navigate to the feedback section. Share your project and the community will provide structured input."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Ready to build verifiable proof?",
+      "description": "Join the builder community. Run experiments. Generate onchain reputation.",
+      "cta": {
+        "label": "Enter Lab",
+        "href": "/access"
+      }
+    },
+    "footer": {
+      "tagline": "Ship fast. Prove smarter.",
+      "sections": {
+        "product": {
+          "title": "Product",
+          "links": [
+            {
+              "label": "Experiments",
+              "href": "#experiments"
+            },
+            {
+              "label": "How it works",
+              "href": "#how-it-works"
+            }
+          ]
+        },
+        "resources": {
+          "title": "Resources",
+          "links": [
+            {
+              "label": "FAQ",
+              "href": "#faq"
+            },
+            {
+              "label": "Documentation",
+              "href": "/docs"
+            }
+          ]
+        },
+        "community": {
+          "title": "Community",
+          "links": [
+            {
+              "label": "Twitter",
+              "href": "https://twitter.com/denlabs",
+              "external": true
+            },
+            {
+              "label": "GitHub",
+              "href": "https://github.com/denlabs",
+              "external": true
+            }
+          ]
+        }
+      },
+      "legal": {
+        "copyright": "© 2025 DenLabs. All rights reserved."
+      }
     },
     "highlights": {
       "label": "Why organizers pick the lab",

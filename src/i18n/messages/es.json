@@ -628,18 +628,52 @@
     "dark": "Oscuro"
   },
   "HomeLanding": {
+    "navbar": {
+      "logo": "DenLabs",
+      "links": {
+        "experiments": "Experimentos",
+        "howItWorks": "Experimentos Activos",
+        "faq": "FAQ",
+        "enterLab": "Entrar al Lab"
+      },
+      "aria": {
+        "navigation": "Navegación principal",
+        "toggleMenu": "Alternar menú"
+      }
+    },
     "hero": {
-      "title": "DenLabs: Laboratorio de Feedback y Pruebas",
-      "subtitle": "Envía. Recibe feedback. Demuéstralo.",
-      "description": "En lugar de construir en aislamiento, DenLabs proporciona loops de feedback estructurados, características experimentales para probar hipótesis y generación de pruebas onchain para construir reputación.",
+      "title": "Laboratorio de Feedback y Pruebas",
+      "subtitle": "Envía más rápido. Prueba mejor.",
+      "description": "Transforma tus proyectos en prueba verificable. Obtén feedback estructurado, prueba hipótesis con datos reales y construye reputación onchain que los sponsors confían.",
+      "trustRow": {
+        "label": "Impulsado por"
+      },
       "primaryCta": {
-        "label": "Enviar para Feedback",
-        "href": "/feedback"
+        "label": "Entrar al Lab",
+        "href": "/access"
       },
       "secondaryCta": {
         "label": "Explorar Experimentos",
         "href": "#experiments"
       }
+    },
+    "howItWorks": {
+      "label": "Experimentos Activos",
+      "title": "Tres pasos hacia prueba verificable",
+      "steps": [
+        {
+          "title": "Envía tu proyecto",
+          "description": "Comparte tu trabajo y obtén feedback estructurado de la comunidad de builders."
+        },
+        {
+          "title": "Ejecuta experimentos",
+          "description": "Prueba funcionalidades con usuarios reales usando 8004 Scan, x402 y capacidades A2A."
+        },
+        {
+          "title": "Genera prueba",
+          "description": "Construye reputación onchain con outputs verificables que los sponsors reconocen."
+        }
+      ]
     },
     "experiments": {
       "label": "Experimentos Activos",
@@ -648,23 +682,143 @@
       "items": [
         {
           "id": "scan-8004",
-          "title": "Escaneo 8004",
-          "description": "Verifica puntuaciones de confianza antes de colaborar",
-          "href": "/scan-8004"
+          "title": "8004 Scan",
+          "description": "Verifica puntajes de confianza y reputación antes de colaborar con cualquier dirección",
+          "href": "/scan-8004",
+          "cta": "Explorar"
         },
         {
           "id": "x402",
           "title": "x402 Premium",
-          "description": "Experimentos de acceso premium",
-          "href": "/x402"
+          "description": "Prueba funcionalidades con acceso de pago y experimentos de micropagos",
+          "href": "/x402",
+          "cta": "Explorar"
         },
         {
           "id": "a2a",
           "title": "A2A",
-          "description": "Descubrimiento de capacidades de agentes",
-          "href": "/a2a"
+          "description": "Habilita descubrimiento e interoperabilidad entre agentes",
+          "href": "/a2a",
+          "cta": "Explorar"
         }
       ]
+    },
+    "proof": {
+      "label": "Prueba y Reputación",
+      "title": "Construye reputación onchain verificable",
+      "description": "Cada acción en DenLabs genera prueba criptográfica que establece tu credibilidad.",
+      "outputs": {
+        "title": "Qué obtienes",
+        "items": [
+          {
+            "title": "Puntajes de confianza",
+            "description": "Métricas de reputación verificables basadas en identidad Self.xyz y actividad onchain"
+          },
+          {
+            "title": "Resultados de experimentos",
+            "description": "Resultados documentados de cada prueba, sesión de feedback y colaboración"
+          },
+          {
+            "title": "Certificados onchain",
+            "description": "Prueba inmutable de participación, logros y contribuciones"
+          },
+          {
+            "title": "Reportes para sponsors",
+            "description": "Analíticas y datos de engagement que los sponsors pueden verificar independientemente"
+          }
+        ]
+      }
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Preguntas frecuentes",
+      "items": [
+        {
+          "question": "¿Qué es DenLabs?",
+          "answer": "DenLabs es un laboratorio de feedback y pruebas donde builders prueban funcionalidades, obtienen feedback estructurado y generan reputación onchain verificable."
+        },
+        {
+          "question": "¿Cómo funcionan los experimentos?",
+          "answer": "Elige un experimento (8004 Scan, x402 o A2A), ejecuta pruebas con usuarios reales y recolecta datos. Cada experimento genera prueba que construye tu reputación."
+        },
+        {
+          "question": "¿Qué es prueba onchain?",
+          "answer": "Prueba onchain es evidencia criptográfica de tu actividad que vive en la blockchain. Es verificable, inmutable y reconocida por sponsors y colaboradores."
+        },
+        {
+          "question": "¿Necesito una wallet para empezar?",
+          "answer": "Puedes explorar DenLabs sin wallet, pero necesitarás una para ejecutar experimentos, recibir feedback y generar prueba onchain."
+        },
+        {
+          "question": "¿Cómo funciona la verificación Self.xyz?",
+          "answer": "Self.xyz proporciona verificación de identidad que mantiene los experimentos resistentes a sybil. Usuarios verificados obtienen acceso a funciones premium y puntajes de confianza más altos."
+        },
+        {
+          "question": "¿Pueden los sponsors verificar mi trabajo?",
+          "answer": "Sí. Toda la prueba generada en DenLabs es públicamente verificable. Los sponsors pueden confirmar independientemente tus contribuciones, resultados de pruebas y puntajes de reputación."
+        },
+        {
+          "question": "¿Cómo envío feedback?",
+          "answer": "Conecta tu wallet, entra al lab y navega a la sección de feedback. Comparte tu proyecto y la comunidad proporcionará información estructurada."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "¿Listo para construir prueba verificable?",
+      "description": "Únete a la comunidad de builders. Ejecuta experimentos. Genera reputación onchain.",
+      "cta": {
+        "label": "Entrar al Lab",
+        "href": "/access"
+      }
+    },
+    "footer": {
+      "tagline": "Envía rápido. Prueba mejor.",
+      "sections": {
+        "product": {
+          "title": "Producto",
+          "links": [
+            {
+              "label": "Experimentos",
+              "href": "#experiments"
+            },
+            {
+              "label": "Cómo funciona",
+              "href": "#how-it-works"
+            }
+          ]
+        },
+        "resources": {
+          "title": "Recursos",
+          "links": [
+            {
+              "label": "FAQ",
+              "href": "#faq"
+            },
+            {
+              "label": "Documentación",
+              "href": "/docs"
+            }
+          ]
+        },
+        "community": {
+          "title": "Comunidad",
+          "links": [
+            {
+              "label": "Twitter",
+              "href": "https://twitter.com/denlabs",
+              "external": true
+            },
+            {
+              "label": "GitHub",
+              "href": "https://github.com/denlabs",
+              "external": true
+            }
+          ]
+        }
+      },
+      "legal": {
+        "copyright": "© 2025 DenLabs. Todos los derechos reservados."
+      }
     },
     "highlights": {
       "label": "Por qué nos eligen",
