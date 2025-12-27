@@ -12,6 +12,7 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { FeedbackList } from "@/components/modules/labs/FeedbackList";
 import { LabModeControl } from "@/components/modules/labs/LabModeControl";
+import { TelemetryDashboard } from "@/components/modules/labs/TelemetryDashboard";
 import { Button } from "@/components/ui/button";
 import type { EventLab } from "@/lib/eventLabs";
 import { getEventLab } from "@/lib/eventLabsClient";
@@ -219,6 +220,9 @@ export default function LabDetailPage({
           </div>
         </div>
       )}
+
+      {/* Telemetry Dashboard */}
+      <TelemetryDashboard labSlug={slug} />
 
       {/* Feedback List */}
       <div className="space-y-4">
