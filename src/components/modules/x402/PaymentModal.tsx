@@ -35,20 +35,23 @@ export function PaymentModal({
 
     try {
       // Call facilitator to create payment
-      const response = await fetch(`${paymentInstructions.facilitator}/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${paymentInstructions.facilitator}/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: paymentInstructions.price,
+            token: paymentInstructions.token,
+            recipient: paymentInstructions.recipient,
+            endpoint: paymentInstructions.endpoint,
+            method: paymentInstructions.method,
+            description: paymentInstructions.description,
+          }),
         },
-        body: JSON.stringify({
-          amount: paymentInstructions.price,
-          token: paymentInstructions.token,
-          recipient: paymentInstructions.recipient,
-          endpoint: paymentInstructions.endpoint,
-          method: paymentInstructions.method,
-          description: paymentInstructions.description,
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Payment creation failed: ${response.statusText}`);

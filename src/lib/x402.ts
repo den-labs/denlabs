@@ -324,14 +324,14 @@ export function shouldGate(_req: NextRequest, condition: boolean): boolean {
  * Prices in USD (will be converted to token amounts by facilitator)
  */
 export const PRICING = {
-  RETRO_MARKDOWN: 0.03,      // $0.03 (3 cents)
-  ACTIVITY_7D: 0.02,          // $0.02 (2 cents)
-  ACTIVITY_30D: 0.03,         // $0.03 (3 cents)
-  ACTIVITY_90D: 0.05,         // $0.05 (5 cents)
-  FEEDBACK_CSV: 0.02,         // $0.02 (2 cents)
-  ACTIVITY_JSON: 0.02,        // $0.02 (2 cents)
-  INSIGHTS_AI: 0.08,          // $0.08 (8 cents)
-  BULK_EXPORT: 0.10,          // $0.10 (10 cents)
+  RETRO_MARKDOWN: 0.03, // $0.03 (3 cents)
+  ACTIVITY_7D: 0.02, // $0.02 (2 cents)
+  ACTIVITY_30D: 0.03, // $0.03 (3 cents)
+  ACTIVITY_90D: 0.05, // $0.05 (5 cents)
+  FEEDBACK_CSV: 0.02, // $0.02 (2 cents)
+  ACTIVITY_JSON: 0.02, // $0.02 (2 cents)
+  INSIGHTS_AI: 0.08, // $0.08 (8 cents)
+  BULK_EXPORT: 0.1, // $0.10 (10 cents)
 } as const;
 
 /**

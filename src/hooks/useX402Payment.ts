@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { PaymentInstructions } from "@/lib/x402Client";
 
 interface UseX402PaymentReturn {
@@ -6,6 +6,7 @@ interface UseX402PaymentReturn {
   isPaymentModalOpen: boolean;
   paymentInstructions: PaymentInstructions | null;
   closePaymentModal: () => void;
+  handlePaymentComplete: (signature: string) => Promise<void>;
 }
 
 /**
@@ -13,7 +14,7 @@ interface UseX402PaymentReturn {
  *
  * Usage:
  * ```tsx
- * const { fetchWithPayment, isPaymentModalOpen, paymentInstructions, closePaymentModal } = useX402Payment();
+ * const { fetchWithPayment, isPaymentModalOpen, paymentInstructions, closePaymentModal, handlePaymentComplete } = useX402Payment();
  *
  * // Fetch with automatic payment handling
  * const response = await fetchWithPayment('/api/labs/demo-event/retro?format=markdown');
@@ -28,33 +29,53 @@ export function useX402Payment(): UseX402PaymentReturn {
     options?: RequestInit;
   } | null>(null);
 
+  // Store promise resolvers for async payment flow
+  const paymentPromiseRef = useRef<{
+    resolve: (response: Response) => void;
+    reject: (error: Error) => void;
+  } | null>(null);
+
   const closePaymentModal = useCallback(() => {
     setIsPaymentModalOpen(false);
     setPaymentInstructions(null);
     setPendingRequest(null);
+
+    // Reject the pending promise if user cancels
+    if (paymentPromiseRef.current) {
+      paymentPromiseRef.current.reject(new Error("Payment cancelled by user"));
+      paymentPromiseRef.current = null;
+    }
   }, []);
 
   const handlePaymentComplete = useCallback(
     async (signature: string) => {
-      if (!pendingRequest) return;
+      if (!pendingRequest || !paymentPromiseRef.current) return;
 
-      // Close modal
-      setIsPaymentModalOpen(false);
+      const { resolve, reject } = paymentPromiseRef.current;
 
-      // Retry request with payment signature
-      const retryResponse = await fetch(pendingRequest.url, {
-        ...pendingRequest.options,
-        headers: {
-          ...pendingRequest.options?.headers,
-          "PAYMENT-SIGNATURE": signature,
-        },
-      });
+      try {
+        // Close modal
+        setIsPaymentModalOpen(false);
 
-      // Clear pending request
-      setPendingRequest(null);
-      setPaymentInstructions(null);
+        // Retry request with payment signature
+        const retryResponse = await fetch(pendingRequest.url, {
+          ...pendingRequest.options,
+          headers: {
+            ...pendingRequest.options?.headers,
+            "PAYMENT-SIGNATURE": signature,
+          },
+        });
 
-      return retryResponse;
+        // Clear pending state
+        setPendingRequest(null);
+        setPaymentInstructions(null);
+        paymentPromiseRef.current = null;
+
+        // Resolve the promise with the response
+        resolve(retryResponse);
+      } catch (error) {
+        reject(error instanceof Error ? error : new Error("Payment failed"));
+      }
     },
     [pendingRequest],
   );
@@ -89,33 +110,27 @@ export function useX402Payment(): UseX402PaymentReturn {
         setPaymentInstructions(instructions);
         setIsPaymentModalOpen(true);
 
-        // Return a promise that will be resolved by handlePaymentComplete
+        // Return promise that will be resolved by handlePaymentComplete callback
         return new Promise<Response>((resolve, reject) => {
-          const checkInterval = setInterval(() => {
-            if (!pendingRequest) {
-              clearInterval(checkInterval);
-              // Payment was completed, make retry request
-              handlePaymentComplete("signature-from-modal")
-                .then((response) => {
-                  if (response) resolve(response);
-                  else reject(new Error("Payment processing failed"));
-                })
-                .catch(reject);
-            }
-          }, 100);
+          paymentPromiseRef.current = { resolve, reject };
 
           // Timeout after 5 minutes
-          setTimeout(() => {
-            clearInterval(checkInterval);
-            reject(new Error("Payment timeout"));
-          }, 5 * 60 * 1000);
+          setTimeout(
+            () => {
+              if (paymentPromiseRef.current) {
+                paymentPromiseRef.current.reject(new Error("Payment timeout"));
+                paymentPromiseRef.current = null;
+              }
+            },
+            5 * 60 * 1000,
+          );
         });
       }
 
       // Other errors, throw
       throw new Error(`Request failed: ${response.statusText}`);
     },
-    [pendingRequest, handlePaymentComplete],
+    [],
   );
 
   return {
@@ -123,5 +138,6 @@ export function useX402Payment(): UseX402PaymentReturn {
     isPaymentModalOpen,
     paymentInstructions,
     closePaymentModal,
+    handlePaymentComplete,
   };
 }

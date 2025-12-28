@@ -92,8 +92,8 @@ export function clampWindow(windowStr?: string): number {
   if (hours === 24 || hours === 48 || hours === 72) return hours;
 
   // Premium tiers
-  if (hours === 168) return 168;  // 7 days ($2)
-  if (hours === 720) return 720;  // 30 days ($3)
+  if (hours === 168) return 168; // 7 days ($2)
+  if (hours === 720) return 720; // 30 days ($3)
   if (hours === 2160) return 2160; // 90 days ($5)
 
   // Invalid value - clamp to nearest valid tier

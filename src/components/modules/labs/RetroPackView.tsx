@@ -27,6 +27,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
     isPaymentModalOpen,
     paymentInstructions,
     closePaymentModal,
+    handlePaymentComplete,
   } = useX402Payment();
 
   const handleDownloadMarkdown = async () => {
@@ -49,7 +50,9 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
     } catch (error) {
       console.error("Failed to export markdown", error);
       alert(
-        error instanceof Error ? error.message : "Failed to download retro pack",
+        error instanceof Error
+          ? error.message
+          : "Failed to download retro pack",
       );
     } finally {
       setIsExporting(false);
@@ -293,9 +296,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
           isOpen={isPaymentModalOpen}
           onClose={closePaymentModal}
           paymentInstructions={paymentInstructions}
-          onPaymentComplete={(signature) => {
-            console.log("Payment completed:", signature);
-          }}
+          onPaymentComplete={handlePaymentComplete}
         />
       )}
     </div>

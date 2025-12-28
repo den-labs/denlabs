@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const testEndpoint =
-    searchParams.get("endpoint") || "/api/labs/demo-event/retro?format=markdown";
+    searchParams.get("endpoint") ||
+    "/api/labs/demo-event/retro?format=markdown";
 
   // Build full URL for internal fetch
   const baseUrl =
