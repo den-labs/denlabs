@@ -9,6 +9,42 @@
  * 4. Conformance (header validation)
  */
 
+const fs = require('fs');
+const path = require('path');
+
+// Load .env.local file
+function loadEnvFile() {
+  const envPath = path.join(__dirname, '..', '.env.local');
+
+  if (!fs.existsSync(envPath)) {
+    console.warn('⚠️  .env.local not found, using defaults');
+    return;
+  }
+
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  const lines = envContent.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Skip comments and empty lines
+    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('//')) {
+      continue;
+    }
+
+    const match = trimmed.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      // Don't override existing env vars
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
+loadEnvFile();
+
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const FACILITATOR_URL = process.env.X402_FACILITATOR_URL || 'https://facilitator.ultravioletadao.xyz';
 
