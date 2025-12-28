@@ -1,9 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { exportRetroPackAsMarkdown, generateRetroPack } from "@/lib/retroPack";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { PRICING, build402Response, shouldGate, verifyPayment } from "@/lib/x402";
 
 // =====================================================
 // GET /api/labs/:slug/retro - Generate retro pack
+// FREE: JSON format (UI preview)
+// PREMIUM: Markdown format (export) - $3
 // =====================================================
 
 export async function GET(
@@ -26,6 +29,25 @@ export async function GET(
       return NextResponse.json({ error: "Lab not found" }, { status: 404 });
     }
 
+    // Check if premium gating required (markdown export)
+    if (shouldGate(request, format === "markdown")) {
+      const verification = await verifyPayment(request, {
+        price: PRICING.RETRO_MARKDOWN,
+        endpoint: `/api/labs/${slug}/retro`,
+        method: "GET",
+        description: "Export retro pack as sponsor-ready markdown",
+      });
+
+      if (!verification.valid) {
+        return build402Response({
+          price: PRICING.RETRO_MARKDOWN,
+          endpoint: `/api/labs/${slug}/retro?format=markdown`,
+          method: "GET",
+          description: "Export retro pack as sponsor-ready markdown",
+        });
+      }
+    }
+
     // Generate retro pack
     const retro = await generateRetroPack(lab.id);
 
@@ -41,7 +63,7 @@ export async function GET(
       });
     }
 
-    // Default: JSON
+    // Default: JSON (FREE)
     return NextResponse.json({ retro });
   } catch (error) {
     console.error("Unexpected error generating retro pack", error);
