@@ -39,7 +39,7 @@ export async function GET(
       });
 
       if (!verification.valid) {
-        return build402Response({
+        return await build402Response({
           price: PRICING.RETRO_MARKDOWN,
           endpoint: `/api/labs/${slug}/retro?format=markdown`,
           method: "GET",

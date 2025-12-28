@@ -63,7 +63,7 @@ export async function GET(
       });
 
       if (!verification.valid) {
-        return build402Response({
+        return await build402Response({
           price: PRICING.FEEDBACK_CSV,
           endpoint: `/api/labs/${slug}/feedback?export=csv`,
           method: "GET",

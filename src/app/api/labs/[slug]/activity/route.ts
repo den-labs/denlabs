@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!verification.valid) {
-      return build402Response({
+      return await build402Response({
         price,
         endpoint: `/api/labs/${slug}/activity?window=${window_hours}h${exportFormat ? `&export=${exportFormat}` : ""}`,
         method: "GET",
