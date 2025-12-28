@@ -10,7 +10,8 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TrustIndicator } from "@/components/ui/TrustIndicator";
-import { exportRetroMarkdown } from "@/lib/eventLabsClient";
+import { useX402Payment } from "@/hooks/useX402Payment";
+import { PaymentModal } from "@/components/modules/x402/PaymentModal";
 import type { RetroPack } from "@/lib/retroPack";
 
 interface RetroPackViewProps {
@@ -21,11 +22,21 @@ interface RetroPackViewProps {
 export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const {
+    fetchWithPayment,
+    isPaymentModalOpen,
+    paymentInstructions,
+    closePaymentModal,
+  } = useX402Payment();
 
   const handleDownloadMarkdown = async () => {
     setIsExporting(true);
     try {
-      const markdown = await exportRetroMarkdown(labSlug);
+      const response = await fetchWithPayment(
+        `/api/labs/${labSlug}/retro?format=markdown`,
+      );
+
+      const markdown = await response.text();
       const blob = new Blob([markdown], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -37,6 +48,9 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to export markdown", error);
+      alert(
+        error instanceof Error ? error.message : "Failed to download retro pack",
+      );
     } finally {
       setIsExporting(false);
     }
@@ -44,12 +58,19 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
 
   const handleCopyMarkdown = async () => {
     try {
-      const markdown = await exportRetroMarkdown(labSlug);
+      const response = await fetchWithPayment(
+        `/api/labs/${labSlug}/retro?format=markdown`,
+      );
+
+      const markdown = await response.text();
       await navigator.clipboard.writeText(markdown);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy markdown", error);
+      alert(
+        error instanceof Error ? error.message : "Failed to copy retro pack",
+      );
     }
   };
 
@@ -264,6 +285,18 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
             </ul>
           </div>
         </div>
+      )}
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && paymentInstructions && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={closePaymentModal}
+          paymentInstructions={paymentInstructions}
+          onPaymentComplete={(signature) => {
+            console.log("Payment completed:", signature);
+          }}
+        />
       )}
     </div>
   );
