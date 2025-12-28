@@ -230,7 +230,7 @@ Verify premium endpoints correctly implement 402 flow:
 curl http://localhost:3000/api/x402/conformance
 
 # Or test specific endpoint:
-curl "http://localhost:3000/api/x402/conformance?endpoint=/api/labs/demo/retro?format=markdown"
+curl "http://localhost:3000/api/x402/conformance?endpoint=/api/labs/demo-event/retro?format=markdown"
 ```
 
 **Expected conformance report:**
@@ -244,7 +244,7 @@ curl "http://localhost:3000/api/x402/conformance?endpoint=/api/labs/demo/retro?f
     "currency": "USD",
     "token": "usdc",
     "recipient": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-    "endpoint": "/api/labs/demo/retro",
+    "endpoint": "/api/labs/demo-event/retro",
     "method": "GET",
     "description": "Export retro pack as sponsor-ready markdown",
     "facilitator": "https://facilitator.ultravioletadao.xyz",
@@ -265,18 +265,18 @@ Test premium endpoints without payment headers:
 
 ```bash
 # Test retro markdown export (should return 402)
-curl -i http://localhost:3000/api/labs/demo/retro?format=markdown
+curl -i http://localhost:3000/api/labs/demo-event/retro?format=markdown
 
 # Expected: HTTP/1.1 402 Payment Required
 # Expected header: PAYMENT-REQUIRED: {"price":3,"currency":"USD",...}
 
 # Test extended activity window (should return 402)
-curl -i "http://localhost:3000/api/labs/demo/activity?window=168"
+curl -i "http://localhost:3000/api/labs/demo-event/activity?window=168"
 
 # Expected: HTTP/1.1 402 Payment Required
 
 # Test feedback CSV export (should return 402)
-curl -i "http://localhost:3000/api/labs/demo/feedback?export=csv"
+curl -i "http://localhost:3000/api/labs/demo-event/feedback?export=csv"
 
 # Expected: HTTP/1.1 402 Payment Required
 ```

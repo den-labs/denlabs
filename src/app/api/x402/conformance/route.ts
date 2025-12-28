@@ -14,7 +14,7 @@ import { type NextRequest, NextResponse } from "next/server";
  *
  * Usage:
  *   GET /api/x402/conformance
- *   GET /api/x402/conformance?endpoint=/api/labs/demo/retro?format=markdown
+ *   GET /api/x402/conformance?endpoint=/api/labs/demo-event/retro?format=markdown
  */
 
 // Only allow in development or when explicitly enabled
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const testEndpoint =
-    searchParams.get("endpoint") || "/api/labs/demo/retro?format=markdown";
+    searchParams.get("endpoint") || "/api/labs/demo-event/retro?format=markdown";
 
   // Build full URL for internal fetch
   const baseUrl =
