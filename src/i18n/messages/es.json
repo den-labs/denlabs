@@ -635,7 +635,7 @@
         "capabilities": "Componentes",
         "howItWorks": "Cómo Funciona",
         "faq": "Preguntas Frecuentes",
-        "enterLab": "Entrar al Lab"
+        "enterLab": "Entrar a Consola"
       },
       "aria": {
         "navigation": "Navegación principal",
@@ -654,7 +654,7 @@
         "href": "/labs/create"
       },
       "secondaryCta": {
-        "label": "Ejecutar Demo Lab",
+        "label": "Probar Demo",
         "href": "/labs/demo"
       }
     },

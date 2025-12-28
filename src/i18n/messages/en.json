@@ -635,7 +635,7 @@
         "capabilities": "Components",
         "howItWorks": "How It Works",
         "faq": "FAQ",
-        "enterLab": "Enter Lab"
+        "enterLab": "Enter Console"
       },
       "aria": {
         "navigation": "Main navigation",
@@ -654,7 +654,7 @@
         "href": "/labs/create"
       },
       "secondaryCta": {
-        "label": "Run a Demo Lab",
+        "label": "Try Demo",
         "href": "/labs/demo"
       }
     },
