@@ -140,12 +140,23 @@ export default function LabsPage() {
               : `You don't have any ${filter} labs`}
           </p>
           {filter === "all" && (
-            <Link href="/labs/create">
-              <Button className="mt-6 bg-wolf-emerald text-black hover:bg-wolf-emerald/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Lab
-              </Button>
-            </Link>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Link href="/labs/create">
+                <Button className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Lab
+                </Button>
+              </Link>
+              <Link href="/labs/demo-event">
+                <Button
+                  variant="outline"
+                  className="border-white/10 bg-white/5 text-white hover:bg-white/10"
+                >
+                  <FlaskConical className="mr-2 h-4 w-4" />
+                  Open Demo Lab
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       ) : (
