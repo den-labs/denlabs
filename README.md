@@ -221,12 +221,26 @@ pnpm x402:smoke
 
 The facilitator health is checked **before** returning 402 responses. If the facilitator is down, endpoints return **503 Service Unavailable** instead of 402 (since payment cannot be processed).
 
-### Conformance Testing
+### Integration Testing
 
-Verify premium endpoints correctly implement 402 flow:
+Run complete x402 test suite (recommended):
 
 ```bash
-# Test conformance (dev/staging only)
+# Run full integration test suite
+pnpm x402:test
+
+# Tests include:
+# - Facilitator health (external)
+# - Dev bypass mode validation
+# - Premium gating (402 flow)
+# - Conformance validation
+# - Configuration check
+```
+
+Or test individual components:
+
+```bash
+# Test conformance only (dev/staging only)
 curl http://localhost:3000/api/x402/conformance
 
 # Or test specific endpoint:
@@ -303,6 +317,40 @@ X402_DEV_DIAGNOSTICS=false             # Enable /api/x402/conformance in prod
 | **402** | Payment Required | No payment header, facilitator is healthy |
 | **403** | Forbidden | Only creators can export CSV (non-creator attempted) |
 | **503** | Service Unavailable | Facilitator is down (cannot process payment) |
+
+### Troubleshooting
+
+**Getting 200 instead of 402?**
+- Check `X402_DEV_BYPASS` in `.env.local` - should be `false` to enable payment gating
+- Restart the dev server after changing env vars
+
+**Getting 404 "Lab not found"?**
+- Visit `/labs/demo` to auto-create the demo lab
+- Or create your own lab via `/labs/create`
+
+**Getting 503 Service Unavailable?**
+- Run `pnpm x402:smoke` to check facilitator health
+- If facilitator is down, this is **correct behavior** (payment cannot be processed)
+- Wait for facilitator to recover or disable health check: `X402_ENABLE_HEALTHCHECK=false`
+
+**Conformance test failing?**
+- Ensure demo lab exists: visit `/labs/demo` first
+- Check facilitator URL in `.env.local`: `https://facilitator.ultravioletadao.xyz`
+- Verify server is running: `pnpm dev`
+- Check logs for detailed error messages
+
+**Full test suite:**
+```bash
+# 1. Create demo lab
+# Visit http://localhost:3000/labs/demo
+
+# 2. Run integration tests
+pnpm x402:test
+
+# 3. Test with bypass disabled (optional)
+# Set X402_DEV_BYPASS=false in .env.local
+# Restart server and run tests again
+```
 
 ---
 
