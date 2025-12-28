@@ -86,12 +86,12 @@ export function ActivityRail({
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Activity</h2>
+        <h2 className="text-lg font-semibold text-white">Activity</h2>
         <button
           type="button"
           onClick={fetchActivity}
           disabled={isLoading}
-          className="rounded p-1 hover:bg-gray-100 disabled:opacity-50"
+          className="rounded p-1 text-white/70 hover:bg-white/10 disabled:opacity-50"
           title="Refresh activity"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -103,14 +103,14 @@ export function ActivityRail({
         <div
           className={`rounded-full px-2 py-1 text-xs font-medium ${
             isLabModeActive
-              ? "bg-emerald-100 text-emerald-800"
-              : "bg-gray-100 text-gray-600"
+              ? "bg-wolf-emerald/20 text-wolf-emerald border border-wolf-emerald/30"
+              : "bg-white/5 text-white/50 border border-white/10"
           }`}
         >
           Lab Mode {isLabModeActive ? "ON" : "OFF"}
         </div>
         {isLabModeActive && (
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-white/60">
             {observing === "all"
               ? "Observing: all routes"
               : `Observing: ${surfacesCount} surfaces`}
@@ -121,13 +121,13 @@ export function ActivityRail({
       {/* Loading State */}
       {isLoading && !activity && (
         <div className="flex flex-1 items-center justify-center">
-          <div className="text-sm text-gray-500">Loading activity...</div>
+          <div className="text-sm text-white/50">Loading activity...</div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -137,7 +137,7 @@ export function ActivityRail({
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
           {/* Mini-Dashboard */}
           <section>
-            <h3 className="mb-2 text-sm font-medium text-gray-700">
+            <h3 className="mb-2 text-sm font-medium text-white/70">
               Key Metrics (24h)
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -183,22 +183,22 @@ export function ActivityRail({
             </div>
 
             {/* Trust Distribution */}
-            <div className="mt-2 rounded border border-gray-200 bg-gray-50 p-2">
-              <div className="mb-1 flex items-center gap-1 text-xs font-medium text-gray-700">
+            <div className="mt-2 rounded border border-white/10 bg-white/[0.03] p-2">
+              <div className="mb-1 flex items-center gap-1 text-xs font-medium text-white/70">
                 <Shield className="h-3 w-3" />
                 Trust
               </div>
               <div className="flex gap-2 text-xs">
-                <span className="text-emerald-700">
+                <span className="text-emerald-400">
                   ✓ {activity.summary.kpis.trust.trusted}
                 </span>
-                <span className="text-amber-700">
+                <span className="text-amber-400">
                   ? {activity.summary.kpis.trust.unverified}
                 </span>
-                <span className="text-red-700">
+                <span className="text-red-400">
                   ⚠ {activity.summary.kpis.trust.risk}
                 </span>
-                <span className="ml-auto text-gray-600">
+                <span className="ml-auto text-white/50">
                   Spam: {Math.round(activity.summary.kpis.spam_rate * 100)}%
                 </span>
               </div>
@@ -210,7 +210,7 @@ export function ActivityRail({
 
           {/* Feed Tabs */}
           <section className="flex flex-1 flex-col">
-            <div className="mb-2 flex gap-1 border-b border-gray-200">
+            <div className="mb-2 flex gap-1 border-b border-white/10">
               <TabButton
                 active={activeTab === "all"}
                 onClick={() => setActiveTab("all")}
@@ -257,7 +257,7 @@ export function ActivityRail({
                   <FeedItem key={item.id} item={item} />
                 ))
               ) : (
-                <div className="py-8 text-center text-sm text-gray-500">
+                <div className="py-8 text-center text-sm text-white/50">
                   No activity yet
                 </div>
               )}
@@ -285,23 +285,23 @@ function MetricCard({
 }) {
   const bgColor =
     variant === "danger"
-      ? "bg-red-50 border-red-200"
+      ? "bg-red-500/10 border-red-500/20"
       : variant === "warning"
-        ? "bg-amber-50 border-amber-200"
-        : "bg-gray-50 border-gray-200";
+        ? "bg-amber-500/10 border-amber-500/20"
+        : "bg-white/[0.03] border-white/10";
 
   const textColor =
     variant === "danger"
-      ? "text-red-900"
+      ? "text-red-400"
       : variant === "warning"
-        ? "text-amber-900"
-        : "text-gray-900";
+        ? "text-amber-400"
+        : "text-white";
 
   return (
     <div className={`rounded border p-2 ${bgColor}`}>
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-600">{label}</div>
-        {icon && <div className="text-gray-500">{icon}</div>}
+        <div className="text-xs text-white/60">{label}</div>
+        {icon && <div className="text-white/50">{icon}</div>}
       </div>
       <div className={`text-lg font-semibold ${textColor}`}>{value}</div>
     </div>
@@ -321,20 +321,20 @@ function TopSection({ summary }: { summary: ActivitySummary }) {
 
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-medium text-gray-700">Top Items (24h)</h3>
+      <h3 className="text-sm font-medium text-white/70">Top Items (24h)</h3>
 
       {/* Top Routes */}
       {summary.top.routes_24h.length > 0 && (
-        <div className="rounded border border-gray-200 bg-gray-50 p-2">
-          <div className="mb-1 text-xs font-medium text-gray-700">Routes</div>
+        <div className="rounded border border-white/10 bg-white/[0.03] p-2">
+          <div className="mb-1 text-xs font-medium text-white/70">Routes</div>
           <div className="space-y-1">
             {summary.top.routes_24h.map((item) => (
               <div
                 key={item.route}
                 className="flex items-center justify-between text-xs"
               >
-                <span className="truncate text-gray-800">{item.route}</span>
-                <span className="ml-2 text-gray-600">{item.page_views}</span>
+                <span className="truncate text-white/80">{item.route}</span>
+                <span className="ml-2 text-white/60">{item.page_views}</span>
               </div>
             ))}
           </div>
@@ -343,8 +343,8 @@ function TopSection({ summary }: { summary: ActivitySummary }) {
 
       {/* Top Error Routes */}
       {summary.top.error_routes_24h.length > 0 && (
-        <div className="rounded border border-red-200 bg-red-50 p-2">
-          <div className="mb-1 text-xs font-medium text-red-700">
+        <div className="rounded border border-red-500/20 bg-red-500/10 p-2">
+          <div className="mb-1 text-xs font-medium text-red-400">
             Error Routes
           </div>
           <div className="space-y-1">
@@ -353,8 +353,8 @@ function TopSection({ summary }: { summary: ActivitySummary }) {
                 key={item.route}
                 className="flex items-center justify-between text-xs"
               >
-                <span className="truncate text-red-800">{item.route}</span>
-                <span className="ml-2 text-red-600">{item.errors}</span>
+                <span className="truncate text-red-400/80">{item.route}</span>
+                <span className="ml-2 text-red-400/60">{item.errors}</span>
               </div>
             ))}
           </div>
@@ -363,13 +363,13 @@ function TopSection({ summary }: { summary: ActivitySummary }) {
 
       {/* Top Tags */}
       {summary.top.tags.length > 0 && (
-        <div className="rounded border border-gray-200 bg-gray-50 p-2">
-          <div className="mb-1 text-xs font-medium text-gray-700">Tags</div>
+        <div className="rounded border border-white/10 bg-white/[0.03] p-2">
+          <div className="mb-1 text-xs font-medium text-white/70">Tags</div>
           <div className="flex flex-wrap gap-1">
             {summary.top.tags.map((item) => (
               <span
                 key={item.tag}
-                className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800"
+                className="rounded bg-blue-500/20 border border-blue-500/30 px-2 py-0.5 text-xs text-blue-400"
               >
                 {item.tag} ({item.count})
               </span>
@@ -401,8 +401,8 @@ function TabButton({
       onClick={onClick}
       className={`px-3 py-1 text-xs font-medium transition-colors ${
         active
-          ? "border-b-2 border-blue-600 text-blue-600"
-          : "text-gray-600 hover:text-gray-900"
+          ? "border-b-2 border-wolf-emerald text-wolf-emerald"
+          : "text-white/60 hover:text-white/90"
       }`}
     >
       {children} {count > 0 && `(${count})`}
@@ -419,35 +419,35 @@ function FeedItem({ item }: { item: ActivityFeedItem }) {
   if (item.type === "feedback") {
     const riskColor =
       item.risk_level === "trusted"
-        ? "text-emerald-700"
+        ? "text-emerald-400"
         : item.risk_level === "unverified"
-          ? "text-amber-700"
-          : "text-red-700";
+          ? "text-amber-400"
+          : "text-red-400";
 
     const priorityColor =
       item.priority === "P0"
-        ? "bg-red-100 text-red-800"
+        ? "bg-red-500/20 text-red-400 border border-red-500/30"
         : item.priority === "P1"
-          ? "bg-amber-100 text-amber-800"
+          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
           : item.priority === "P2"
-            ? "bg-blue-100 text-blue-800"
-            : "bg-gray-100 text-gray-800";
+            ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+            : "bg-white/5 text-white/60 border border-white/10";
 
     const statusColor =
       item.status === "new"
-        ? "bg-blue-100 text-blue-800"
+        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
         : item.status === "triaged"
-          ? "bg-purple-100 text-purple-800"
+          ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
           : item.status === "done"
-            ? "bg-green-100 text-green-800"
-            : "bg-gray-100 text-gray-800";
+            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+            : "bg-white/5 text-white/60 border border-white/10";
 
     return (
-      <div className="rounded border border-gray-200 bg-white p-2 text-xs">
+      <div className="rounded border border-white/10 bg-white/[0.03] p-2 text-xs">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <MessageSquare className="h-3 w-3 text-gray-500" />
-            <span className="font-medium text-gray-900">
+            <MessageSquare className="h-3 w-3 text-white/50" />
+            <span className="font-medium text-white">
               {item.handle || "Anonymous"}
             </span>
             {item.priority && (
@@ -459,10 +459,10 @@ function FeedItem({ item }: { item: ActivityFeedItem }) {
               {item.status}
             </span>
           </div>
-          <span className="text-gray-500">{timeAgo}</span>
+          <span className="text-white/50">{timeAgo}</span>
         </div>
-        <p className="mb-1 text-gray-700">{item.message_preview}</p>
-        <div className="flex items-center gap-2 text-gray-500">
+        <p className="mb-1 text-white/70">{item.message_preview}</p>
+        <div className="flex items-center gap-2 text-white/50">
           {item.route && <span className="truncate">{item.route}</span>}
           <span className={`ml-auto ${riskColor}`}>
             Trust: {item.trust_score}
@@ -474,23 +474,23 @@ function FeedItem({ item }: { item: ActivityFeedItem }) {
 
   if (item.type === "error") {
     return (
-      <div className="rounded border border-red-200 bg-red-50 p-2 text-xs">
+      <div className="rounded border border-red-500/20 bg-red-500/10 p-2 text-xs">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <AlertTriangle className="h-3 w-3 text-red-600" />
-            <span className="font-medium text-red-900">Error</span>
+            <AlertTriangle className="h-3 w-3 text-red-400" />
+            <span className="font-medium text-red-400">Error</span>
             {item.is_observed_surface && (
-              <span className="rounded bg-red-200 px-1 py-0.5 text-xs text-red-800">
+              <span className="rounded bg-red-500/20 border border-red-500/30 px-1 py-0.5 text-xs text-red-400">
                 Observed
               </span>
             )}
           </div>
-          <span className="text-red-700">{timeAgo}</span>
+          <span className="text-red-400/70">{timeAgo}</span>
         </div>
         {item.message_preview && (
-          <p className="mb-1 text-red-800">{item.message_preview}</p>
+          <p className="mb-1 text-red-400/80">{item.message_preview}</p>
         )}
-        <div className="flex items-center gap-2 text-red-700">
+        <div className="flex items-center gap-2 text-red-400/70">
           {item.route && <span className="truncate">{item.route}</span>}
           {item.error_code && (
             <span className="ml-auto">Code: {item.error_code}</span>
@@ -502,16 +502,16 @@ function FeedItem({ item }: { item: ActivityFeedItem }) {
 
   if (item.type === "lab_mode") {
     return (
-      <div className="rounded border border-blue-200 bg-blue-50 p-2 text-xs">
+      <div className="rounded border border-blue-500/20 bg-blue-500/10 p-2 text-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <BarChart3 className="h-3 w-3 text-blue-600" />
-            <span className="font-medium text-blue-900">
+            <BarChart3 className="h-3 w-3 text-blue-400" />
+            <span className="font-medium text-blue-400">
               Lab Mode {item.action}
             </span>
-            <span className="text-blue-700">({item.actor})</span>
+            <span className="text-blue-400/70">({item.actor})</span>
           </div>
-          <span className="text-blue-700">{timeAgo}</span>
+          <span className="text-blue-400/70">{timeAgo}</span>
         </div>
       </div>
     );

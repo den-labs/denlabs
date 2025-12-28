@@ -79,56 +79,60 @@ export function FeedbackList({
     <div className="space-y-4">
       {/* Filters */}
       {isCreator && (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-white/70">
             <Filter className="h-4 w-4" aria-hidden="true" />
             <span>Filters:</span>
           </div>
 
-          <Select
-            value={filters.status}
-            onValueChange={(value) => setFilters({ ...filters, status: value })}
-          >
-            <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="triaged">Triaged</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
-              <SelectItem value="spam">Spam</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <Select
+                value={filters.status}
+                onValueChange={(value) => setFilters({ ...filters, status: value })}
+              >
+                <SelectTrigger className="w-full sm:w-[160px] bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="triaged">Triaged</SelectItem>
+                  <SelectItem value="done">Done</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                </SelectContent>
+              </Select>
 
-          <Select
-            value={filters.priority}
-            onValueChange={(value) =>
-              setFilters({ ...filters, priority: value })
-            }
-          >
-            <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="P0">P0 (Critical)</SelectItem>
-              <SelectItem value="P1">P1 (High)</SelectItem>
-              <SelectItem value="P2">P2 (Medium)</SelectItem>
-              <SelectItem value="P3">P3 (Low)</SelectItem>
-            </SelectContent>
-          </Select>
+              <Select
+                value={filters.priority}
+                onValueChange={(value) =>
+                  setFilters({ ...filters, priority: value })
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[160px] bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="P0">P0 (Critical)</SelectItem>
+                  <SelectItem value="P1">P1 (High)</SelectItem>
+                  <SelectItem value="P2">P2 (Medium)</SelectItem>
+                  <SelectItem value="P3">P3 (Low)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {(filters.status !== "all" || filters.priority !== "all") && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFilters({ status: "all", priority: "all" })}
-              className="text-white/60 hover:text-white"
-            >
-              Clear Filters
-            </Button>
-          )}
+            {(filters.status !== "all" || filters.priority !== "all") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({ status: "all", priority: "all" })}
+                className="w-full sm:w-auto text-white/60 hover:text-white"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
