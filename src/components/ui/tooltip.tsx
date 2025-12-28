@@ -1,23 +1,30 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { createContext, useContext, type ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
+
+const TooltipContext = createContext<{
+  isVisible: boolean;
+  setIsVisible: (visible: boolean) => void;
+}>({ isVisible: false, setIsVisible: () => {} });
 
 export function TooltipProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
 export function Tooltip({ children }: { children: ReactNode }) {
-  const [_isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   return (
-    <div
-      className="relative inline-flex"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-    >
-      {children}
-    </div>
+    <TooltipContext.Provider value={{ isVisible, setIsVisible }}>
+      <div
+        className="relative inline-flex"
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+      >
+        {children}
+      </div>
+    </TooltipContext.Provider>
   );
 }
 
@@ -40,12 +47,16 @@ export function TooltipContent({
   className?: string;
   children: ReactNode;
 }) {
+  const { isVisible } = useContext(TooltipContext);
+
   const sideStyles = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
     bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
     left: "right-full top-1/2 -translate-y-1/2 mr-2",
     right: "left-full top-1/2 -translate-y-1/2 ml-2",
   };
+
+  if (!isVisible) return null;
 
   return (
     <div
