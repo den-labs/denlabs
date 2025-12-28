@@ -15,6 +15,7 @@
     "bmad:validate": "bmad-method validate",
     "doc:delta": "node scripts/check-doc-delta.cjs",
     "doc:snapshot": "node scripts/create-snapshot.cjs",
+    "x402:smoke": "node scripts/x402-smoke.cjs",
     "db:link": "supabase link",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
