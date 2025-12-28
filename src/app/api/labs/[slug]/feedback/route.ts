@@ -10,7 +10,12 @@ import {
 } from "@/lib/eventLabs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { calculateTrustScore } from "@/lib/trustScoring";
-import { PRICING, build402Response, shouldGate, verifyPayment } from "@/lib/x402";
+import {
+  PRICING,
+  build402Response,
+  shouldGate,
+  verifyPayment,
+} from "@/lib/x402";
 
 // =====================================================
 // GET /api/labs/:slug/feedback - List feedback (hybrid visibility)

@@ -16,7 +16,12 @@ import {
   truncateMessage,
 } from "@/lib/activity";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { PRICING, build402Response, shouldGate, verifyPayment } from "@/lib/x402";
+import {
+  PRICING,
+  build402Response,
+  shouldGate,
+  verifyPayment,
+} from "@/lib/x402";
 
 interface RouteParams {
   params: Promise<{

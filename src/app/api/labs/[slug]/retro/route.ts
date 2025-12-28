@@ -1,7 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { exportRetroPackAsMarkdown, generateRetroPack } from "@/lib/retroPack";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { PRICING, build402Response, shouldGate, verifyPayment } from "@/lib/x402";
+import {
+  PRICING,
+  build402Response,
+  shouldGate,
+  verifyPayment,
+} from "@/lib/x402";
 
 // =====================================================
 // GET /api/labs/:slug/retro - Generate retro pack

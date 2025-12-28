@@ -1,12 +1,12 @@
 "use client";
 
 import {
-	CheckCircle2,
-	FlaskConical,
-	Loader2,
-	ShieldCheck,
-	Sparkles,
-	UserCheck,
+  CheckCircle2,
+  FlaskConical,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -20,78 +20,78 @@ import { createEventLab, updateEventLab } from "@/lib/eventLabsClient";
 
 // Observable routes in DenLabs
 const OBSERVABLE_ROUTES = [
-	"/access",
-	"/auth",
-	"/profile",
-	"/onboarding",
-	"/welcome",
-	"/profile-setup",
-	"/spray",
-	"/transactions",
-	"/confirmation",
-	"/checkout",
-	"/dashboard",
-	"/labs",
-	"/labs/create",
-	"/scan-8004",
-	"/x402",
-	"/a2a",
-	"/gooddollar",
-	"/taberna",
-	"/mentorship",
-	"/checkin",
-	"/voting",
-	"/showcase",
-	"/mind-games",
-	"/missions",
-	"/quests",
-	"/leaderboard",
-	"/stats",
-	"/settings",
+  "/access",
+  "/auth",
+  "/profile",
+  "/onboarding",
+  "/welcome",
+  "/profile-setup",
+  "/spray",
+  "/transactions",
+  "/confirmation",
+  "/checkout",
+  "/dashboard",
+  "/labs",
+  "/labs/create",
+  "/scan-8004",
+  "/x402",
+  "/a2a",
+  "/gooddollar",
+  "/taberna",
+  "/mentorship",
+  "/checkin",
+  "/voting",
+  "/showcase",
+  "/mind-games",
+  "/missions",
+  "/quests",
+  "/leaderboard",
+  "/stats",
+  "/settings",
 ];
 
 interface LabTemplate {
-	id: string;
-	name: string;
-	description: string;
-	icon: typeof FlaskConical;
-	objective: string;
-	surfaces: string[];
+  id: string;
+  name: string;
+  description: string;
+  icon: typeof FlaskConical;
+  objective: string;
+  surfaces: string[];
 }
 
 const LAB_TEMPLATES: LabTemplate[] = [
-	{
-		id: "onboarding",
-		name: "Onboarding Audit",
-		description: "Test user onboarding flow and identify friction points",
-		icon: UserCheck,
-		objective: "Test user onboarding flow and identify friction points",
-		surfaces: ["/onboarding", "/welcome", "/profile-setup"],
-	},
-	{
-		id: "wallet-connect",
-		name: "Wallet Connect Audit",
-		description: "Audit wallet connection and trust verification flow",
-		icon: ShieldCheck,
-		objective: "Audit wallet connection experience and trust verification flow",
-		surfaces: ["/access", "/auth", "/profile"],
-	},
-	{
-		id: "spray-flow",
-		name: "Spray Flow Audit",
-		description: "Test bulk reward distribution and transaction flow",
-		icon: Sparkles,
-		objective: "Test bulk reward distribution and transaction flow",
-		surfaces: ["/spray", "/transactions", "/confirmation"],
-	},
-	{
-		id: "general-event",
-		name: "General Event Lab",
-		description: "Collect general feedback from event participants",
-		icon: FlaskConical,
-		objective: "Collect general feedback from event participants",
-		surfaces: [],
-	},
+  {
+    id: "onboarding",
+    name: "Onboarding Audit",
+    description: "Test user onboarding flow and identify friction points",
+    icon: UserCheck,
+    objective: "Test user onboarding flow and identify friction points",
+    surfaces: ["/onboarding", "/welcome", "/profile-setup"],
+  },
+  {
+    id: "wallet-connect",
+    name: "Wallet Connect Audit",
+    description: "Audit wallet connection and trust verification flow",
+    icon: ShieldCheck,
+    objective: "Audit wallet connection experience and trust verification flow",
+    surfaces: ["/access", "/auth", "/profile"],
+  },
+  {
+    id: "spray-flow",
+    name: "Spray Flow Audit",
+    description: "Test bulk reward distribution and transaction flow",
+    icon: Sparkles,
+    objective: "Test bulk reward distribution and transaction flow",
+    surfaces: ["/spray", "/transactions", "/confirmation"],
+  },
+  {
+    id: "general-event",
+    name: "General Event Lab",
+    description: "Collect general feedback from event participants",
+    icon: FlaskConical,
+    objective: "Collect general feedback from event participants",
+    surfaces: [],
+  },
 ];
 
 interface LabFormProps {
@@ -204,7 +204,8 @@ export function LabForm({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-white text-sm font-semibold">
-              Start with a Template <span className="text-white/40 font-normal">(Optional)</span>
+              Start with a Template{" "}
+              <span className="text-white/40 font-normal">(Optional)</span>
             </Label>
             {selectedTemplate && (
               <button
@@ -279,7 +280,8 @@ export function LabForm({
             })}
           </div>
           <p className="text-xs text-white/50">
-            Templates pre-fill the objective and surfaces. You can edit them after selecting.
+            Templates pre-fill the objective and surfaces. You can edit them
+            after selecting.
           </p>
         </div>
       )}
@@ -352,7 +354,8 @@ export function LabForm({
           placeholder="Type route and press Enter, or select from suggestions"
         />
         <p className="text-xs text-white/60">
-          Add routes to track. Start typing to see suggestions from existing DenLabs routes.
+          Add routes to track. Start typing to see suggestions from existing
+          DenLabs routes.
         </p>
       </div>
 

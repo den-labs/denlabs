@@ -19,7 +19,7 @@ async function fetchWithTimeout(url, options = {}) {
   try {
     const response = await fetch(url, {
       ...options,
-      signal: controller.signal
+      signal: controller.signal,
     });
     clearTimeout(timeoutId);
     return response;
@@ -62,14 +62,18 @@ async function checkSupported() {
     }
 
     const data = await response.json();
-    const networkCount = Array.isArray(data) ? data.length : Object.keys(data).length;
+    const networkCount = Array.isArray(data)
+      ? data.length
+      : Object.keys(data).length;
     console.log(`   ✅ Supported networks count: ${networkCount}`);
 
     if (networkCount > 0) {
       const preview = Array.isArray(data)
         ? data.slice(0, 3).join(", ")
         : Object.keys(data).slice(0, 3).join(", ");
-      console.log(`   Networks (preview): ${preview}${networkCount > 3 ? "..." : ""}`);
+      console.log(
+        `   Networks (preview): ${preview}${networkCount > 3 ? "..." : ""}`,
+      );
     }
 
     return true;
@@ -130,7 +134,7 @@ async function main() {
   console.log(`Supported: ${results.supported ? "✅ OK" : "❌ FAIL"}`);
   console.log(`Verify:    ${results.verify ? "✅ OK" : "❌ FAIL"}`);
 
-  const allPassed = Object.values(results).every(r => r);
+  const allPassed = Object.values(results).every((r) => r);
 
   if (allPassed) {
     console.log("\n✅ All checks passed - Facilitator OK\n");
@@ -141,7 +145,7 @@ async function main() {
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error("\n💥 Unexpected error:", error);
   process.exit(1);
 });
