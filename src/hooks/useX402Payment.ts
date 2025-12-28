@@ -90,15 +90,16 @@ export function useX402Payment(): UseX402PaymentReturn {
         setIsPaymentModalOpen(true);
 
         // Return a promise that will be resolved by handlePaymentComplete
-        return new Promise((resolve, reject) => {
+        return new Promise<Response>((resolve, reject) => {
           const checkInterval = setInterval(() => {
             if (!pendingRequest) {
               clearInterval(checkInterval);
               // Payment was completed, make retry request
-              handlePaymentComplete(
-                "signature-from-modal",
-              ) /* This will be called by PaymentModal */
-                .then(resolve)
+              handlePaymentComplete("signature-from-modal")
+                .then((response) => {
+                  if (response) resolve(response);
+                  else reject(new Error("Payment processing failed"));
+                })
                 .catch(reject);
             }
           }, 100);
