@@ -52,7 +52,14 @@ export default function AccessGate({ nextPath }: AccessGateProps) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const resolvedNext = nextPath ?? "/lab";
+  // Clean the next path to remove any locale prefix that might be duplicated
+  const cleanNextPath = (path: string): string => {
+    // Remove leading /en/ or /es/ if present
+    const cleaned = path.replace(/^\/(en|es)\//, "/");
+    return cleaned;
+  };
+
+  const resolvedNext = nextPath ? cleanNextPath(nextPath) : "/labs";
 
   const applySession = useCallback((next: UserSession) => {
     setSession(next);
@@ -74,6 +81,12 @@ export default function AccessGate({ nextPath }: AccessGateProps) {
     try {
       const data = await fetchUserSession();
       applySession(data);
+
+      // Auto-redirect if already onboarded (wallet + handle)
+      if (data.isAuthenticated && data.hasProfile) {
+        // User is fully onboarded, redirect to next path (router will add locale)
+        router.push(resolvedNext);
+      }
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : t("errors.generic"),
@@ -81,7 +94,7 @@ export default function AccessGate({ nextPath }: AccessGateProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [applySession, t]);
+  }, [applySession, t, router, resolvedNext]);
 
   useEffect(() => {
     void loadSession();
