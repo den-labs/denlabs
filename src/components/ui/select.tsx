@@ -5,6 +5,9 @@ import {
   forwardRef,
   type SelectHTMLAttributes,
   useContext,
+  Children,
+  isValidElement,
+  cloneElement,
 } from "react";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +27,17 @@ export function Select({
   onValueChange?: (value: string) => void;
   children: React.ReactNode;
 }) {
+  // Extract the SelectContent children (the options)
+  let selectOptions: React.ReactNode = null;
+
+  Children.forEach(children, (child) => {
+    if (isValidElement(child) && child.type === SelectContent) {
+      selectOptions = child.props.children;
+    }
+  });
+
   return (
-    <SelectContext.Provider value={{ value, onValueChange }}>
+    <SelectContext.Provider value={{ value, onValueChange, children: selectOptions }}>
       {children}
     </SelectContext.Provider>
   );
@@ -36,7 +48,9 @@ export interface SelectTriggerProps
 
 export const SelectTrigger = forwardRef<HTMLSelectElement, SelectTriggerProps>(
   ({ className, children, ...props }, ref) => {
-    const { value, onValueChange } = useContext(SelectContext);
+    const context = useContext(SelectContext);
+    const { value, onValueChange } = context;
+    const options = (context as any).children;
 
     return (
       <select
@@ -49,7 +63,7 @@ export const SelectTrigger = forwardRef<HTMLSelectElement, SelectTriggerProps>(
         )}
         {...props}
       >
-        {children}
+        {options}
       </select>
     );
   },
@@ -62,7 +76,10 @@ export function SelectValue({}: { placeholder?: string }) {
 }
 
 export function SelectContent({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  // This component's children are extracted by the Select component
+  // and passed to SelectTrigger, so we return null here to avoid
+  // rendering the options twice
+  return null;
 }
 
 export function SelectItem({
