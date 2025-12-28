@@ -20,25 +20,32 @@ import {
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { DemoChooser } from "@/components/demo/DemoChooser";
 import { Link } from "@/i18n/routing";
 import { fetchUserSession } from "@/lib/userClient";
 
 export default function HomeLanding() {
   const t = useTranslations("HomeLanding");
   const [enterLabHref, setEnterLabHref] = useState("/access");
+  const [createLabHref, setCreateLabHref] = useState("/access");
+  const [finalCtaHref, setFinalCtaHref] = useState("/access");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
+  const [isDemoChooserOpen, setIsDemoChooserOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     fetchUserSession()
       .then((session) => {
         if (!cancelled && session?.hasProfile) {
-          setEnterLabHref("/lab");
+          // User has wallet + handle, go directly to host console
+          setEnterLabHref("/labs");
+          setCreateLabHref("/labs/create");
+          setFinalCtaHref("/labs/create");
         }
       })
       .catch(() => {
-        // ignore errors, default CTA stays on /access
+        // ignore errors, default CTAs go to /access which handles redirection
       });
     return () => {
       cancelled = true;
@@ -215,18 +222,19 @@ export default function HomeLanding() {
             {/* CTAs */}
             <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href={t("hero.primaryCta.href")}
+                href={createLabHref}
                 className="inline-flex items-center gap-3 rounded-xl bg-[#baff5c] px-8 py-4 text-base font-semibold text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:bg-[#89e24a] hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c]"
               >
                 <span>{t("hero.primaryCta.label")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <a
-                href={t("hero.secondaryCta.href")}
+              <button
+                type="button"
+                onClick={() => setIsDemoChooserOpen(true)}
                 className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10"
               >
                 <span>{t("hero.secondaryCta.label")}</span>
-              </a>
+              </button>
             </div>
 
             {/* Trust row */}
@@ -476,7 +484,7 @@ export default function HomeLanding() {
                 {t("finalCta.description")}
               </p>
               <Link
-                href={t("finalCta.cta.href")}
+                href={finalCtaHref}
                 className="inline-flex items-center gap-3 rounded-xl bg-[#baff5c] px-8 py-4 text-base font-semibold text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:bg-[#89e24a] hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)]"
               >
                 <span>{t("finalCta.cta.label")}</span>
@@ -575,6 +583,12 @@ export default function HomeLanding() {
           </div>
         </footer>
       </main>
+
+      {/* Demo Chooser Modal */}
+      <DemoChooser
+        isOpen={isDemoChooserOpen}
+        onClose={() => setIsDemoChooserOpen(false)}
+      />
     </div>
   );
 }
