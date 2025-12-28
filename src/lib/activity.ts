@@ -76,18 +76,35 @@ export function riskLevelFromTrust(
 }
 
 /**
- * Parse and clamp window parameter to 24, 48, or 72 hours
+ * Parse and clamp window parameter
+ * FREE: 24h, 48h, 72h
+ * PREMIUM: 168h (7d), 720h (30d), 2160h (90d)
  */
 export function clampWindow(windowStr?: string): number {
   if (!windowStr) return 24;
 
-  const match = windowStr.match(/^(\d+)h$/);
+  const match = windowStr.match(/^(\d+)h?$/);
   if (!match) return 24;
 
   const hours = Number.parseInt(match[1], 10);
-  if (hours === 48) return 48;
-  if (hours === 72) return 72;
-  return 24;
+
+  // Free tier: 24h, 48h, 72h
+  if (hours === 24 || hours === 48 || hours === 72) return hours;
+
+  // Premium tiers
+  if (hours === 168) return 168;  // 7 days ($2)
+  if (hours === 720) return 720;  // 30 days ($3)
+  if (hours === 2160) return 2160; // 90 days ($5)
+
+  // Invalid value - clamp to nearest valid tier
+  if (hours < 24) return 24;
+  if (hours > 2160) return 2160;
+
+  // For other values, find closest valid tier
+  if (hours <= 72) return 72;
+  if (hours <= 168) return 168;
+  if (hours <= 720) return 720;
+  return 2160;
 }
 
 /**
