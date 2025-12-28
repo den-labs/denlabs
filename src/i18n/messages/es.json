@@ -632,7 +632,7 @@
     "navbar": {
       "logo": "DenLabs",
       "links": {
-        "experiments": "Componentes",
+        "capabilities": "Componentes",
         "howItWorks": "Cómo Funciona",
         "faq": "Preguntas Frecuentes",
         "enterLab": "Entrar al Lab"
@@ -645,62 +645,89 @@
     "hero": {
       "title": "Event Feedback Ops",
       "subtitle": "Captura señales. Genera insights. Envía más rápido.",
-      "description": "Ejecuta labs de feedback para tus eventos, demos y lanzamientos. Captura señales en tiempo real de los participantes, rastrea interacciones automáticamente y exporta retros accionables. Construido para builders que envían.",
+      "description": "Ejecuta un lab de feedback para tu demo o evento. DenLabs rastrea superficies clave, recolecta feedback y exporta un retro pack accionable. Setup de 10 minutos, cero mantenimiento.",
       "trustRow": {
         "label": "Impulsado por"
       },
       "primaryCta": {
-        "label": "Crea Tu Lab",
+        "label": "Crear un Lab",
         "href": "/labs/create"
       },
       "secondaryCta": {
-        "label": "Ver Lab de Demo",
-        "href": "/lab/jungle-avax"
+        "label": "Ejecutar Demo Lab",
+        "href": "/lab/demo-event"
       }
     },
     "howItWorks": {
       "label": "Cómo funciona",
-      "title": "Envía Mejores Eventos",
+      "title": "Tu Ciclo de Feedback en 3 Pasos",
       "steps": [
         {
-          "title": "Crea Lab",
-          "description": "Configura un lab de feedback para tu evento o demo. Define qué estás probando y qué señales importan."
+          "title": "1. Crear Lab",
+          "description": "Configura un lab de feedback en 2 minutos. Elige una plantilla o define superficies personalizadas a observar. Sin código, sin setup."
         },
         {
-          "title": "Captura Señales",
-          "description": "Comparte un enlace público con participantes. Feedback e interacciones se capturan automáticamente con scoring de confianza."
+          "title": "2. Iniciar Lab Mode + Compartir",
+          "description": "Activa Lab Mode para rastrear interacciones. Comparte el enlace público con participantes. Envían feedback—sin cuenta requerida."
         },
         {
-          "title": "Exporta Retro",
-          "description": "Genera un retro pack en markdown con issues priorizados, puntos de abandono y recomendaciones accionables. Envía mejoras más rápido."
+          "title": "3. Live Ops + Exportar Retro",
+          "description": "Monitorea señales en tiempo real vía Activity Rail. Al terminar, exporta un Retro Pack en markdown con top issues, abandonos y recomendaciones."
         }
       ]
     },
-    "experiments": {
-      "label": "Componentes Core",
-      "title": "Plataforma de Feedback Trust-Native",
-      "description": "Event Labs combina verificación de confianza, control de acceso premium e interoperabilidad de agentes para crear una plataforma de feedback confiable.",
+    "outputs": {
+      "label": "Qué obtienes",
+      "title": "Entregables Accionables",
+      "description": "Cada lab genera insights con scoring de confianza listos para compartir con tu equipo.",
+      "items": [
+        {
+          "title": "Top Issues P0/P1",
+          "description": "Items de feedback críticos y alta prioridad rankeados por trust score y urgencia."
+        },
+        {
+          "title": "Abandonos por Ruta",
+          "description": "Identifica dónde usuarios luchan o abandonan flujos basado en superficies rastreadas."
+        },
+        {
+          "title": "Puntos de Error",
+          "description": "Ve qué rutas generan más errores y flags reportados por usuarios."
+        },
+        {
+          "title": "Feedback con Trust Score",
+          "description": "Filtra spam con scoring de confianza integrado (auto-verificación, wallet, límites de tasa)."
+        },
+        {
+          "title": "Exportar Retro Pack",
+          "description": "Descarga un resumen en markdown con todos los hallazgos clave. Copia, comparte o commitea a tu repo."
+        }
+      ]
+    },
+    "capabilities": {
+      "label": "Explorar Capacidades",
+      "title": "Integraciones Opcionales",
+      "description": "Event Feedback Ops funciona standalone. Estas capacidades mejoran casos de uso específicos.",
       "items": [
         {
           "id": "scan-8004",
           "title": "8004 Trust Scoring",
-          "description": "Cada item de feedback obtiene un trust score basado en auto-verificación, conexión de wallet y señales de comportamiento. Filtra spam automáticamente.",
+          "description": "Señales de confianza para reducir spam y mejorar confianza. Cada item de feedback scored automáticamente.",
           "href": "/scan-8004",
-          "cta": "Ver Trust Scanner"
+          "cta": "Aprender Más"
         },
         {
           "id": "x402",
-          "title": "Acceso Premium (402)",
-          "description": "Protege tus labs de feedback más valiosos detrás de micropagos. Asegura participantes comprometidos y reduce ruido.",
+          "title": "Control de Acceso Premium",
+          "description": "Micropagos opcionales para proteger labs de alto valor. Experimental, no requerido.",
           "href": "/x402",
-          "cta": "Explorar Protocolo 402"
+          "cta": "Aprender Más"
         },
         {
           "id": "a2a",
-          "title": "Interoperabilidad de Agentes",
-          "description": "Exporta datos de feedback a tus herramientas favoritas. Agentes IA pueden consultar labs, analizar retros y sugerir mejoras.",
+          "title": "Capa de Insights de Agentes",
+          "description": "Interoperabilidad de agentes IA para análisis automatizado. Capacidad planeada.",
           "href": "/a2a",
-          "cta": "Ver Capacidades de Agentes"
+          "cta": "Aprender Más"
         }
       ]
     },

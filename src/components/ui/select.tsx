@@ -32,12 +32,16 @@ export function Select({
 
   Children.forEach(children, (child) => {
     if (isValidElement(child) && child.type === SelectContent) {
-      selectOptions = (child as React.ReactElement<{ children: React.ReactNode }>).props.children;
+      selectOptions = (
+        child as React.ReactElement<{ children: React.ReactNode }>
+      ).props.children;
     }
   });
 
   return (
-    <SelectContext.Provider value={{ value, onValueChange, children: selectOptions } as any}>
+    <SelectContext.Provider
+      value={{ value, onValueChange, children: selectOptions } as any}
+    >
       {children}
     </SelectContext.Provider>
   );

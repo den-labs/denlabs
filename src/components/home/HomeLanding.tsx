@@ -1,12 +1,17 @@
 "use client";
 
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowRight,
+  BarChart3,
   CheckCircle2,
   ChevronDown,
+  Download,
   Menu,
   Scan,
   Send,
+  Shield,
   Sparkles,
   TestTube,
   Workflow,
@@ -40,12 +45,17 @@ export default function HomeLanding() {
     };
   }, []);
 
-  const experiments = t.raw("experiments.items") as Array<{
+  const capabilities = t.raw("capabilities.items") as Array<{
     id: string;
     title: string;
     description: string;
     href: string;
     cta: string;
+  }>;
+
+  const outputs = t.raw("outputs.items") as Array<{
+    title: string;
+    description: string;
   }>;
 
   const howItWorksSteps = t.raw("howItWorks.steps") as Array<{
@@ -67,13 +77,15 @@ export default function HomeLanding() {
     };
   };
 
-  const experimentIcons: Record<string, typeof Scan> = {
+  const capabilityIcons: Record<string, typeof Scan> = {
     "scan-8004": Scan,
     x402: Sparkles,
     a2a: Workflow,
   };
 
   const stepIcons = [Send, TestTube, CheckCircle2];
+
+  const outputIcons = [AlertCircle, BarChart3, AlertTriangle, Shield, Download];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#050809] text-white">
@@ -105,10 +117,10 @@ export default function HomeLanding() {
             {/* Desktop Navigation */}
             <div className="hidden items-center gap-8 md:flex">
               <a
-                href="#experiments"
+                href="#capabilities"
                 className="text-sm font-medium text-white/70 transition hover:text-white"
               >
-                {t("navbar.links.experiments")}
+                {t("navbar.links.capabilities")}
               </a>
               <a
                 href="#how-it-works"
@@ -151,11 +163,11 @@ export default function HomeLanding() {
             <div className="mt-4 flex flex-col gap-4 border-t border-white/5 pt-4 md:hidden">
               {/* biome-ignore lint/a11y/useValidAnchor: Hash links for in-page navigation */}
               <a
-                href="#experiments"
+                href="#capabilities"
                 className="text-sm font-medium text-white/70 transition hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t("navbar.links.experiments")}
+                {t("navbar.links.capabilities")}
               </a>
               {/* biome-ignore lint/a11y/useValidAnchor: Hash links for in-page navigation */}
               <a
@@ -314,30 +326,70 @@ export default function HomeLanding() {
           </div>
         </section>
 
-        {/* Experiments */}
+        {/* Outputs */}
+        <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
+              {t("outputs.label")}
+            </p>
+            <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
+              {t("outputs.title")}
+            </h2>
+            <p className="mx-auto max-w-2xl text-base text-white/70">
+              {t("outputs.description")}
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {outputs.map((output, index) => {
+              const Icon = outputIcons[index];
+              return (
+                <div
+                  key={output.title}
+                  className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.02] p-6 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+                    <Icon
+                      className="h-6 w-6 text-white/80"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <h3 className="mb-2 text-lg font-semibold text-white">
+                    {output.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-white/70">
+                    {output.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Capabilities */}
         <section
-          id="experiments"
+          id="capabilities"
           className="mx-auto max-w-7xl px-6 py-24 lg:px-8"
         >
           <div className="mb-16 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
-              {t("experiments.label")}
+              {t("capabilities.label")}
             </p>
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              {t("experiments.title")}
+              {t("capabilities.title")}
             </h2>
             <p className="mx-auto max-w-2xl text-base text-white/70">
-              {t("experiments.description")}
+              {t("capabilities.description")}
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {experiments.map((experiment) => {
-              const Icon = experimentIcons[experiment.id];
+            {capabilities.map((capability) => {
+              const Icon = capabilityIcons[capability.id];
               return (
                 <Link
-                  key={experiment.id}
-                  href={experiment.href}
+                  key={capability.id}
+                  href={capability.href}
                   className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-8 backdrop-blur-sm transition hover:border-[#2fe68b]/40 hover:shadow-[0_8px_30px_rgba(47,230,139,0.15)]"
                 >
                   <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition group-hover:border-[#2fe68b]/40 group-hover:bg-[#2fe68b]/10">
@@ -347,13 +399,13 @@ export default function HomeLanding() {
                     />
                   </div>
                   <h3 className="mb-3 text-lg font-semibold text-white">
-                    {experiment.title}
+                    {capability.title}
                   </h3>
                   <p className="mb-6 text-sm leading-relaxed text-white/70">
-                    {experiment.description}
+                    {capability.description}
                   </p>
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-[#2fe68b] transition group-hover:gap-3">
-                    <span>{experiment.cta}</span>
+                    <span>{capability.cta}</span>
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </div>
                 </Link>

@@ -32,13 +32,14 @@ export function DropdownMenuTrigger({
     setIsOpen(!isOpen);
   };
 
-  if (asChild && typeof children === "object" && children !== null && "props" in children) {
+  if (
+    asChild &&
+    typeof children === "object" &&
+    children !== null &&
+    "props" in children
+  ) {
     const child = children as React.ReactElement;
-    return (
-      <div onClick={handleClick}>
-        {child}
-      </div>
-    );
+    return <div onClick={handleClick}>{child}</div>;
   }
 
   return <div onClick={handleClick}>{children}</div>;
@@ -63,10 +64,7 @@ export function DropdownMenuContent({
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40"
-        onClick={() => setIsOpen(false)}
-      />
+      <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       <div
         className={cn(
           "absolute top-full z-50 mt-2 min-w-[160px] rounded-lg border border-white/10 bg-black/95 p-1 shadow-lg",

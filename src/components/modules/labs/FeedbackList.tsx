@@ -89,7 +89,9 @@ export function FeedbackList({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <Select
                 value={filters.status}
-                onValueChange={(value) => setFilters({ ...filters, status: value })}
+                onValueChange={(value) =>
+                  setFilters({ ...filters, status: value })
+                }
               >
                 <SelectTrigger className="w-full sm:w-[160px] bg-white/5 border-white/10 text-white">
                   <SelectValue placeholder="Status" />
