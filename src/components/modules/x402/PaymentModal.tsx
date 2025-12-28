@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { useAppKitProvider, useAppKitAccount } from "@reown/appkit/react";
-import { BrowserProvider, type Eip1193Provider } from "ethers";
-import { X402Client } from "uvd-x402-sdk";
+import {
+  useAppKitProvider,
+  useAppKitAccount,
+  useAppKitNetwork,
+} from "@reown/appkit/react";
+import { BrowserProvider, type Eip1193Provider, parseUnits } from "ethers";
 import type { PaymentInstructions } from "@/lib/x402Client";
 
 interface PaymentModalProps {
@@ -22,6 +25,7 @@ export function PaymentModal({
 }: PaymentModalProps) {
   const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
   const { address, isConnected } = useAppKitAccount();
+  const { chainId } = useAppKitNetwork();
   const [status, setStatus] = useState<
     "confirming" | "processing" | "success" | "error"
   >("confirming");
@@ -40,61 +44,53 @@ export function PaymentModal({
 
     try {
       // Check if wallet is connected
-      if (!isConnected || !walletProvider) {
+      if (!isConnected || !walletProvider || !address || !chainId) {
         throw new Error(
           "Wallet not connected. Please connect your wallet first.",
         );
       }
 
-      // Initialize X402Client (uses already-connected wallet via window.ethereum)
-      const client = new X402Client({
-        facilitatorUrl: paymentInstructions.facilitator,
-        autoConnect: false, // Don't auto-connect, use existing wallet
-      });
+      // Create ethers provider and signer
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
 
-      // Verify wallet is connected in the client
-      if (!client.isConnected()) {
-        // Try to detect the already-connected wallet
-        const ethereum = (window as any).ethereum;
-        if (!ethereum) {
-          throw new Error("Ethereum provider not found");
-        }
+      // Create EIP-712 TypedData for x402 payment
+      const domain = {
+        name: "x402 Payment",
+        version: "1",
+        chainId: chainId,
+      };
 
-        // Request accounts to ensure connection
-        const accounts = await ethereum.request({
-          method: "eth_accounts",
-        });
+      const types = {
+        Payment: [
+          { name: "recipient", type: "address" },
+          { name: "amount", type: "uint256" },
+          { name: "token", type: "string" },
+          { name: "nonce", type: "uint256" },
+        ],
+      };
 
-        if (!accounts || accounts.length === 0) {
-          throw new Error("No accounts found. Please connect your wallet.");
-        }
-      }
+      // USDC has 6 decimals
+      const amountInTokenUnits = parseUnits(
+        paymentInstructions.price.toString(),
+        6,
+      );
 
-      // Create payment authorization
-      const paymentResult = await client.createPayment({
+      const value = {
         recipient: paymentInstructions.recipient,
-        amount: paymentInstructions.price.toString(),
+        amount: amountInTokenUnits,
         token: paymentInstructions.token,
-      });
+        nonce: BigInt(Date.now()), // Use timestamp as nonce
+      };
 
-      if (!paymentResult.success) {
-        throw new Error("Payment creation failed");
-      }
-
-      // Get the PAYMENT-SIGNATURE header (x402 v2)
-      const paymentSignature =
-        paymentResult.headers?.["PAYMENT-SIGNATURE"] ||
-        paymentResult.paymentHeader;
-
-      if (!paymentSignature) {
-        throw new Error("Payment signature not generated");
-      }
+      // Sign the typed data
+      const signature = await signer.signTypedData(domain, types, value);
 
       setStatus("success");
 
       // Wait a moment to show success state
       setTimeout(() => {
-        onPaymentComplete(paymentSignature);
+        onPaymentComplete(signature);
       }, 1000);
     } catch (error) {
       setStatus("error");
