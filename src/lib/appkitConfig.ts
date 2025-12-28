@@ -5,7 +5,9 @@ import {
   celo,
   optimism,
 } from "@reown/appkit/networks";
-import { EthersAdapter } from "@reown/appkit-adapter-ethers";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { cookieStorage, createStorage } from "wagmi";
+import { avalanche as avalancheChain, base as baseChain, celo as celoChain, optimism as optimismChain } from "wagmi/chains";
 
 export const appKitProjectId =
   process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ??
@@ -25,4 +27,15 @@ export const appKitMetadata = {
   icons: ["https://wolfden.xyz/android-chrome-512x512.png"],
 };
 
-export const appKitAdapter = new EthersAdapter();
+export const wagmiConfig = {
+  chains: [celoChain, optimismChain, baseChain, avalancheChain] as const,
+  projectId: appKitProjectId,
+  metadata: appKitMetadata,
+  networks: appKitNetworks,
+  ssr: true,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
+};
+
+export const appKitAdapter = new WagmiAdapter(wagmiConfig);
