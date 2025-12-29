@@ -52,7 +52,12 @@ const feedbackExperimentsNavigation = [
   { key: "scan8004", href: "/scan-8004", icon: Scan },
   { key: "x402", href: "/x402", icon: Sparkles },
   { key: "a2a", href: "/a2a", icon: Workflow },
-  { key: "xAccount", href: "https://x.com/akaDenLabs", icon: Twitter, external: true },
+  {
+    key: "xAccount",
+    href: "https://x.com/akaDenLabs",
+    icon: Twitter,
+    external: true,
+  },
 ] as const;
 
 const experimentsNavigation = [
@@ -188,7 +193,9 @@ export default function SidebarNav() {
                               collapsed ? "hidden" : "inline",
                             )}
                           >
-                            {t(`sections.feedbackExperiments.items.${item.key}`)}
+                            {t(
+                              `sections.feedbackExperiments.items.${item.key}`,
+                            )}
                           </span>
                         </a>
                       ) : (
@@ -207,7 +214,9 @@ export default function SidebarNav() {
                               collapsed ? "hidden" : "inline",
                             )}
                           >
-                            {t(`sections.feedbackExperiments.items.${item.key}`)}
+                            {t(
+                              `sections.feedbackExperiments.items.${item.key}`,
+                            )}
                           </span>
                         </Link>
                       )}

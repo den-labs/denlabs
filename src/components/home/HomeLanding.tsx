@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   AlertCircle,
@@ -16,83 +16,83 @@ import {
   TestTube,
   Workflow,
   X,
-} from 'lucide-react'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { DemoChooser } from '@/components/demo/DemoChooser'
-import { Link } from '@/i18n/routing'
-import { fetchUserSession } from '@/lib/userClient'
+} from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { DemoChooser } from "@/components/demo/DemoChooser";
+import { Link } from "@/i18n/routing";
+import { fetchUserSession } from "@/lib/userClient";
 
 export default function HomeLanding() {
-  const t = useTranslations('HomeLanding')
-  const [enterLabHref, setEnterLabHref] = useState('/access')
-  const [createLabHref, setCreateLabHref] = useState('/access')
-  const [finalCtaHref, setFinalCtaHref] = useState('/access')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeFAQ, setActiveFAQ] = useState<number | null>(null)
-  const [isDemoChooserOpen, setIsDemoChooserOpen] = useState(false)
+  const t = useTranslations("HomeLanding");
+  const [enterLabHref, setEnterLabHref] = useState("/access");
+  const [createLabHref, setCreateLabHref] = useState("/access");
+  const [finalCtaHref, setFinalCtaHref] = useState("/access");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
+  const [isDemoChooserOpen, setIsDemoChooserOpen] = useState(false);
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
     fetchUserSession()
       .then((session) => {
         if (!cancelled && session?.hasProfile) {
           // User has wallet + handle, go directly to host console
-          setEnterLabHref('/labs')
-          setCreateLabHref('/labs/create')
-          setFinalCtaHref('/labs/create')
+          setEnterLabHref("/labs");
+          setCreateLabHref("/labs/create");
+          setFinalCtaHref("/labs/create");
         }
       })
       .catch(() => {
         // ignore errors, default CTAs go to /access which handles redirection
-      })
+      });
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
-  const capabilities = t.raw('capabilities.items') as Array<{
-    id: string
-    title: string
-    description: string
-    href: string
-    cta: string
-  }>
+  const capabilities = t.raw("capabilities.items") as Array<{
+    id: string;
+    title: string;
+    description: string;
+    href: string;
+    cta: string;
+  }>;
 
-  const outputs = t.raw('outputs.items') as Array<{
-    title: string
-    description: string
-  }>
+  const outputs = t.raw("outputs.items") as Array<{
+    title: string;
+    description: string;
+  }>;
 
-  const howItWorksSteps = t.raw('howItWorks.steps') as Array<{
-    title: string
-    description: string
-  }>
+  const howItWorksSteps = t.raw("howItWorks.steps") as Array<{
+    title: string;
+    description: string;
+  }>;
 
-  const faqItems = t.raw('faq.items') as Array<{
-    question: string
-    answer: string
-  }>
+  const faqItems = t.raw("faq.items") as Array<{
+    question: string;
+    answer: string;
+  }>;
 
-  const footerSections = t.raw('footer.sections') as {
-    product: { title: string; links: Array<{ label: string; href: string }> }
-    resources: { title: string; links: Array<{ label: string; href: string }> }
+  const footerSections = t.raw("footer.sections") as {
+    product: { title: string; links: Array<{ label: string; href: string }> };
+    resources: { title: string; links: Array<{ label: string; href: string }> };
     community: {
-      title: string
-      links: Array<{ label: string; href: string; external?: boolean }>
-    }
-  }
+      title: string;
+      links: Array<{ label: string; href: string; external?: boolean }>;
+    };
+  };
 
   const capabilityIcons: Record<string, typeof Scan> = {
-    'scan-8004': Scan,
+    "scan-8004": Scan,
     x402: Sparkles,
     a2a: Workflow,
-  }
+  };
 
-  const stepIcons = [Send, TestTube, CheckCircle2]
+  const stepIcons = [Send, TestTube, CheckCircle2];
 
-  const outputIcons = [AlertCircle, BarChart3, AlertTriangle, Shield, Download]
+  const outputIcons = [AlertCircle, BarChart3, AlertTriangle, Shield, Download];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#050809] text-white">
@@ -103,7 +103,7 @@ export default function HomeLanding() {
       {/* Navbar */}
       <nav
         className="relative z-50 border-b border-white/5 backdrop-blur-xl"
-        aria-label={t('navbar.aria.navigation')}
+        aria-label={t("navbar.aria.navigation")}
       >
         <div className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex items-center justify-between">
@@ -111,13 +111,13 @@ export default function HomeLanding() {
             <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/denlabs.png"
-                alt={t('navbar.logo')}
+                alt={t("navbar.logo")}
                 width={40}
                 height={40}
                 className="h-10 w-10"
               />
               <span className="text-xl font-bold text-white">
-                {t('navbar.logo')}
+                {t("navbar.logo")}
               </span>
             </Link>
 
@@ -127,25 +127,25 @@ export default function HomeLanding() {
                 href="#capabilities"
                 className="text-sm font-medium text-white/70 transition hover:text-white"
               >
-                {t('navbar.links.capabilities')}
+                {t("navbar.links.capabilities")}
               </a>
               <a
                 href="#how-it-works"
                 className="text-sm font-medium text-white/70 transition hover:text-white"
               >
-                {t('navbar.links.howItWorks')}
+                {t("navbar.links.howItWorks")}
               </a>
               <a
                 href="#faq"
                 className="text-sm font-medium text-white/70 transition hover:text-white"
               >
-                {t('navbar.links.faq')}
+                {t("navbar.links.faq")}
               </a>
               <Link
                 href={enterLabHref}
                 className="inline-flex items-center gap-2 rounded-lg bg-[#baff5c] px-5 py-2.5 text-sm font-semibold text-[#09140a] transition hover:bg-[#89e24a] hover:shadow-[0_0_20px_rgba(186,255,92,0.35)]"
               >
-                {t('navbar.links.enterLab')}
+                {t("navbar.links.enterLab")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -155,7 +155,7 @@ export default function HomeLanding() {
               type="button"
               className="inline-flex items-center justify-center rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={t('navbar.aria.toggleMenu')}
+              aria-label={t("navbar.aria.toggleMenu")}
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -174,7 +174,7 @@ export default function HomeLanding() {
                 className="text-sm font-medium text-white/70 transition hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t('navbar.links.capabilities')}
+                {t("navbar.links.capabilities")}
               </a>
               {/* biome-ignore lint/a11y/useValidAnchor: Hash links for in-page navigation */}
               <a
@@ -182,7 +182,7 @@ export default function HomeLanding() {
                 className="text-sm font-medium text-white/70 transition hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t('navbar.links.howItWorks')}
+                {t("navbar.links.howItWorks")}
               </a>
               {/* biome-ignore lint/a11y/useValidAnchor: Hash links for in-page navigation */}
               <a
@@ -190,14 +190,14 @@ export default function HomeLanding() {
                 className="text-sm font-medium text-white/70 transition hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t('navbar.links.faq')}
+                {t("navbar.links.faq")}
               </a>
               <Link
                 href={enterLabHref}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#baff5c] px-5 py-2.5 text-sm font-semibold text-[#09140a] transition hover:bg-[#89e24a]"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t('navbar.links.enterLab')}
+                {t("navbar.links.enterLab")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -210,13 +210,13 @@ export default function HomeLanding() {
         <section className="mx-auto max-w-7xl px-6 py-24 text-center lg:px-8 lg:py-32">
           <div className="mx-auto max-w-4xl">
             <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              {t('hero.title')}
+              {t("hero.title")}
             </h1>
             <p className="mb-4 text-xl font-semibold text-[#baff5c] sm:text-2xl">
-              {t('hero.subtitle')}
+              {t("hero.subtitle")}
             </p>
             <p className="mx-auto mb-10 max-w-2xl text-base text-white/70 sm:text-lg">
-              {t('hero.description')}
+              {t("hero.description")}
             </p>
 
             {/* CTAs */}
@@ -225,7 +225,7 @@ export default function HomeLanding() {
                 href={createLabHref}
                 className="inline-flex items-center gap-3 rounded-xl bg-[#baff5c] px-8 py-4 text-base font-semibold text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:bg-[#89e24a] hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c]"
               >
-                <span>{t('hero.primaryCta.label')}</span>
+                <span>{t("hero.primaryCta.label")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <button
@@ -233,14 +233,14 @@ export default function HomeLanding() {
                 onClick={() => setIsDemoChooserOpen(true)}
                 className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10"
               >
-                <span>{t('hero.secondaryCta.label')}</span>
+                <span>{t("hero.secondaryCta.label")}</span>
               </button>
             </div>
 
             {/* Trust row */}
             <div className="flex flex-col items-center gap-6">
               <p className="text-sm font-medium uppercase tracking-wider text-white/50">
-                {t('hero.trustRow.label')}
+                {t("hero.trustRow.label")}
               </p>
               <div className="flex gap-8 opacity-80">
                 {/* Celo logo */}
@@ -302,16 +302,16 @@ export default function HomeLanding() {
         >
           <div className="mb-16 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
-              {t('howItWorks.label')}
+              {t("howItWorks.label")}
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              {t('howItWorks.title')}
+              {t("howItWorks.title")}
             </h2>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {howItWorksSteps.map((step, index) => {
-              const Icon = stepIcons[index]
+              const Icon = stepIcons[index];
               return (
                 <div
                   key={step.title}
@@ -325,7 +325,7 @@ export default function HomeLanding() {
                   </div>
                   <div className="mb-2 flex items-center gap-3">
                     <span className="text-sm font-bold text-[#baff5c]">
-                      {String(index + 1).padStart(2, '0')}
+                      {String(index + 1).padStart(2, "0")}
                     </span>
                     <h3 className="text-xl font-semibold text-white">
                       {step.title}
@@ -335,7 +335,7 @@ export default function HomeLanding() {
                     {step.description}
                   </p>
                 </div>
-              )
+              );
             })}
           </div>
         </section>
@@ -344,19 +344,19 @@ export default function HomeLanding() {
         <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
           <div className="mb-16 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
-              {t('outputs.label')}
+              {t("outputs.label")}
             </p>
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              {t('outputs.title')}
+              {t("outputs.title")}
             </h2>
             <p className="mx-auto max-w-2xl text-base text-white/70">
-              {t('outputs.description')}
+              {t("outputs.description")}
             </p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {outputs.map((output, index) => {
-              const Icon = outputIcons[index]
+              const Icon = outputIcons[index];
               return (
                 <div
                   key={output.title}
@@ -375,7 +375,7 @@ export default function HomeLanding() {
                     {output.description}
                   </p>
                 </div>
-              )
+              );
             })}
           </div>
         </section>
@@ -387,19 +387,19 @@ export default function HomeLanding() {
         >
           <div className="mb-16 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
-              {t('capabilities.label')}
+              {t("capabilities.label")}
             </p>
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              {t('capabilities.title')}
+              {t("capabilities.title")}
             </h2>
             <p className="mx-auto max-w-2xl text-base text-white/70">
-              {t('capabilities.description')}
+              {t("capabilities.description")}
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
             {capabilities.map((capability) => {
-              const Icon = capabilityIcons[capability.id]
+              const Icon = capabilityIcons[capability.id];
               return (
                 <Link
                   key={capability.id}
@@ -423,7 +423,7 @@ export default function HomeLanding() {
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </div>
                 </Link>
-              )
+              );
             })}
           </div>
         </section>
@@ -432,16 +432,16 @@ export default function HomeLanding() {
         <section id="faq" className="mx-auto max-w-3xl px-6 py-24 lg:px-8">
           <div className="mb-12 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-[#baff5c]">
-              {t('faq.label')}
+              {t("faq.label")}
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              {t('faq.title')}
+              {t("faq.title")}
             </h2>
           </div>
 
           <div className="space-y-3">
             {faqItems.map((item) => {
-              const faqIndex = faqItems.indexOf(item)
+              const faqIndex = faqItems.indexOf(item);
               return (
                 <div
                   key={item.question}
@@ -460,7 +460,7 @@ export default function HomeLanding() {
                     </span>
                     <ChevronDown
                       className={`h-5 w-5 flex-shrink-0 text-white/70 transition ${
-                        activeFAQ === faqIndex ? 'rotate-180' : ''
+                        activeFAQ === faqIndex ? "rotate-180" : ""
                       }`}
                       aria-hidden="true"
                     />
@@ -473,7 +473,7 @@ export default function HomeLanding() {
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         </section>
@@ -484,16 +484,16 @@ export default function HomeLanding() {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(186,255,92,0.15),transparent_70%)]" />
             <div className="relative z-10">
               <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-                {t('finalCta.title')}
+                {t("finalCta.title")}
               </h2>
               <p className="mx-auto mb-8 max-w-xl text-base text-white/80">
-                {t('finalCta.description')}
+                {t("finalCta.description")}
               </p>
               <Link
                 href={finalCtaHref}
                 className="inline-flex items-center gap-3 rounded-xl bg-[#baff5c] px-8 py-4 text-base font-semibold text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:bg-[#89e24a] hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)]"
               >
-                <span>{t('finalCta.cta.label')}</span>
+                <span>{t("finalCta.cta.label")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -516,7 +516,7 @@ export default function HomeLanding() {
                   />
                   <span className="text-lg font-bold text-white">DenLabs</span>
                 </div>
-                <p className="text-sm text-white/60">{t('footer.tagline')}</p>
+                <p className="text-sm text-white/60">{t("footer.tagline")}</p>
               </div>
 
               {/* Product */}
@@ -569,8 +569,8 @@ export default function HomeLanding() {
                         href={link.href}
                         className="text-sm text-white/60 transition hover:text-white"
                         {...(link.external && {
-                          target: '_blank',
-                          rel: 'noopener noreferrer',
+                          target: "_blank",
+                          rel: "noopener noreferrer",
                         })}
                       >
                         {link.label}
@@ -583,7 +583,7 @@ export default function HomeLanding() {
 
             <div className="mt-12 border-t border-white/5 pt-8 text-center">
               <p className="text-sm text-white/50">
-                {t('footer.legal.copyright')}
+                {t("footer.legal.copyright")}
               </p>
             </div>
           </div>
@@ -596,5 +596,5 @@ export default function HomeLanding() {
         onClose={() => setIsDemoChooserOpen(false)}
       />
     </div>
-  )
+  );
 }

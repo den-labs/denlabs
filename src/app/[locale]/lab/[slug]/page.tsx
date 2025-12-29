@@ -81,7 +81,9 @@ export default function PublicLabPage({
             {/* Context Banner */}
             <div className="rounded-lg border border-wolf-emerald/20 bg-wolf-emerald/5 px-4 py-2 text-sm">
               <p className="text-wolf-emerald/90">
-                <span className="font-semibold">You're submitting feedback for:</span>{" "}
+                <span className="font-semibold">
+                  You're submitting feedback for:
+                </span>{" "}
                 <span className="text-white">{lab.name}</span>
               </p>
             </div>
