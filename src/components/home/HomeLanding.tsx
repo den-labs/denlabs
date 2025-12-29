@@ -259,7 +259,7 @@ export default function HomeLanding() {
                 </svg>
                 {/* Self logo */}
                 <svg
-                  className="h-10 w-auto"
+                  className="h-8 w-auto"
                   viewBox="0 0 192 72"
                   fill="none"
                   aria-hidden="true"
@@ -284,6 +284,12 @@ export default function HomeLanding() {
                     </clipPath>
                   </defs>
                 </svg>
+                {/* Facilitator logo */}
+                <img
+                  src="https://facilitator.ultravioletadao.xyz/logo.png"
+                  alt="Facilitator"
+                  className="h-8 w-auto opacity-80"
+                />
               </div>
             </div>
           </div>
