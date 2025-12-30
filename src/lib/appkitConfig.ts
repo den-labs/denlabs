@@ -32,7 +32,7 @@ export const appKitMetadata = {
   name: "DenLabs",
   description: "Wallet onboarding for DenLabs",
   url: siteUrl,
-  icons: [`${siteUrl}/android-chrome-512x512.png`],
+  icons: [`${siteUrl}/denlabsfavicon.png`],
 };
 
 // WagmiAdapter - Recommended by Core Extension docs for optimal integration
