@@ -18,10 +18,11 @@ export function TopBar() {
   const breadcrumbKeys = getBreadcrumbKeys(pathname || "");
 
   const title = titleKey ? t(titleKey) : t("TopBar.fallback.title");
-  const description = titleKey
-    ? t(`${titleKey.replace("sidebar", "TopBar.modules")}.description`, {
-        default: "",
-      })
+
+  // Extract module name from titleKey (sidebar.section.module -> module)
+  const moduleName = config?.module;
+  const description = moduleName
+    ? t(`TopBar.modules.${moduleName}.description`, { default: "" })
     : t("TopBar.fallback.description");
 
   // Generate breadcrumb text
