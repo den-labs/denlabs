@@ -99,6 +99,25 @@ function _formatAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+function isENSName(address: string): boolean {
+  const trimmed = address.trim().toLowerCase();
+  return trimmed.endsWith('.eth') || trimmed.endsWith('.xyz') || trimmed.includes('.');
+}
+
+function validateAddress(address: string): { valid: boolean; isENS: boolean } {
+  const trimmed = address.trim();
+  if (!trimmed) {
+    return { valid: false, isENS: false };
+  }
+
+  const isENS = isENSName(trimmed);
+  if (isENS) {
+    return { valid: false, isENS: true };
+  }
+
+  return { valid: isAddress(trimmed), isENS: false };
+}
+
 function formatHash(hash: string) {
   if (hash.length <= 10) {
     return hash;
@@ -374,9 +393,13 @@ export default function SprayDisperser() {
     }
 
     const normalized = tokenAddress.trim();
-    if (!isAddress(normalized)) {
+    const validation = validateAddress(normalized);
+    if (!validation.valid) {
       setTokenInfo(null);
       setIsFetchingTokenInfo(false);
+      if (validation.isENS) {
+        console.warn("ENS names are not supported. Please use a wallet address (0x...)");
+      }
       return;
     }
 
@@ -858,8 +881,13 @@ export default function SprayDisperser() {
     }
 
     const normalized = tokenAddress.trim();
-    if (!isAddress(normalized)) {
-      setError(t("errors.invalidToken"));
+    const validation = validateAddress(normalized);
+    if (!validation.valid) {
+      if (validation.isENS) {
+        setError("ENS names are not supported. Please use a wallet address (0x...)");
+      } else {
+        setError(t("errors.invalidToken"));
+      }
       return;
     }
 
@@ -961,6 +989,13 @@ export default function SprayDisperser() {
     const recipients = rows.map((row) => row.address.trim());
     const amountsInput = rows.map((row) => row.amount.trim());
 
+    // Validate all addresses
+    const hasENS = recipients.some((address) => isENSName(address));
+    if (hasENS) {
+      setError("ENS names are not supported. Please use wallet addresses (0x...)");
+      return;
+    }
+
     if (recipients.some((address) => !isAddress(address))) {
       setError(t("errors.invalidRecipient"));
       return;
@@ -1029,8 +1064,13 @@ export default function SprayDisperser() {
         }
       } else {
         const normalized = tokenAddress.trim();
-        if (!isAddress(normalized) || !tokenInfo) {
-          setError(t("errors.invalidToken"));
+        const validation = validateAddress(normalized);
+        if (!validation.valid || !tokenInfo) {
+          if (validation.isENS) {
+            setError("ENS names are not supported. Please use a wallet address (0x...)");
+          } else {
+            setError(t("errors.invalidToken"));
+          }
           return;
         }
 
@@ -1109,7 +1149,7 @@ export default function SprayDisperser() {
   const ctaDisabled =
     isSubmitting ||
     rows.some((row) => row.address.trim() === "" || row.amount.trim() === "") ||
-    (mode === "token" && (!isAddress(tokenAddress.trim()) || !tokenInfo));
+    (mode === "token" && (!validateAddress(tokenAddress.trim()).valid || !tokenInfo));
   const formatActivityTimestamp = (value: string) => {
     try {
       return activityTimestampFormatter.format(new Date(value));
