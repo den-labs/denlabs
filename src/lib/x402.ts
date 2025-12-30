@@ -47,6 +47,13 @@ import {
   extractPaymentFromHeaders,
   type PaymentRequirements,
 } from "uvd-x402-sdk/backend";
+import {
+  normalizeNetwork,
+  getNetworkFromChainId,
+  CHAIN_ID_TO_NETWORK,
+  getDefaultChainId,
+} from "@/utils/network";
+import { getDefaultX402Token } from "@/config/x402Tokens";
 
 // Environment config
 const X402_CONFIG = {
@@ -69,6 +76,129 @@ const X402_CONFIG = {
 let facilitatorHealthCache: { healthy: boolean; timestamp: number } | null =
   null;
 const HEALTH_CACHE_TTL = 30000; // 30 seconds
+
+// Cache facilitator supported networks (TTL: 5 minutes)
+let facilitatorSupportedNetworks: Set<string> | null = null;
+let facilitatorSupportedFetchedAt = 0;
+const SUPPORTED_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Resolve x402 network configuration from request
+ * Priority: query param (chainId or network) > default
+ */
+export function resolveX402Network(req: NextRequest): {
+  chainId: number;
+  chainName: string;
+  tokenAddress: string;
+} {
+  const url = new URL(req.url);
+  const defaultChainId = getDefaultChainId();
+
+  // Try chainId query param first
+  const chainIdParam = url.searchParams.get("chainId");
+  if (chainIdParam) {
+    const chainId = parseInt(chainIdParam, 10);
+    if (CHAIN_ID_TO_NETWORK[chainId]) {
+      const chainName = getNetworkFromChainId(chainId) || "avalanche-fuji";
+      const token = getDefaultX402Token(chainId);
+      return {
+        chainId,
+        chainName,
+        tokenAddress:
+          token?.address || "0x5425890298aed601595a70AB815c96711a31Bc65",
+      };
+    }
+  }
+
+  // Try network query param
+  const networkParam = url.searchParams.get("network");
+  if (networkParam) {
+    const normalized = normalizeNetwork(networkParam);
+    if (normalized) {
+      // Find chainId for this network
+      const entry = Object.entries(CHAIN_ID_TO_NETWORK).find(
+        ([, name]) => name === normalized,
+      );
+      if (entry) {
+        const chainId = parseInt(entry[0], 10);
+        const token = getDefaultX402Token(chainId);
+        return {
+          chainId,
+          chainName: normalized,
+          tokenAddress:
+            token?.address || "0x5425890298aed601595a70AB815c96711a31Bc65",
+        };
+      }
+    }
+  }
+
+  // Default fallback
+  const defaultNetwork =
+    getNetworkFromChainId(defaultChainId) || "avalanche-fuji";
+  const defaultToken = getDefaultX402Token(defaultChainId);
+  return {
+    chainId: defaultChainId,
+    chainName: defaultNetwork,
+    tokenAddress:
+      defaultToken?.address || "0x5425890298aed601595a70AB815c96711a31Bc65",
+  };
+}
+
+/**
+ * Get networks supported by the facilitator
+ * Caches result for 5 minutes
+ */
+export async function getFacilitatorSupportedNetworks(): Promise<Set<string>> {
+  const now = Date.now();
+
+  // Use cache if valid
+  if (
+    facilitatorSupportedNetworks &&
+    now - facilitatorSupportedFetchedAt < SUPPORTED_CACHE_TTL
+  ) {
+    return facilitatorSupportedNetworks;
+  }
+
+  try {
+    const response = await fetch(`${X402_CONFIG.facilitatorUrl}/supported`, {
+      signal: AbortSignal.timeout(X402_CONFIG.healthcheckTimeout),
+    });
+
+    if (!response.ok) {
+      console.warn("[x402] Facilitator /supported returned", response.status);
+      return facilitatorSupportedNetworks || new Set();
+    }
+
+    const data = await response.json();
+    const networks = new Set<string>();
+
+    for (const kind of data.kinds ?? []) {
+      const normalized = normalizeNetwork(kind.network);
+      if (normalized) networks.add(normalized);
+    }
+
+    console.info("[x402] Facilitator supports:", [...networks].join(", "));
+    facilitatorSupportedNetworks = networks;
+    facilitatorSupportedFetchedAt = now;
+
+    return networks;
+  } catch (error) {
+    console.warn(
+      "[x402] Failed to fetch facilitator supported networks:",
+      error,
+    );
+    return facilitatorSupportedNetworks || new Set();
+  }
+}
+
+/**
+ * Check if a network is supported by the facilitator
+ */
+export async function isNetworkSupported(network: string): Promise<boolean> {
+  const supported = await getFacilitatorSupportedNetworks();
+  // If we couldn't fetch supported networks, assume all are supported
+  return supported.size === 0 || supported.has(network);
+}
 
 export interface PaymentRequirement {
   price: number; // USD
@@ -178,7 +308,8 @@ export async function verifyPayment(
     if (!paymentHeader) {
       return {
         valid: false,
-        error: "Missing or invalid payment header (X-PAYMENT or PAYMENT-SIGNATURE)",
+        error:
+          "Missing or invalid payment header (X-PAYMENT or PAYMENT-SIGNATURE)",
       };
     }
 
@@ -214,7 +345,10 @@ export async function verifyPayment(
     );
 
     if (!verifyResult.isValid) {
-      console.warn("[x402] Payment verification failed:", verifyResult.invalidReason);
+      console.warn(
+        "[x402] Payment verification failed:",
+        verifyResult.invalidReason,
+      );
       return {
         valid: false,
         error: verifyResult.invalidReason || "Payment verification failed",
