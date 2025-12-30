@@ -96,7 +96,8 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 export default function SidebarNav() {
-  const t = useTranslations();
+  const t = useTranslations(); // For global sidebar.* keys
+  const tNav = useTranslations("SidebarNav"); // For component-specific keys
   const pathname = usePathname();
   const { open, isMobile } = useSidebar();
 
@@ -116,7 +117,7 @@ export default function SidebarNav() {
   }
 
   const collapsed = !open && !isMobile;
-  const footerCopy = t("footer.copy").replace(". ", ".\n");
+  const footerCopy = tNav("footer.copy").replace(". ", ".\n");
 
   const matchesPath = (href: string) => {
     return pathname === href || pathname?.startsWith(`${href}/`);
