@@ -118,6 +118,42 @@ export const X402_TOKENS: X402TokensByChain = {
   44787: [
     // Add Celo Alfajores tokens here after verification
   ],
+
+  // Polygon Mainnet (137)
+  137: [
+    {
+      symbol: "USDC",
+      name: "USD Coin",
+      address: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      decimals: 6,
+      isEip3009Likely: true,
+      iconUrl: "/tokens-usdc.png",
+      verifiedAt: "2025-12-30",
+    },
+  ],
+
+  // Polygon Amoy Testnet (80002)
+  80002: [
+    // Add Polygon Amoy tokens here after verification
+  ],
+
+  // Arbitrum Mainnet (42161)
+  42161: [
+    {
+      symbol: "USDC",
+      name: "USD Coin",
+      address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      decimals: 6,
+      isEip3009Likely: true,
+      iconUrl: "/tokens-usdc.png",
+      verifiedAt: "2025-12-30",
+    },
+  ],
+
+  // Arbitrum Sepolia Testnet (421614)
+  421614: [
+    // Add Arbitrum Sepolia tokens here after verification
+  ],
 };
 
 /**
