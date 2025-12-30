@@ -1,6 +1,7 @@
 import {
   type AppKitNetwork,
   avalanche,
+  avalancheFuji,
   base,
   celo,
   optimism,
@@ -17,6 +18,7 @@ export const appKitNetworks: [AppKitNetwork, ...AppKitNetwork[]] = [
   optimism,
   base,
   avalanche,
+  avalancheFuji,
 ];
 
 const siteUrl =
@@ -38,6 +40,7 @@ export const appKitAdapter = new WagmiAdapter({
     [optimism.id]: http(),
     [base.id]: http(),
     [avalanche.id]: http(),
+    [avalancheFuji.id]: http(),
   },
   projectId: appKitProjectId,
 });
