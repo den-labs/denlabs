@@ -42,6 +42,12 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  FacilitatorClient,
+  buildPaymentRequirements,
+  extractPaymentFromHeaders,
+  type PaymentRequirements,
+} from "uvd-x402-sdk/backend";
 
 // Environment config
 const X402_CONFIG = {
@@ -70,15 +76,16 @@ export interface PaymentRequirement {
   endpoint: string;
   method: string;
   description: string;
-  chainId?: number;
-  tokenAddress?: string;
-  payer?: string;
+  chainId: number;
+  tokenAddress: string;
+  chainName: string; // e.g., "avalanche-fuji", "base", "celo"
+  mimeType?: string;
 }
 
 export interface PaymentVerificationResult {
   valid: boolean;
   error?: string;
-  paidAmount?: number;
+  payer?: string;
 }
 
 /**
@@ -136,8 +143,18 @@ async function checkFacilitatorHealth(): Promise<boolean> {
 }
 
 /**
- * Verify payment signature from request headers
- * Calls facilitator /verify endpoint to validate payment
+ * Create facilitator client instance
+ */
+function createFacilitatorClient(): FacilitatorClient {
+  return new FacilitatorClient({
+    baseUrl: X402_CONFIG.facilitatorUrl,
+    timeout: 30000,
+  });
+}
+
+/**
+ * Verify payment from request headers using the facilitator
+ * Uses uvd-x402-sdk to validate payment payload
  */
 export async function verifyPayment(
   req: NextRequest,
@@ -148,66 +165,66 @@ export async function verifyPayment(
     console.log(
       `[x402 DEV] Bypassing payment verification for ${requirement.endpoint}`,
     );
-    return { valid: true, paidAmount: requirement.price };
-  }
-
-  // Check for payment signature header
-  const paymentSignature = req.headers.get("PAYMENT-SIGNATURE");
-  if (!paymentSignature) {
-    return {
-      valid: false,
-      error: "Missing PAYMENT-SIGNATURE header",
-    };
+    return { valid: true };
   }
 
   try {
-    // Call facilitator to verify payment (transaction hash)
-    const verifyPayload = {
-      transactionHash: paymentSignature, // The on-chain tx hash
-      recipient: X402_CONFIG.recipient,
-      expectedAmount: requirement.price,
-      token: X402_CONFIG.token,
-      endpoint: requirement.endpoint,
-      method: requirement.method,
-      ...(requirement.chainId && { chainId: requirement.chainId }),
-      ...(requirement.tokenAddress && { tokenAddress: requirement.tokenAddress }),
-      ...(requirement.payer && { payer: requirement.payer }),
-    };
-
-    console.log("[x402] Verifying payment with facilitator:", verifyPayload);
-
-    const response = await fetch(`${X402_CONFIG.facilitatorUrl}/verify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(verifyPayload),
+    // Extract payment header from request (checks both X-PAYMENT and PAYMENT-SIGNATURE)
+    const headers: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      headers[key] = value;
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[x402] Facilitator returned error:", response.status, errorText);
+    const paymentHeader = extractPaymentFromHeaders(headers);
+    if (!paymentHeader) {
       return {
         valid: false,
-        error: `Facilitator verification failed: ${response.statusText} - ${errorText}`,
+        error: "Missing or invalid payment header (X-PAYMENT or PAYMENT-SIGNATURE)",
       };
     }
 
-    const result = await response.json();
-    console.log("[x402] Facilitator response:", result);
+    console.log("[x402] Payment header received:", paymentHeader);
 
-    if (result.verified) {
-      console.log("[x402] Payment verified successfully!");
+    // Build payment requirements using SDK helper
+    const paymentRequirements = buildPaymentRequirements({
+      amount: requirement.price.toString(),
+      recipient: X402_CONFIG.recipient,
+      resource: `${req.nextUrl.origin}${requirement.endpoint}`,
+      chainName: requirement.chainName,
+      description: requirement.description,
+      mimeType: requirement.mimeType || "application/json",
+      timeoutSeconds: 300,
+    });
+
+    console.log("[x402] Verifying payment with facilitator:", {
+      resource: paymentRequirements.resource,
+      amount: paymentRequirements.maxAmountRequired,
+      network: paymentRequirements.network,
+    });
+
+    // Verify with facilitator using SDK
+    const facilitator = createFacilitatorClient();
+    const verifyResult = await facilitator.verify(
+      paymentHeader,
+      paymentRequirements,
+    );
+
+    if (!verifyResult.isValid) {
+      console.warn("[x402] Payment verification failed:", verifyResult.invalidReason);
       return {
-        valid: true,
-        paidAmount: result.amount,
+        valid: false,
+        error: verifyResult.invalidReason || "Payment verification failed",
       };
     }
 
-    console.warn("[x402] Payment verification failed:", result.error);
+    console.log("[x402] Payment verified successfully!", {
+      payer: verifyResult.payer,
+      network: verifyResult.network,
+    });
+
     return {
-      valid: false,
-      error: result.error || "Payment verification failed",
+      valid: true,
+      payer: verifyResult.payer,
     };
   } catch (error) {
     console.error("[x402] Payment verification error:", error);
@@ -221,7 +238,7 @@ export async function verifyPayment(
 
 /**
  * Build 402 Payment Required response
- * Includes PAYMENT-REQUIRED header with payment instructions
+ * Returns structured payment requirements for the client
  *
  * IMPORTANT: Check facilitator health first. If down, return 503 instead of 402
  * because payment cannot be processed.
@@ -243,7 +260,7 @@ export async function build402Response(
         error: "Service Unavailable",
         message:
           "Payment facilitator is currently unavailable. Please retry in a few moments.",
-        retryAfter: 30, // Suggest retry after 30 seconds
+        retryAfter: 30,
         facilitator: X402_CONFIG.facilitatorUrl,
       },
       {
@@ -255,18 +272,32 @@ export async function build402Response(
     );
   }
 
-  // Facilitator is healthy - proceed with 402 response
+  // Build payment requirements for the client
+  const paymentRequirements = buildPaymentRequirements({
+    amount: requirement.price.toString(),
+    recipient: X402_CONFIG.recipient,
+    resource: requirement.endpoint,
+    chainName: requirement.chainName,
+    description: requirement.description,
+    mimeType: requirement.mimeType || "application/json",
+    timeoutSeconds: 300,
+  });
+
+  // Payment instructions for the client
   const paymentInstructions = {
     price: requirement.price,
     currency: "USD",
-    token: X402_CONFIG.token,
     recipient: X402_CONFIG.recipient,
     endpoint: requirement.endpoint,
-    method: requirement.method,
     description: requirement.description,
     facilitator: X402_CONFIG.facilitatorUrl,
+    chainId: requirement.chainId,
+    chainName: requirement.chainName,
+    tokenAddress: requirement.tokenAddress,
+    // Add payment requirements for SDK usage
+    requirements: paymentRequirements,
     instructions:
-      "Include PAYMENT-SIGNATURE header with valid payment proof to access this resource",
+      "Sign payment with EIP-3009 and include in X-PAYMENT header to access this resource",
   };
 
   const response = NextResponse.json(
@@ -313,7 +344,8 @@ export function withX402<T extends unknown[]>(
     }
 
     console.log(
-      `[x402] Payment verified for ${requirement.endpoint}: $${verification.paidAmount}`,
+      `[x402] Payment verified for ${requirement.endpoint}`,
+      verification.payer ? `from payer: ${verification.payer}` : "",
     );
 
     // Payment valid - execute handler
