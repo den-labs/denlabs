@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import { Geist_Mono, Quicksand } from "next/font/google";
 import ThemeInitializer from "@/components/ThemeInitializer";
@@ -20,18 +21,21 @@ export const metadata: Metadata = {
   description: "Control center for the Wolf Den builder collective.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const cookies = headersList.get("cookie");
+
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <body
         className={`${quicksand.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeInitializer />
-        <AppKitProvider>{children}</AppKitProvider>
+        <AppKitProvider cookies={cookies}>{children}</AppKitProvider>
       </body>
     </html>
   );

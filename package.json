@@ -35,6 +35,7 @@
     "@selfxyz/core": "1.0.8",
     "@selfxyz/qrcode": "1.0.11",
     "@supabase/supabase-js": "^2.86.2",
+    "@tanstack/react-query": "^5.90.16",
     "@wagmi/connectors": "^7.0.5",
     "@wagmi/core": "^3.0.1",
     "@walletconnect/ethereum-provider": "^2.23.1",

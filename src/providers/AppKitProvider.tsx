@@ -1,13 +1,17 @@
 "use client";
 
 import { createAppKit } from "@reown/appkit/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { type Config, cookieToInitialState, WagmiProvider } from "wagmi";
 import {
   appKitAdapter,
   appKitMetadata,
   appKitNetworks,
   appKitProjectId,
 } from "@/lib/appkitConfig";
+
+const queryClient = new QueryClient();
 
 const shouldEnableAppKit = Boolean(appKitProjectId);
 
@@ -58,8 +62,25 @@ function initializeAppKit() {
 // Initialize on module load (only once)
 initializeAppKit();
 
-export function AppKitProvider({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+interface AppKitProviderProps {
+  children: ReactNode;
+  cookies?: string | null;
+}
+
+export function AppKitProvider({ children, cookies }: AppKitProviderProps) {
+  const initialState = cookieToInitialState(
+    appKitAdapter.wagmiConfig as Config,
+    cookies ?? "",
+  );
+
+  return (
+    <WagmiProvider
+      config={appKitAdapter.wagmiConfig as Config}
+      initialState={initialState}
+    >
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
+  );
 }
 
 export default AppKitProvider;
