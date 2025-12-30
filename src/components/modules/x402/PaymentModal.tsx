@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import {
   useAppKitProvider,
   useAppKitAccount,
@@ -9,6 +9,11 @@ import {
 } from "@reown/appkit/react";
 import { BrowserProvider, type Eip1193Provider, parseUnits } from "ethers";
 import type { PaymentInstructions } from "@/lib/x402Client";
+import {
+  getVerifiedX402Tokens,
+  getDefaultX402Token,
+  type X402Token,
+} from "@/config/x402Tokens";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -31,12 +36,29 @@ export function PaymentModal({
   >("confirming");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Get available tokens for current chain
+  const chainIdNum = typeof chainId === "number" ? chainId : Number(chainId);
+  const availableTokens = chainId
+    ? getVerifiedX402Tokens(chainIdNum)
+    : [];
+  const defaultToken = chainId ? getDefaultX402Token(chainIdNum) : null;
+
+  // Selected token state
+  const [selectedToken, setSelectedToken] = useState<X402Token | null>(null);
+
   useEffect(() => {
     if (!isOpen) {
       setStatus("confirming");
       setErrorMessage(null);
     }
   }, [isOpen]);
+
+  // Set default token when modal opens or chain changes
+  useEffect(() => {
+    if (isOpen && !selectedToken && defaultToken) {
+      setSelectedToken(defaultToken);
+    }
+  }, [isOpen, defaultToken, selectedToken]);
 
   const handleConfirmPayment = async () => {
     setStatus("processing");
@@ -70,10 +92,14 @@ export function PaymentModal({
         ],
       };
 
-      // USDC has 6 decimals
+      // Use selected token's decimals
+      if (!selectedToken) {
+        throw new Error("Please select a payment token");
+      }
+
       const amountInTokenUnits = parseUnits(
         paymentInstructions.price.toString(),
-        6,
+        selectedToken.decimals,
       );
 
       const value = {
@@ -138,17 +164,46 @@ export function PaymentModal({
                 </span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-sm text-white/70">Token</span>
-                <span className="text-sm font-semibold uppercase text-white">
-                  {paymentInstructions.token}
-                </span>
+              {/* Token Selector */}
+              <div className="space-y-2">
+                <label className="text-sm text-white/70">Payment Token</label>
+                {availableTokens.length === 0 ? (
+                  <div className="flex items-start gap-2 rounded-lg bg-yellow-500/10 p-3 text-sm text-yellow-300">
+                    <Info className="h-4 w-4 flex-shrink-0" />
+                    <span>
+                      No EIP-3009 compatible tokens available on this network
+                    </span>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedToken?.symbol || ""}
+                    onChange={(e) => {
+                      const token = availableTokens.find(
+                        (t) => t.symbol === e.target.value,
+                      );
+                      if (token) setSelectedToken(token);
+                    }}
+                    className="w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-white/40"
+                  >
+                    {availableTokens.map((token) => (
+                      <option key={token.address} value={token.symbol}>
+                        {token.symbol} - {token.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 
-            <p className="mb-6 text-sm text-white/60">
-              This will be charged to your connected wallet.
-            </p>
+            <div className="mb-6 flex items-start gap-2 rounded-lg bg-blue-500/10 p-3 text-sm text-blue-300">
+              <Info className="h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-semibold">EIP-3009 Gasless Payment</p>
+                <p className="text-blue-200/80">
+                  You'll sign an authorization. No gas fees required.
+                </p>
+              </div>
+            </div>
 
             <div className="flex gap-3">
               <button
@@ -161,7 +216,8 @@ export function PaymentModal({
               <button
                 type="button"
                 onClick={handleConfirmPayment}
-                className="flex-1 rounded-lg bg-wolf-emerald px-4 py-3 text-sm font-semibold text-black transition hover:bg-wolf-emerald/90"
+                disabled={!selectedToken || availableTokens.length === 0}
+                className="flex-1 rounded-lg bg-wolf-emerald px-4 py-3 text-sm font-semibold text-black transition hover:bg-wolf-emerald/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirm Payment
               </button>
