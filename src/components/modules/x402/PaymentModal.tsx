@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useAppKitAccount,
-  useAppKitNetwork,
-  useAppKitProvider,
-} from "@reown/appkit/react";
-import { BrowserProvider, type Eip1193Provider, parseUnits } from "ethers";
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { AlertCircle, CheckCircle2, Info, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -29,7 +24,6 @@ export function PaymentModal({
   paymentInstructions,
   onPaymentComplete,
 }: PaymentModalProps) {
-  const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
   const { address, isConnected } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
   const [status, setStatus] = useState<
@@ -76,57 +70,49 @@ export function PaymentModal({
       }
 
       // Check if wallet is connected
-      if (!isConnected || !walletProvider || !address || !chainId) {
+      if (!isConnected || !address || !chainId) {
         throw new Error(
           "Wallet not connected. Please connect your wallet first.",
         );
       }
 
-      // Create ethers provider and signer
-      const provider = new BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-
-      // Create EIP-712 TypedData for x402 payment
-      const domain = {
-        name: "x402 Payment",
-        version: "1",
-        chainId: chainId,
-      };
-
-      const types = {
-        Payment: [
-          { name: "recipient", type: "address" },
-          { name: "amount", type: "uint256" },
-          { name: "token", type: "string" },
-          { name: "nonce", type: "uint256" },
-        ],
-      };
-
-      // Use selected token's decimals
+      // Use selected token
       if (!selectedToken) {
         throw new Error("Please select a payment token");
       }
 
-      const amountInTokenUnits = parseUnits(
-        paymentInstructions.price.toString(),
-        selectedToken.decimals,
-      );
+      // Call facilitator to create payment
+      const response = await fetch(`${paymentInstructions.facilitator}/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: paymentInstructions.price,
+          token: paymentInstructions.token,
+          recipient: paymentInstructions.recipient,
+          endpoint: paymentInstructions.endpoint,
+          method: paymentInstructions.method,
+          description: paymentInstructions.description,
+        }),
+      });
 
-      const value = {
-        recipient: paymentInstructions.recipient,
-        amount: amountInTokenUnits,
-        token: paymentInstructions.token,
-        nonce: BigInt(Date.now()), // Use timestamp as nonce
-      };
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Payment creation failed: ${error}`);
+      }
 
-      // Sign the typed data
-      const signature = await signer.signTypedData(domain, types, value);
+      const result = await response.json();
+
+      if (!result.signature) {
+        throw new Error("Payment response missing signature");
+      }
 
       setStatus("success");
 
       // Wait a moment to show success state
       setTimeout(() => {
-        onPaymentComplete(signature);
+        onPaymentComplete(result.signature);
       }, 1000);
     } catch (error) {
       setStatus("error");
