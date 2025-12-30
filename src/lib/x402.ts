@@ -337,32 +337,32 @@ export async function verifyPayment(
       network: paymentRequirements.network,
     });
 
-    // Verify with facilitator using SDK
+    // Verify AND settle with facilitator using SDK
+    // IMPORTANT: Use verifyAndSettle (not verify) to execute on-chain transfer
     const facilitator = createFacilitatorClient();
-    const verifyResult = await facilitator.verify(
+    const settleResult = await facilitator.verifyAndSettle(
       paymentHeader,
       paymentRequirements,
     );
 
-    if (!verifyResult.isValid) {
+    if (!settleResult.verified || !settleResult.settled) {
       console.warn(
-        "[x402] Payment verification failed:",
-        verifyResult.invalidReason,
+        "[x402] Payment verification/settlement failed:",
+        settleResult.error,
       );
       return {
         valid: false,
-        error: verifyResult.invalidReason || "Payment verification failed",
+        error: settleResult.error || "Payment verification failed",
       };
     }
 
-    console.log("[x402] Payment verified successfully!", {
-      payer: verifyResult.payer,
-      network: verifyResult.network,
+    console.log("[x402] Payment verified and settled successfully!", {
+      transactionHash: settleResult.transactionHash,
+      settled: settleResult.settled,
     });
 
     return {
       valid: true,
-      payer: verifyResult.payer,
     };
   } catch (error) {
     console.error("[x402] Payment verification error:", error);
