@@ -82,7 +82,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!verification.valid) {
-      return await build402Response({
+      return await build402Response(request, {
         price,
         endpoint: `/api/labs/${slug}/activity?window=${window_hours}h${exportFormat ? `&export=${exportFormat}` : ""}`,
         method: "GET",

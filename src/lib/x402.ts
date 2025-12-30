@@ -47,13 +47,13 @@ import {
   extractPaymentFromHeaders,
   type PaymentRequirements,
 } from "uvd-x402-sdk/backend";
+import { getDefaultX402Token } from "@/config/x402Tokens";
 import {
-  normalizeNetwork,
-  getNetworkFromChainId,
   CHAIN_ID_TO_NETWORK,
   getDefaultChainId,
+  getNetworkFromChainId,
+  normalizeNetwork,
 } from "@/utils/network";
-import { getDefaultX402Token } from "@/config/x402Tokens";
 
 // Environment config
 const X402_CONFIG = {
@@ -382,6 +382,7 @@ export async function verifyPayment(
  * because payment cannot be processed.
  */
 export async function build402Response(
+  req: NextRequest,
   requirement: PaymentRequirement,
 ): Promise<NextResponse> {
   // Check facilitator health before requiring payment
@@ -418,7 +419,7 @@ export async function build402Response(
     scheme: "exact" as const,
     network: requirement.chainName, // "avalanche-fuji" is supported by facilitator
     maxAmountRequired: atomicAmount,
-    resource: requirement.endpoint,
+    resource: `${req.nextUrl.origin}${requirement.endpoint}`,
     description: requirement.description,
     mimeType: requirement.mimeType || "application/json",
     payTo: X402_CONFIG.recipient,
@@ -466,7 +467,7 @@ export function withX402<T extends unknown[]>(
       console.log(
         `[x402] Payment required for ${requirement.endpoint}: ${verification.error}`,
       );
-      return build402Response(requirement);
+      return build402Response(req, requirement);
     }
 
     console.log(
