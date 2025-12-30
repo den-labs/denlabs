@@ -16,13 +16,13 @@ export const appKitProjectId =
   "b56e18d47c72ab683b10814fe9495694";
 
 export const appKitNetworks: [AppKitNetwork, ...AppKitNetwork[]] = [
+  avalancheFuji, // Default for development - testnet first
   celo,
   optimism,
   base,
   polygon,
   arbitrum,
   avalanche,
-  avalancheFuji,
 ];
 
 const siteUrl =

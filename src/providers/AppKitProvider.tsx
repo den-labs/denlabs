@@ -46,7 +46,8 @@ function initializeAppKit() {
       },
       // Enable EIP-6963 for Core wallet auto-detection
       enableEIP6963: true,
-      allowUnsupportedChain: false,
+      // Allow testnets and chains not in our explicit list
+      allowUnsupportedChain: true,
     });
 
     appKitInitialized = true;
