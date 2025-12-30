@@ -1,10 +1,12 @@
 import {
   type AppKitNetwork,
+  arbitrum,
   avalanche,
   avalancheFuji,
   base,
   celo,
   optimism,
+  polygon,
 } from "@reown/appkit/networks";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { http } from "wagmi";
@@ -17,6 +19,8 @@ export const appKitNetworks: [AppKitNetwork, ...AppKitNetwork[]] = [
   celo,
   optimism,
   base,
+  polygon,
+  arbitrum,
   avalanche,
   avalancheFuji,
 ];
@@ -39,6 +43,8 @@ export const appKitAdapter = new WagmiAdapter({
     [celo.id]: http(),
     [optimism.id]: http(),
     [base.id]: http(),
+    [polygon.id]: http(),
+    [arbitrum.id]: http(),
     [avalanche.id]: http(),
     [avalancheFuji.id]: http(),
   },
