@@ -11,8 +11,8 @@ import {
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { calculateTrustScore } from "@/lib/trustScoring";
 import {
-  PRICING,
   build402Response,
+  PRICING,
   shouldGate,
   verifyPayment,
 } from "@/lib/x402";

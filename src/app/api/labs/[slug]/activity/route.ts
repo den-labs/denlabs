@@ -17,8 +17,8 @@ import {
 } from "@/lib/activity";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
-  PRICING,
   build402Response,
+  PRICING,
   shouldGate,
   verifyPayment,
 } from "@/lib/x402";

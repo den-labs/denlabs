@@ -1,17 +1,19 @@
 "use client";
 
+import { useAppKit } from "@reown/appkit/react";
 import {
+  Check,
+  Copy,
   LayoutDashboard,
   LogOut,
   Settings,
   ShieldCheck,
   Wallet,
-  Copy,
-  Check,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useAppKit } from "@reown/appkit/react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,10 +22,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
 import { useDenUser } from "@/hooks/useDenUser";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 export function WalletMenu() {
@@ -80,7 +80,9 @@ export function WalletMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-xs">{formatAddress(walletAddress)}</span>
+            <span className="truncate text-xs">
+              {formatAddress(walletAddress)}
+            </span>
             <Button
               variant="ghost"
               size="sm"
@@ -102,18 +104,27 @@ export function WalletMenu() {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <LayoutDashboard className="h-4 w-4" />
             <span>{t("sidebar.laboratory.dashboard")}</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/verification" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            href="/verification"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <ShieldCheck className="h-4 w-4" />
             <span>{t("sidebar.account.verification")}</span>
             {!isVerified && (
-              <Badge variant="outline" className="ml-auto h-5 px-1.5 text-[0.65rem]">
+              <Badge
+                variant="outline"
+                className="ml-auto h-5 px-1.5 text-[0.65rem]"
+              >
                 ⚠️
               </Badge>
             )}
@@ -121,7 +132,10 @@ export function WalletMenu() {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <Settings className="h-4 w-4" />
             <span>{t("sidebar.account.settings")}</span>
           </Link>

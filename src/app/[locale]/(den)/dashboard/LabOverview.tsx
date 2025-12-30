@@ -17,11 +17,11 @@ import {
   UserCircle,
 } from "lucide-react";
 import Image from "next/image";
-import { Link as NextLink } from "@/i18n/routing";
+import { useParams } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
 import { DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
-import { useParams } from "next/navigation";
+import { Link as NextLink } from "@/i18n/routing";
 
 const MINI_APPS = [
   {
@@ -101,7 +101,7 @@ export default function LabOverview() {
   const holdMax = 120;
   const holdProgress = Math.min(
     100,
-    Math.max(0, Math.round((holdScore / holdMax) * 100))
+    Math.max(0, Math.round((holdScore / holdMax) * 100)),
   );
 
   const stats = [
@@ -123,9 +123,12 @@ export default function LabOverview() {
   ];
 
   const handle = formatHandle(user.handle ?? user.walletAddress ?? null);
-  const displayName = user.displayName || formatWalletFallback(user.walletAddress ?? null) || "Den Builder";
+  const displayName =
+    user.displayName ||
+    formatWalletFallback(user.walletAddress ?? null) ||
+    "Den Builder";
   const liveMiniApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self"
+    (app) => app.status === "LIVE" && app.id !== "self",
   );
   const avatarSrc = user.avatarUrl ?? "/avatar.png";
 
@@ -350,7 +353,7 @@ function QuestAction({ quest }: { quest: QuestItem }) {
 
 function LabRightSidebar({ locale }: { locale: string }) {
   const liveApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self"
+    (app) => app.status === "LIVE" && app.id !== "self",
   );
 
   return (

@@ -1,8 +1,11 @@
 "use client";
 
-import { LibraryModuleTabs, EmptyTabContent } from "@/components/library/LibraryModuleTabs";
-import { useTranslations } from "next-intl";
 import { Workflow } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  EmptyTabContent,
+  LibraryModuleTabs,
+} from "@/components/library/LibraryModuleTabs";
 
 export default function A2APage() {
   return (
@@ -60,23 +63,19 @@ function ConceptsTab() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
           <h4 className="font-semibold text-[#89e24a]">Capability Discovery</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item1")}
-          </p>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item1")}</p>
         </div>
 
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
-          <h4 className="font-semibold text-[#89e24a]">Standardized Interfaces</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item2")}
-          </p>
+          <h4 className="font-semibold text-[#89e24a]">
+            Standardized Interfaces
+          </h4>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item2")}</p>
         </div>
 
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
           <h4 className="font-semibold text-[#89e24a]">Interoperability</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item3")}
-          </p>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item3")}</p>
         </div>
       </div>
 

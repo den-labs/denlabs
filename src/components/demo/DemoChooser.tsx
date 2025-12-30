@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Settings, X } from "lucide-react";
+import { Settings, Users, X } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 

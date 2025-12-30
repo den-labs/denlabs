@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ActivityRail } from "@/components/modules/labs/ActivityRail";
 import { getActiveLabSlugClient } from "@/lib/labMode";
 

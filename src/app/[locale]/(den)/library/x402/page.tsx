@@ -1,8 +1,11 @@
 "use client";
 
-import { LibraryModuleTabs, EmptyTabContent } from "@/components/library/LibraryModuleTabs";
-import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  EmptyTabContent,
+  LibraryModuleTabs,
+} from "@/components/library/LibraryModuleTabs";
 
 export default function X402Page() {
   return (
@@ -37,7 +40,7 @@ function DemoTab() {
       <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
         <h4 className="font-semibold text-white">Code Example</h4>
         <pre className="mt-3 overflow-x-auto rounded-lg bg-black/40 p-4 text-xs text-white/80">
-{`// Request premium feature with x402
+          {`// Request premium feature with x402
 const response = await fetch('/api/x402/analytics', {
   headers: {
     'X-Payment-Token': 'your-payment-token',
@@ -71,31 +74,26 @@ function ConceptsTab() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
           <h4 className="font-semibold text-[#89e24a]">Pay-per-use</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item1")}
-          </p>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item1")}</p>
         </div>
 
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
           <h4 className="font-semibold text-[#89e24a]">Micropayments</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item2")}
-          </p>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item2")}</p>
         </div>
 
         <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
           <h4 className="font-semibold text-[#89e24a]">Transparent pricing</h4>
-          <p className="mt-2 text-sm text-white/70">
-            {t("concept.item3")}
-          </p>
+          <p className="mt-2 text-sm text-white/70">{t("concept.item3")}</p>
         </div>
       </div>
 
       <div className="wolf-card--muted rounded-xl border border-wolf-border-soft p-4">
         <h4 className="font-semibold">Use in Event Feedback Ops</h4>
         <p className="mt-2 text-sm text-white/70">
-          Gate high-value labs behind small payments to ensure committed participants and reduce
-          noise. Experimental feature for premium access control.
+          Gate high-value labs behind small payments to ensure committed
+          participants and reduce noise. Experimental feature for premium access
+          control.
         </p>
       </div>
     </div>

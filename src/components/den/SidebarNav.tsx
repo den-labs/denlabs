@@ -3,9 +3,9 @@
 import {
   BadgeDollarSign,
   BarChart3,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Droplets,
   FlaskConical,
   Gift,
@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -31,15 +32,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
+import { MODULE_STATUS, shouldExpandParent } from "@/config/moduleKeys";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import { shouldExpandParent, MODULE_STATUS } from "@/config/moduleKeys";
 
 // Product navigation items
 const productNavigation = [
@@ -70,23 +70,26 @@ const libraryNavigation = [
 ] as const;
 
 type StatusBadgeProps = {
-  status: 'ready' | 'experimental' | 'planned' | 'external';
+  status: "ready" | "experimental" | "planned" | "external";
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  if (status === 'ready') return null;
+  if (status === "ready") return null;
 
   const config = {
-    experimental: { label: '🟡 Beta', variant: 'secondary' as const },
-    planned: { label: '🔵 Soon', variant: 'outline' as const },
-    external: { label: '🔗', variant: 'outline' as const },
+    experimental: { label: "🟡 Beta", variant: "secondary" as const },
+    planned: { label: "🔵 Soon", variant: "outline" as const },
+    external: { label: "🔗", variant: "outline" as const },
   };
 
   const badge = config[status];
   if (!badge) return null;
 
   return (
-    <Badge variant={badge.variant} className="ml-auto text-[0.6rem] px-1.5 py-0">
+    <Badge
+      variant={badge.variant}
+      className="ml-auto text-[0.6rem] px-1.5 py-0"
+    >
       {badge.label}
     </Badge>
   );
@@ -99,11 +102,11 @@ export default function SidebarNav() {
 
   // Auto-expand Rewards if on Spray or GoodDollar pages
   const [rewardsExpanded, setRewardsExpanded] = useState(() =>
-    shouldExpandParent(pathname || '', 'rewards')
+    shouldExpandParent(pathname || "", "rewards"),
   );
 
   useEffect(() => {
-    if (shouldExpandParent(pathname || '', 'rewards')) {
+    if (shouldExpandParent(pathname || "", "rewards")) {
       setRewardsExpanded(true);
     }
   }, [pathname]);
@@ -166,7 +169,11 @@ export default function SidebarNav() {
                 const ItemIcon = item.icon;
 
                 // Collapsible item (Rewards)
-                if ('collapsible' in item && item.collapsible && item.children) {
+                if (
+                  "collapsible" in item &&
+                  item.collapsible &&
+                  item.children
+                ) {
                   return (
                     <SidebarMenuItem key={item.key}>
                       <SidebarMenuButton
@@ -189,7 +196,7 @@ export default function SidebarNav() {
                           <ChevronDown
                             className={cn(
                               "ml-auto h-3.5 w-3.5 transition-transform",
-                              rewardsExpanded ? "rotate-180" : ""
+                              rewardsExpanded ? "rotate-180" : "",
                             )}
                           />
                         )}
@@ -201,7 +208,10 @@ export default function SidebarNav() {
                             const isActive = matchesPath(child.href);
                             return (
                               <SidebarMenuSubItem key={child.key}>
-                                <SidebarMenuSubButton asChild isActive={isActive}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={isActive}
+                                >
                                   <Link
                                     href={child.href}
                                     aria-current={isActive ? "page" : undefined}
@@ -226,12 +236,12 @@ export default function SidebarNav() {
                 }
 
                 // Regular item
-                const isActive = 'href' in item && matchesPath(item.href);
+                const isActive = "href" in item && matchesPath(item.href);
                 return (
                   <SidebarMenuItem key={item.key}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link
-                        href={'href' in item ? item.href : '#'}
+                        href={"href" in item ? item.href : "#"}
                         aria-current={isActive ? "page" : undefined}
                         className="flex w-full items-center gap-3"
                       >
@@ -258,7 +268,9 @@ export default function SidebarNav() {
 
         {/* LABORATORIO */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sections.laboratory.title")}</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            {t("sections.laboratory.title")}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {laboratoryNavigation.map((item) => {
@@ -301,7 +313,7 @@ export default function SidebarNav() {
               {libraryNavigation.map((item) => {
                 const ItemIcon = item.icon;
                 const isActive = matchesPath(item.href);
-                const isIndex = 'isIndex' in item && item.isIndex;
+                const isIndex = "isIndex" in item && item.isIndex;
                 const status = MODULE_STATUS[item.key];
 
                 return (

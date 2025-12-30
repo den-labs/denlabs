@@ -3,11 +3,11 @@
 import { AlertCircle, CheckCircle2, Copy, Shield, XCircle } from "lucide-react";
 import { useState } from "react";
 import {
-  type Eip3009CheckResult,
-  type SupportedChainId,
   checkEip3009,
+  type Eip3009CheckResult,
   getChainName,
   getSupportedChainIds,
+  type SupportedChainId,
 } from "@/lib/eip3009/checker";
 
 export default function Eip3009CheckerPage() {
@@ -70,10 +70,12 @@ export default function Eip3009CheckerPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-white">EIP-3009 Token Checker</h1>
+        <h1 className="text-3xl font-bold text-white">
+          EIP-3009 Token Checker
+        </h1>
         <p className="text-white/60">
-          Detect if an ERC-20 token supports EIP-3009 (Transfer With Authorization)
-          for gasless/authorized transfers.
+          Detect if an ERC-20 token supports EIP-3009 (Transfer With
+          Authorization) for gasless/authorized transfers.
         </p>
       </div>
 
@@ -84,8 +86,9 @@ export default function Eip3009CheckerPage() {
           <div className="space-y-1 text-sm">
             <p className="font-semibold text-blue-300">What is EIP-3009?</p>
             <p className="text-blue-200/80">
-              EIP-3009 enables gasless token transfers using signed authorizations.
-              Required for x402 payment system. This tool checks for{" "}
+              EIP-3009 enables gasless token transfers using signed
+              authorizations. Required for x402 payment system. This tool checks
+              for{" "}
               <code className="rounded bg-blue-400/10 px-1 py-0.5">
                 transferWithAuthorization
               </code>{" "}
@@ -111,7 +114,9 @@ export default function Eip3009CheckerPage() {
           <select
             id="network"
             value={chainId}
-            onChange={(e) => setChainId(Number(e.target.value) as SupportedChainId)}
+            onChange={(e) =>
+              setChainId(Number(e.target.value) as SupportedChainId)
+            }
             className="w-full rounded border border-white/20 bg-black/40 px-4 py-2 text-white outline-none focus:border-white/40"
           >
             {supportedChains.map((id) => (
@@ -235,25 +240,29 @@ export default function Eip3009CheckerPage() {
 
               {/* Selectors Found */}
               <div className="space-y-2 border-t border-white/10 pt-4">
-                <h5 className="font-semibold text-white/80">Function Selectors</h5>
+                <h5 className="font-semibold text-white/80">
+                  Function Selectors
+                </h5>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {Object.entries(result.selectorsFound).map(([name, found]) => (
-                    <div
-                      key={name}
-                      className="flex items-center gap-2 rounded bg-black/20 px-3 py-2"
-                    >
-                      {found ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-400" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-white/20" />
-                      )}
-                      <span
-                        className={found ? "text-green-300" : "text-white/40"}
+                  {Object.entries(result.selectorsFound).map(
+                    ([name, found]) => (
+                      <div
+                        key={name}
+                        className="flex items-center gap-2 rounded bg-black/20 px-3 py-2"
                       >
-                        {name}
-                      </span>
-                    </div>
-                  ))}
+                        {found ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-400" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-white/20" />
+                        )}
+                        <span
+                          className={found ? "text-green-300" : "text-white/40"}
+                        >
+                          {name}
+                        </span>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
 
@@ -276,7 +285,8 @@ export default function Eip3009CheckerPage() {
         <p className="font-semibold text-white/80">For x402 Integration:</p>
         <p className="mt-1">
           Tokens showing &quot;EIP-3009 Likely&quot; can be added to the x402
-          allowlist for gasless payment support. Copy the JSON result and add it to{" "}
+          allowlist for gasless payment support. Copy the JSON result and add it
+          to{" "}
           <code className="rounded bg-white/10 px-1 py-0.5">
             src/config/x402Tokens.ts
           </code>

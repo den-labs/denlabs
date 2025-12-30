@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import {
-  useAppKitProvider,
   useAppKitAccount,
   useAppKitNetwork,
+  useAppKitProvider,
 } from "@reown/appkit/react";
 import { BrowserProvider, type Eip1193Provider, parseUnits } from "ethers";
-import type { PaymentInstructions } from "@/lib/x402Client";
+import { AlertCircle, CheckCircle2, Info, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
-  getVerifiedX402Tokens,
   getDefaultX402Token,
+  getVerifiedX402Tokens,
   type X402Token,
 } from "@/config/x402Tokens";
+import type { PaymentInstructions } from "@/lib/x402Client";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -38,9 +38,7 @@ export function PaymentModal({
 
   // Get available tokens for current chain
   const chainIdNum = typeof chainId === "number" ? chainId : Number(chainId);
-  const availableTokens = chainId
-    ? getVerifiedX402Tokens(chainIdNum)
-    : [];
+  const availableTokens = chainId ? getVerifiedX402Tokens(chainIdNum) : [];
   const defaultToken = chainId ? getDefaultX402Token(chainIdNum) : null;
 
   // Selected token state

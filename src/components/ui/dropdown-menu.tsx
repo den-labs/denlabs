@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const DropdownContext = createContext<{
@@ -98,7 +98,12 @@ export function DropdownMenuItem({
     setIsOpen(false);
   };
 
-  if (asChild && typeof children === "object" && children !== null && "props" in children) {
+  if (
+    asChild &&
+    typeof children === "object" &&
+    children !== null &&
+    "props" in children
+  ) {
     const child = children as React.ReactElement;
     return (
       <div onClick={handleClick} className={cn("w-full", className)}>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { PaymentInstructions } from "@/lib/x402Client";
 
 interface UseX402PaymentReturn {

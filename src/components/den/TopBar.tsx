@@ -2,20 +2,24 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  getBreadcrumbKeys,
+  getModuleConfig,
+  getTitleKey,
+} from "@/config/moduleKeys";
 import { Link, usePathname } from "@/i18n/routing";
-import { getModuleConfig, getBreadcrumbKeys, getTitleKey } from "@/config/moduleKeys";
 
 export function TopBar() {
   const t = useTranslations();
   const pathname = usePathname();
 
-  const config = getModuleConfig(pathname || '');
-  const titleKey = getTitleKey(pathname || '');
-  const breadcrumbKeys = getBreadcrumbKeys(pathname || '');
+  const config = getModuleConfig(pathname || "");
+  const titleKey = getTitleKey(pathname || "");
+  const breadcrumbKeys = getBreadcrumbKeys(pathname || "");
 
   const title = titleKey ? t(titleKey) : t("TopBar.fallback.title");
   const description = titleKey
-    ? t(`${titleKey.replace('sidebar', 'TopBar.modules')}.description`, {
+    ? t(`${titleKey.replace("sidebar", "TopBar.modules")}.description`, {
         default: "",
       })
     : t("TopBar.fallback.description");

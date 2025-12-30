@@ -8,10 +8,10 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { useState } from "react";
+import { PaymentModal } from "@/components/modules/x402/PaymentModal";
 import { Button } from "@/components/ui/button";
 import { TrustIndicator } from "@/components/ui/TrustIndicator";
 import { useX402Payment } from "@/hooks/useX402Payment";
-import { PaymentModal } from "@/components/modules/x402/PaymentModal";
 import type { RetroPack } from "@/lib/retroPack";
 
 interface RetroPackViewProps {

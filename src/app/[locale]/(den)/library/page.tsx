@@ -13,9 +13,9 @@ import {
   Workflow,
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "@/i18n/routing";
-import { MODULE_STATUS } from "@/config/moduleKeys";
 import type { ModuleStatus } from "@/config/moduleKeys";
+import { MODULE_STATUS } from "@/config/moduleKeys";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 type LibraryModule = {
@@ -126,7 +126,9 @@ export default function LibraryIndexPage() {
     return matchesSearch && matchesFilter;
   });
 
-  const categories = Array.from(new Set(LIBRARY_MODULES.map((m) => m.category)));
+  const categories = Array.from(
+    new Set(LIBRARY_MODULES.map((m) => m.category)),
+  );
 
   return (
     <div className="space-y-6">
@@ -158,7 +160,7 @@ export default function LibraryIndexPage() {
               "rounded-lg border px-4 py-2 text-sm font-medium transition",
               filter === "all"
                 ? "border-[#89e24a] bg-[#89e24a]/10 text-[#89e24a]"
-                : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white"
+                : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white",
             )}
           >
             All
@@ -171,7 +173,7 @@ export default function LibraryIndexPage() {
                 "rounded-lg border px-4 py-2 text-sm font-medium transition",
                 filter === status
                   ? "border-[#89e24a] bg-[#89e24a]/10 text-[#89e24a]"
-                  : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white"
+                  : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white",
               )}
             >
               {STATUS_CONFIG[status].label}
@@ -208,7 +210,7 @@ export default function LibraryIndexPage() {
                       <span
                         className={cn(
                           "text-xs font-medium",
-                          statusConfig.color
+                          statusConfig.color,
                         )}
                       >
                         {statusConfig.label}
@@ -232,7 +234,9 @@ export default function LibraryIndexPage() {
       {filtered.length === 0 && (
         <div className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-12 text-center">
           <Search className="mx-auto mb-4 h-12 w-12 text-white/20" />
-          <h3 className="text-lg font-semibold text-white/60">No modules found</h3>
+          <h3 className="text-lg font-semibold text-white/60">
+            No modules found
+          </h3>
           <p className="mt-2 text-sm text-white/40">
             Try adjusting your search or filters
           </p>

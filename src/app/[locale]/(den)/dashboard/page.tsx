@@ -3,8 +3,8 @@
 import { BarChart3, LayoutDashboard, Trophy } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Link } from "@/i18n/routing";
 import { useDenUser } from "@/hooks/useDenUser";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 // Import components from old /lab page
@@ -47,9 +47,7 @@ function DashboardContent() {
               href={`/dashboard?tab=${tab.key}`}
               className={cn(
                 "relative flex items-center gap-2 px-4 py-3 text-sm font-semibold uppercase transition-colors",
-                isActive
-                  ? "text-white"
-                  : "text-white/50 hover:text-white"
+                isActive ? "text-white" : "text-white/50 hover:text-white",
               )}
             >
               <Icon className="h-4 w-4" aria-hidden />
@@ -101,7 +99,9 @@ function LeaderboardTab() {
         <h3 className="text-sm font-semibold uppercase text-wolf-text-subtle">
           Leaderboard
         </h3>
-        <p className="mt-1 text-xs text-white/60">Weekly ranking across the pack</p>
+        <p className="mt-1 text-xs text-white/60">
+          Weekly ranking across the pack
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -117,7 +117,7 @@ function LeaderboardTab() {
                   entry.position === 1 && "bg-[#ffd700]/20 text-[#ffd700]",
                   entry.position === 2 && "bg-[#c0c0c0]/20 text-[#c0c0c0]",
                   entry.position === 3 && "bg-[#cd7f32]/20 text-[#cd7f32]",
-                  entry.position > 3 && "bg-white/10 text-white/60"
+                  entry.position > 3 && "bg-white/10 text-white/60",
                 )}
               >
                 {entry.position}

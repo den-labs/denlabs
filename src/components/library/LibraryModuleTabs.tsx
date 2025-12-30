@@ -59,7 +59,7 @@ function LibraryModuleTabsContent({
               href={`${modulePath}?tab=${tab.key}`}
               className={cn(
                 "relative flex items-center gap-2 px-4 py-3 text-sm font-semibold uppercase transition-colors",
-                isActive ? "text-white" : "text-white/50 hover:text-white"
+                isActive ? "text-white" : "text-white/50 hover:text-white",
               )}
             >
               <Icon className="h-4 w-4" aria-hidden />

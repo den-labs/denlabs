@@ -2,8 +2,8 @@
 
 import { ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "@/i18n/routing";
 import { useDenUser } from "@/hooks/useDenUser";
+import { Link } from "@/i18n/routing";
 
 type VerificationBannerProps = {
   context: "spray" | "gooddollar" | "general";
