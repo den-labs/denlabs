@@ -14,6 +14,7 @@ import {
   type X402Token,
 } from "@/config/x402Tokens";
 import type { PaymentInstructions } from "@/lib/x402Client";
+import { validateAddress } from "@/lib/addressValidation";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -63,6 +64,17 @@ export function PaymentModal({
     setErrorMessage(null);
 
     try {
+      // Validate recipient address is not an ENS name
+      const recipientValidation = validateAddress(
+        paymentInstructions.recipient,
+      );
+      if (!recipientValidation.valid) {
+        throw new Error(
+          recipientValidation.error ||
+            "Invalid recipient address in payment instructions",
+        );
+      }
+
       // Check if wallet is connected
       if (!isConnected || !walletProvider || !address || !chainId) {
         throw new Error(

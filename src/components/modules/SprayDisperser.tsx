@@ -23,6 +23,7 @@ import {
   parseEther,
   parseUnits,
 } from "ethers";
+import { isENSName, validateAddress } from "@/lib/addressValidation";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -97,25 +98,6 @@ function createRow(): RecipientRow {
 
 function _formatAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
-function isENSName(address: string): boolean {
-  const trimmed = address.trim().toLowerCase();
-  return trimmed.endsWith('.eth') || trimmed.endsWith('.xyz') || trimmed.includes('.');
-}
-
-function validateAddress(address: string): { valid: boolean; isENS: boolean } {
-  const trimmed = address.trim();
-  if (!trimmed) {
-    return { valid: false, isENS: false };
-  }
-
-  const isENS = isENSName(trimmed);
-  if (isENS) {
-    return { valid: false, isENS: true };
-  }
-
-  return { valid: isAddress(trimmed), isENS: false };
 }
 
 function formatHash(hash: string) {
@@ -397,8 +379,8 @@ export default function SprayDisperser() {
     if (!validation.valid) {
       setTokenInfo(null);
       setIsFetchingTokenInfo(false);
-      if (validation.isENS) {
-        console.warn("ENS names are not supported. Please use a wallet address (0x...)");
+      if (validation.error) {
+        console.warn(validation.error);
       }
       return;
     }
@@ -883,11 +865,7 @@ export default function SprayDisperser() {
     const normalized = tokenAddress.trim();
     const validation = validateAddress(normalized);
     if (!validation.valid) {
-      if (validation.isENS) {
-        setError("ENS names are not supported. Please use a wallet address (0x...)");
-      } else {
-        setError(t("errors.invalidToken"));
-      }
+      setError(validation.error || t("errors.invalidToken"));
       return;
     }
 
@@ -1066,11 +1044,7 @@ export default function SprayDisperser() {
         const normalized = tokenAddress.trim();
         const validation = validateAddress(normalized);
         if (!validation.valid || !tokenInfo) {
-          if (validation.isENS) {
-            setError("ENS names are not supported. Please use a wallet address (0x...)");
-          } else {
-            setError(t("errors.invalidToken"));
-          }
+          setError(validation.error || t("errors.invalidToken"));
           return;
         }
 
