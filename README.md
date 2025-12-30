@@ -1,599 +1,209 @@
-# DenLabs - Event Feedback Ops
+# 🧪 DenLabs: Event Feedback Ops
 
-> Trust-native feedback platform for events, demos, and launches. Capture signals, track interactions, and ship improvements faster.
-
-## What is Event Feedback Ops?
-
-DenLabs helps you run **Event Labs**—feedback collection sessions for your events and demos. Share a public link, participants submit feedback (no account required), and you get:
-
-- **Trust-scored feedback** - Every submission gets a 0-100 trust score based on self-verification, wallet connection, and behavioral signals
-- **Automatic event tracking** - Page views, clicks, and errors captured in real-time
-- **Hybrid visibility** - Participants see their own feedback + top issues; you see everything
-- **Retro Pack export** - Auto-generated markdown summary with P0/P1/P2 issues, drop-offs, and recommendations
-
-## Core Components
-
-### Event Labs
-Create feedback labs for events and demos. Define objectives, share public links, and collect trust-scored feedback.
-
-**Key Features:**
-- Public participation (no auth required)
-- Real-time event tracking with instrumentation
-- Trust scoring (0-100) based on verification signals
-- Hybrid visibility model (creators vs participants)
-- Retro pack generation with markdown export
-
-**Routes:**
-- `/labs` - List all your labs
-- `/labs/create` - Create new lab
-- `/labs/[slug]` - Lab detail (creator view)
-- `/labs/[slug]/retro` - Retro pack view
-- `/lab/[slug]` - Public participation page
-
-### 8004 Trust Scoring
-Middleware that scores feedback (0-100) based on:
-- Self-verification (+30 points)
-- Wallet connection (+20 points)
-- Rate limiting (-50 if >10 submissions per session)
-
-Trust scores help filter spam automatically and prioritize high-quality signals.
-
-### Premium Access (x402) - *Mock*
-Experimental HTTP 402 payment layer for gating premium labs. Not yet implemented.
-
-### Agent Interoperability (A2A) - *Mock*
-Agent-to-agent protocol for querying labs and exporting feedback data. Static capability discovery only.
-
-### Existing Features
-- **Lab** - Builder profile and command center
-- **Missions** - Challenges and quests with rewards
-- **Spray** - Bulk CELO/ERC20 payouts and airdrops
-- **GoodDollar** - Engagement rewards with anti-sybil verification
-- **Taberna** - Live mentorship sessions and events
+> **Capture signals, ignore noise.**
+> A trust-native feedback platform for events, demos, and launches. Track interactions, score user credibility, and ship improvements faster.
 
 ---
 
-## Tech Stack
+## ⚡ The Product: Why Event Labs?
 
-- **Next.js 15** (App Router + Turbopack)
-- **React 19** with TypeScript 5 (strict mode)
-- **Tailwind CSS v4** (PostCSS pipeline)
-- **Biome** for linting and formatting
-- **Reown AppKit** for wallet connection (ethers 6.15)
-- **Self.xyz** for identity verification (@selfxyz/core, @selfxyz/qrcode)
-- **Supabase** for user profiles and persistence
-- **next-intl** for internationalization (EN/ES)
+Running demos and events is high-effort. Gathering actionable feedback from them is usually chaotic. **DenLabs** solves the "noisy feedback" problem by introducing **Trust Scores** and **Automated Retros**.
+
+### The Feedback Loop
+
+1. **Create a Lab:** Define your event objectives and generate a public link.
+2. **Collect Signals:** Participants submit feedback (no account required). We track behavior and verify identity in the background.
+3. **Filter by Trust:** Our middleware scores every piece of feedback (0-100) based on wallet history, self-verification, and behavioral patterns.
+4. **Export Retro:** Generate an instant Markdown summary with P0/P1 issues, sorted by trust score, ready to paste into your engineering roadmap.
 
 ---
 
-## Requirements
+## 💎 Core Features
 
-- Node.js 20.11+ (Node 22 recommended)
+### 1. Trust Scoring (Middleware 8004)
+
+Not all feedback is equal. We assign a **Trust Score (0-100)** to every interaction to filter spam and prioritize power users.
+
+- **+30 pts:** Self.xyz Verification (Anti-Sybil).
+- **+20 pts:** Wallet Connection (On-chain history).
+- **-50 pts:** Spam behavior (Rate limiting).
+
+### 2. Hybrid Visibility
+
+Balance transparency with privacy during live events.
+
+- **Creators:** See everything (raw data + analytics).
+- **Participants:** See their own feedback + top upvoted issues.
+- **Public:** See only high-trust, aggregated top issues.
+
+### 3. Retro Packs (The "Killer Feature")
+
+Stop manually compiling notes. Click one button to get a **Retro Pack**:
+
+- Summary of top P0/P1 issues.
+- Drop-off analytics.
+- Actionable recommendations.
+- _Format: Markdown (ready for GitHub/Linear)._
+
+### 4. x402 Premium Access (Experimental)
+
+A payment layer based on HTTP 402.
+
+- **Free Tier:** Unlimited collection & real-time ops.
+- **Premium Tier:** Paid access for high-value exports (CSV, detailed Retros, extended history) via crypto micro-payments.
+
+---
+
+## 🛠 Tech Stack
+
+Built for speed, type safety, and modern web standards.
+
+| Layer         | Technology                                          |
+| ------------- | --------------------------------------------------- |
+| **Framework** | Next.js 15 (App Router + Turbopack)                 |
+| **Language**  | React 19 + TypeScript 5 (Strict)                    |
+| **Styling**   | Tailwind CSS v4 + Biome (Linting)                   |
+| **Database**  | Supabase (PostgreSQL)                               |
+| **Identity**  | Reown AppKit (Wallet) + Self.xyz (Verifiable Creds) |
+| **Payments**  | HTTP 402 (Custom Middleware)                        |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 20.11+
 - npm 10+ or pnpm 9+
-- A tunnel (ngrok, Cloudflare, etc.) when testing Self verification
+- Supabase Project
 
----
-
-## Quick Start
+### 1. Installation
 
 ```bash
-# Install dependencies
-npm install  # or pnpm install
+# Clone and install
+git clone https://github.com/your-org/denlabs.git
+cd denlabs
+npm install
 
-# Create .env.local (copy .env.example and fill in values)
+```
+
+### 2. Environment Setup
+
+Create a `.env.local` file based on `.env.example`.
+
+```bash
 cp .env.example .env.local
 
-# Start development server
-npm run dev  # or pnpm dev
+```
 
+**Critical Variables:**
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-key
+NEXT_PUBLIC_REOWN_PROJECT_ID=your-wallet-connect-id
+
+```
+
+### 3. Database Migration
+
+DenLabs relies on specific SQL schemas for the Labs functionality.
+
+1. Go to your Supabase Dashboard → SQL Editor.
+2. Run the content of `database/migrations/001_event_feedback_ops.sql`.
+3. _(Optional)_ Read `database/migrations/README.md` for schema details.
+
+### 4. Run Development Server
+
+```bash
+npm run dev
 # Visit http://localhost:3000
+
 ```
 
-The middleware will redirect to `/en` by default for English locale.
-
-### Quick Start for Event Labs
-
-1. **Run database migration**
-   ```bash
-   # Navigate to Supabase Dashboard → SQL Editor
-   # Copy contents of database/migrations/001_event_feedback_ops.sql
-   # Execute in SQL Editor
-   # See database/migrations/README.md for details
-   ```
-
-2. **Create your first lab**
-   - Navigate to `/labs/create`
-   - Fill in lab details (name, objective, dates)
-   - Share the public link with participants
-
-3. **Public participation**
-   - Participants visit `/lab/[your-slug]`
-   - No account required to submit feedback
-   - Automatic event tracking and trust scoring
-
-4. **Generate retro pack**
-   - Visit `/labs/[your-slug]/retro`
-   - Export markdown summary with top issues and recommendations
-
-## Key Principles
-
-### Trust-First
-Every feedback item is scored 0-100. Filter spam automatically and prioritize high-quality signals.
-
-### Hybrid Visibility
-Balance transparency with privacy:
-- **Creators** see all feedback
-- **Participants** see their own + top P0/P1 issues
-- **Anonymous visitors** see top issues only
-
-### Retro-Ready
-Export markdown retro packs with one click. Share with your team and ship improvements faster.
-
-### Session Cookies
-Anonymous participation enabled via `denlabs-lab-session` cookie. No account required to submit feedback.
+> **Note:** The app redirects to `/en` (English) or `/es` (Spanish) automatically.
 
 ---
 
-## Scripts
+## 🎮 Usage Guide: Running Your First Lab
 
-```bash
-npm run dev          # Next.js dev server with Turbopack
-npm run build        # Production build
-npm run start        # Serve production build
-npm run lint         # Biome lint + static analysis
-npm run format       # Apply Biome formatting fixes
-npm run doc:delta    # Check documentation drift
-npm run doc:snapshot # Create documentation snapshot (in denlabs-docs repo)
-```
+1. **Builder View:** Navigate to `/labs/create`.
 
-**Before committing:** Run `npm run lint` and `npm run build` to ensure code quality.
+- Set a name (e.g., "Alpha Launch V1").
+- Define the objective.
 
----
+2. **Share:** Copy the public link (e.g., `denlabs.app/lab/alpha-v1`).
+3. **Simulate Feedback:** Open the link in an incognito window.
 
-## Environment Setup
+- Notice no login is required (Session Cookie).
+- Submit feedback.
 
-Create `.env.local` with required variables (see `.env.example` for template):
-
-```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Reown AppKit (wallet connection)
-NEXT_PUBLIC_REOWN_PROJECT_ID=your_project_id
-
-# Self.xyz (identity verification)
-NEXT_PUBLIC_SELF_APP_NAME=DenLabs
-NEXT_PUBLIC_SELF_ENDPOINT=https://yourapp.com/api/self/verify
-NEXT_PUBLIC_SELF_SCOPE=your-scope
-NEXT_PUBLIC_SELF_DEEPLINK_CALLBACK=https://yourapp.com/auth
-SELF_USE_SANDBOX=false  # Set true for development
-
-# GoodDollar
-NEXT_PUBLIC_GD_REWARDS_CONTRACT=0x...
-NEXT_PUBLIC_GD_APP_ADDRESS=0x...
-
-# Spray Disperser
-NEXT_PUBLIC_SPRAY_ADDRESS=0x...  # Celo mainnet
-
-# Taberna
-NEXT_PUBLIC_TABERNA_URL=https://...
-
-# Site
-NEXT_PUBLIC_SITE_URL=https://denlabs.vercel.app
-```
-
-**Note:** Restart dev server after changing environment variables.
+4. **Review:** Go back to `/labs/alpha-v1/retro` to see the trust-scored data and generate your Retro Pack.
 
 ---
 
-## x402 Verification & Testing
+## 🧪 Advanced: x402 & Testing
 
-DenLabs implements **x402 Premium Access** with HTTP 402 Payment Required for value-add exports and extended data windows. The implementation follows best practices for stateless payment verification via UVDAO facilitator.
+DenLabs implements the **x402 Payment Required** standard for premium features.
 
-### Premium Policy
-
-**FREE Tier** (Adoption & Real-time Operations):
-- ✅ Create unlimited labs
-- ✅ Submit unlimited feedback
-- ✅ 24h activity window
-- ✅ JSON preview (UI display)
-
-**PREMIUM Tier** (Value-add Exports):
-- 💎 Retro markdown export: **$0.03** (3¢)
-- 💎 Extended activity windows: **$0.02-$0.05** (7d/30d/90d)
-- 💎 Feedback CSV export: **$0.02** (2¢)
-- 💎 Activity JSON export: **$0.02** (2¢)
-
-### Facilitator Health Check
-
-Verify UVDAO facilitator is operational:
+**Facilitator Health Check:**
+Before processing payments, the system checks the UVDAO facilitator.
 
 ```bash
-# Run smoke test (checks /health, /supported, /verify endpoints)
 pnpm x402:smoke
 
-# Expected output:
-# ✅ Facilitator healthy
-# ✅ Supported networks count: X
-# ✅ Verify endpoint present
 ```
 
-The facilitator health is checked **before** returning 402 responses. If the facilitator is down, endpoints return **503 Service Unavailable** instead of 402 (since payment cannot be processed).
-
-### Integration Testing
-
-Run complete x402 test suite (recommended):
+**Integration Tests:**
+Validate the payment gating logic (returns 402 vs 200).
 
 ```bash
-# Run full integration test suite
 pnpm x402:test
 
-# Tests include:
-# - Facilitator health (external)
-# - Dev bypass mode validation
-# - Premium gating (402 flow)
-# - Conformance validation
-# - Configuration check
 ```
 
-Or test individual components:
-
-```bash
-# Test conformance only (dev/staging only)
-curl http://localhost:3000/api/x402/conformance
-
-# Or test specific endpoint:
-curl "http://localhost:3000/api/x402/conformance?endpoint=/api/labs/demo-event/retro?format=markdown"
-```
-
-**Expected conformance report:**
-```json
-{
-  "ok": true,
-  "status": 402,
-  "hasPaymentRequiredHeader": true,
-  "paymentRequiredContent": {
-    "price": 3,
-    "currency": "USD",
-    "token": "usdc",
-    "recipient": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-    "endpoint": "/api/labs/demo-event/retro",
-    "method": "GET",
-    "description": "Export retro pack as sponsor-ready markdown",
-    "facilitator": "https://facilitator.ultravioletadao.xyz",
-    "instructions": "Include PAYMENT-SIGNATURE header..."
-  },
-  "notes": [
-    "✅ Correct 402 status code",
-    "✅ PAYMENT-REQUIRED header present",
-    "✅ All required fields present",
-    "✅ Conformance test PASSED"
-  ]
-}
-```
-
-### Manual Testing
-
-Test premium endpoints without payment headers:
-
-```bash
-# Test retro markdown export (should return 402)
-curl -i http://localhost:3000/api/labs/demo-event/retro?format=markdown
-
-# Expected: HTTP/1.1 402 Payment Required
-# Expected header: PAYMENT-REQUIRED: {"price":3,"currency":"USD",...}
-
-# Test extended activity window (should return 402)
-curl -i "http://localhost:3000/api/labs/demo-event/activity?window=168"
-
-# Expected: HTTP/1.1 402 Payment Required
-
-# Test feedback CSV export (should return 402)
-curl -i "http://localhost:3000/api/labs/demo-event/feedback?export=csv"
-
-# Expected: HTTP/1.1 402 Payment Required
-```
-
-### Environment Variables
-
-Control x402 behavior with these env vars (see `.env.example`):
-
-```bash
-X402_FACILITATOR_URL=https://facilitator.ultravioletadao.xyz  # UVDAO facilitator
-X402_DEV_BYPASS=true                   # Skip payment checks in dev (default: false)
-X402_ENABLE_HEALTHCHECK=true           # Check facilitator before 402 (default: true)
-X402_HEALTHCHECK_TIMEOUT=2000          # Health check timeout ms (default: 2000)
-X402_DEV_DIAGNOSTICS=false             # Enable /api/x402/conformance in prod
-```
-
-**Important:** Set `X402_DEV_BYPASS=false` in production to enforce payment verification.
-
-### Response Codes
-
-| Code | Meaning | When |
-|------|---------|------|
-| **200** | OK | Valid PAYMENT-SIGNATURE provided |
-| **402** | Payment Required | No payment header, facilitator is healthy |
-| **403** | Forbidden | Only creators can export CSV (non-creator attempted) |
-| **503** | Service Unavailable | Facilitator is down (cannot process payment) |
-
-### Troubleshooting
-
-**Getting 200 instead of 402?**
-- Check `X402_DEV_BYPASS` in `.env.local` - should be `false` to enable payment gating
-- Restart the dev server after changing env vars
-
-**Getting 404 "Lab not found"?**
-- Visit `/labs/demo` to auto-create the demo lab
-- Or create your own lab via `/labs/create`
-
-**Getting 503 Service Unavailable?**
-- Run `pnpm x402:smoke` to check facilitator health
-- If facilitator is down, this is **correct behavior** (payment cannot be processed)
-- Wait for facilitator to recover or disable health check: `X402_ENABLE_HEALTHCHECK=false`
-
-**Conformance test failing?**
-- Ensure demo lab exists: visit `/labs/demo` first
-- Check facilitator URL in `.env.local`: `https://facilitator.ultravioletadao.xyz`
-- Verify server is running: `pnpm dev`
-- Check logs for detailed error messages
-
-**Full test suite:**
-```bash
-# 1. Create demo lab
-# Visit http://localhost:3000/labs/demo
-
-# 2. Run integration tests
-pnpm x402:test
-
-# 3. Test with bypass disabled (optional)
-# Set X402_DEV_BYPASS=false in .env.local
-# Restart server and run tests again
-```
+_Set `X402_DEV_BYPASS=true` in .env to skip payments during development._
 
 ---
 
-## Project Structure
+## 📂 Project Structure
+
+Key directories for contributors:
 
 ```
 src/
-  app/
-    [locale]/
-      (den)/              # Main app: lab, missions, spray, experiments
-        labs/             # Event Labs (creator view)
-          page.tsx        # Labs list
-          create/         # Create new lab
-          [slug]/         # Lab detail + retro
-        8004-scan/        # Trust verification scanner
-        x402/             # Premium layer experiments
-        a2a/              # Agent capabilities
-        lab/              # Builder profile
-        missions/         # Challenges
-        spray/            # Bulk payouts
-        gooddollar/       # Engagement rewards
-        taberna/          # Live sessions
-        settings/         # User preferences
-      lab/
-        [slug]/           # Public participation page (no auth)
-      page.tsx            # Landing page
-      access/             # Wallet connection + onboarding
-    api/
-      labs/               # Event Labs API
-        route.ts          # List + Create labs
-        [slug]/
-          route.ts        # Get + Update + Delete lab
-          feedback/       # Feedback endpoints
-          events/         # Event tracking
-          retro/          # Retro pack generation
-      scan/8004/          # 8004 scan API endpoint
-      x402/demo/          # x402 demo endpoint
-      a2a/capabilities/   # A2A capabilities endpoint
-      auth/               # Authentication endpoints
-      profile/            # User profile management
-      trust/              # Trust/verification endpoints
-    layout.tsx            # Global fonts, providers
-    globals.css           # Tailwind + theme tokens
-  components/
-    home/                 # Landing page components
-    den/                  # Shell (SidebarNav, TopBar, StatusStrip)
-    modules/
-      labs/               # Event Labs components
-        LabCard.tsx       # Lab summary card
-        LabForm.tsx       # Create/edit lab form
-        FeedbackForm.tsx  # Submit feedback
-        FeedbackItem.tsx  # Feedback item with trust indicator
-        FeedbackList.tsx  # Feedback list with filters
-        RetroPackView.tsx # Retro pack display + export
-    ui/                   # Reusable UI components
-      TrustIndicator.tsx  # Trust score badge
-  hooks/                  # Custom React hooks
-  lib/                    # Utilities and helpers
-    eventLabs.ts          # Event Labs types + utilities
-    eventLabsClient.ts    # Client-side fetch helpers
-    trustScoring.ts       # Trust score calculation
-    retroPack.ts          # Retro pack generation
-    instrumentation.ts    # Event tracking library
-  providers/
-    EventLabInstrumentationProvider.tsx  # Event tracking context
-  database/
-    migrations/           # Database migration scripts
-      001_event_feedback_ops.sql         # Event Labs schema
-      README.md           # Migration instructions
-  i18n/
-    messages/             # Translation files (en.json, es.json)
-    routing.ts            # next-intl configuration
-  middleware.ts           # Locale detection
+├── app/[locale]/
+│   ├── labs/            # Creator Dashboard (Protected)
+│   ├── lab/             # Public Participation (Anonymous/Session)
+│   ├── 8004-scan/       # Trust Verification Logic
+│   └── x402/            # Payment Layer Experiments
+├── components/
+│   ├── modules/labs/    # Core Lab Components (Forms, Lists, Retro)
+│   └── ui/              # Design System
+├── lib/
+│   ├── trustScoring.ts  # The 0-100 Scoring Algorithm
+│   └── retroPack.ts     # Markdown Generator Logic
+└── database/            # SQL Migrations
+
 ```
 
 ---
 
-## Localization
+## 🤝 Contributing
 
-- Routes are prefixed with `/[locale]` (en or es)
-- Messages in `src/i18n/messages/{locale}.json`
-- Use `useTranslations()` hook in components
-- `t.raw()` for structured data (arrays, objects)
-- Keep JSON keys alphabetical when adding new translations
+We follow a **Split Documentation** model:
 
----
+1. **Code:** Lives here.
+2. **Docs:** Detailed specs live in `denlabs-docs` (private).
 
-## Styling & Theming
+**Workflow:**
 
-- **Tailwind CSS v4** via PostCSS pipeline
-- Custom **"wolf" theme tokens** in `globals.css`:
-  - `--den-lime`, `--den-emerald` (primary colors)
-  - Neon-glass aesthetic with pill buttons (`rounded-[10px]`)
-- **Fonts:** Geist (sans + mono), Bitcount Single Ink for headlines
-- **Theme toggle:** Infrastructure exists for future light/dark modes
-
----
-
-## Documentation Workflow
-
-DenLabs uses a **split documentation model**:
-
-- **Public repo (denlabs):** Code, minimal docs, tooling
-- **Private repo (denlabs-docs):** Complete documentation, status, roadmaps
-
-### When Making Changes
-
-1. **Run doc:delta** after functional changes:
-   ```bash
-   npm run doc:delta  # or pnpm doc:delta
-   ```
-
-2. **Check the report:** `docs/DOC_DELTA_REPORT.md` (auto-generated, not committed)
-
-3. **Update docs in denlabs-docs:**
-   - `docs/STATUS.md` - Project status and features map
-   - `docs/CHANGELOG.md` - Add entry in [Unreleased] section
-   - `CLAUDE.md` - Update architecture/API sections if needed
-
-4. **Link docs PR:** Include link to denlabs-docs PR in your code PR
-
-### Documentation Pointer
-
-See `docs/DOCS_POINTER.md` for complete documentation workflow and access to private docs repo.
-
----
-
-## Development Workflow
-
-### Code Quality
-- **TypeScript strict mode** enforced
-- Export component prop types, avoid `any`
-- Use Tailwind utility-first styling in JSX
-- Biome handles import sorting automatically
-
-### Testing
-- No automated test suite yet (manual testing required)
-- Test flows manually: `/access → /lab → missions/spray/experiments`
-- Test both desktop and mobile layouts
-- Test locale switching (EN/ES)
-
-### Pre-commit Validation
-**REQUIRED before committing:**
-```bash
-npm run lint     # Fix lint errors
-npm run format   # Apply formatting
-npm run build    # Ensure production build succeeds
-```
-
-All three must pass without errors.
-
-### Commit Conventions
-Use Conventional Commits for clean history:
-- `feat: add 8004 scan page`
-- `fix: correct x402 endpoint response`
-- `docs: update README with feedback vision`
-- `style: format imports`
-- `chore: update dependencies`
-
----
-
-## Key Features
-
-### Self.xyz Verification
-- QR code + deeplink flow for identity verification
-- Sandbox mode for development (`SELF_USE_SANDBOX=true`)
-- Enforces: attestation id 1, age ≥18, OFAC screening
-- Anti-sybil layer for quality gating
-
-### Spray Console
-- Bulk CELO/ERC20 airdrops and payouts
-- CSV upload for recipient lists
-- Multi-network support
-- Allowance approval flows
-- Contract address: `NEXT_PUBLIC_SPRAY_ADDRESS`
-
-### GoodDollar Rewards
-- Engagement rewards with invite links
-- Uses Viem (not ethers) for blockchain interactions
-- Limits: 1 claim/app/180 days, max 3 apps/180 days
-- Requires Self verification as anti-sybil
-
----
-
-## Deployment
-
-1. **Build production bundle:**
-   ```bash
-   npm run build
-   ```
-
-2. **Test production build locally:**
-   ```bash
-   npm run start
-   ```
-
-3. **Environment variables:**
-   - Set all `NEXT_PUBLIC_*` vars in hosting platform
-   - Self verifier endpoint must be HTTPS in production
-   - Configure iframe origins for Taberna camera/microphone
-
-4. **Image domains:**
-   - Configure in `next.config.ts` for remote images
-
----
-
-## Contributing
-
-### Before Starting Work
-1. **Read documentation:**
-   - Request access to `denlabs-docs` private repo
-   - Review `docs/STATUS.md`, `docs/VISION_FEEDBACK.md`
-   - Check `PROJECT_FLOW.md` for current phase
-
-2. **Check existing issues:** Align on UX and architecture before large features
-
-3. **Follow the doc workflow:**
-   - Run `pnpm doc:delta` before submitting PR
-   - Create corresponding PR in `denlabs-docs` for functional changes
-   - Link docs PR in code PR description
-
-### PR Requirements
-- [ ] `pnpm run lint` passes
-- [ ] `pnpm run build` passes
-- [ ] Docs PR linked (if functional changes)
-- [ ] Manual testing completed (desktop + mobile)
-- [ ] Screenshots attached for UI changes
-
----
-
-## Related Documentation
-
-**Public (in this repo):**
-- `docs/DOCS_POINTER.md` - Documentation workflow and access
-- `docs/DOC_TARGETS.json` - Code-to-docs mapping
-- `.env.example` - Environment variables template
+1. Run `npm run doc:delta` to check for documentation drift.
+2. Run `npm run lint` and `npm run build` before committing.
+3. Use Conventional Commits (e.g., `feat: add trust score filter`).
 
 ---
 
 ## License
 
-MIT
-
----
-
-**Last Updated:** 2025-12-26
+MIT © 2024 DenLabs Builders
