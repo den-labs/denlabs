@@ -44,7 +44,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
   FacilitatorClient,
-  buildPaymentRequirements,
   extractPaymentFromHeaders,
   type PaymentRequirements,
 } from "uvd-x402-sdk/backend";
@@ -185,16 +184,21 @@ export async function verifyPayment(
 
     console.log("[x402] Payment header received:", paymentHeader);
 
-    // Build payment requirements using SDK helper
-    const paymentRequirements = buildPaymentRequirements({
-      amount: requirement.price.toString(),
-      recipient: X402_CONFIG.recipient,
+    // Build payment requirements manually (SDK doesn't have Avalanche Fuji config)
+    // Calculate amount in atomic units (e.g., 0.03 USD = 30000 USDC with 6 decimals)
+    const atomicAmount = Math.floor(requirement.price * 1_000_000).toString();
+
+    const paymentRequirements: PaymentRequirements = {
+      scheme: "exact" as const,
+      network: requirement.chainName, // "avalanche-fuji" is supported by facilitator
+      maxAmountRequired: atomicAmount,
       resource: `${req.nextUrl.origin}${requirement.endpoint}`,
-      chainName: requirement.chainName,
       description: requirement.description,
       mimeType: requirement.mimeType || "application/json",
-      timeoutSeconds: 300,
-    });
+      payTo: X402_CONFIG.recipient,
+      maxTimeoutSeconds: 300,
+      asset: requirement.tokenAddress, // USDC contract address
+    };
 
     console.log("[x402] Verifying payment with facilitator:", {
       resource: paymentRequirements.resource,
@@ -272,16 +276,20 @@ export async function build402Response(
     );
   }
 
-  // Build payment requirements for the client
-  const paymentRequirements = buildPaymentRequirements({
-    amount: requirement.price.toString(),
-    recipient: X402_CONFIG.recipient,
+  // Build payment requirements manually (SDK doesn't have Avalanche Fuji config)
+  const atomicAmount = Math.floor(requirement.price * 1_000_000).toString();
+
+  const paymentRequirements: PaymentRequirements = {
+    scheme: "exact" as const,
+    network: requirement.chainName, // "avalanche-fuji" is supported by facilitator
+    maxAmountRequired: atomicAmount,
     resource: requirement.endpoint,
-    chainName: requirement.chainName,
     description: requirement.description,
     mimeType: requirement.mimeType || "application/json",
-    timeoutSeconds: 300,
-  });
+    payTo: X402_CONFIG.recipient,
+    maxTimeoutSeconds: 300,
+    asset: requirement.tokenAddress,
+  };
 
   // Payment instructions for the client
   const paymentInstructions = {
