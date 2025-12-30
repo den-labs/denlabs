@@ -970,7 +970,9 @@ export default function SprayDisperser() {
     // Validate all addresses
     const hasENS = recipients.some((address) => isENSName(address));
     if (hasENS) {
-      setError("ENS names are not supported. Please use wallet addresses (0x...)");
+      setError(
+        "ENS names are not supported. Please use wallet addresses (0x...)",
+      );
       return;
     }
 
@@ -1123,7 +1125,8 @@ export default function SprayDisperser() {
   const ctaDisabled =
     isSubmitting ||
     rows.some((row) => row.address.trim() === "" || row.amount.trim() === "") ||
-    (mode === "token" && (!validateAddress(tokenAddress.trim()).valid || !tokenInfo));
+    (mode === "token" &&
+      (!validateAddress(tokenAddress.trim()).valid || !tokenInfo));
   const formatActivityTimestamp = (value: string) => {
     try {
       return activityTimestampFormatter.format(new Date(value));
