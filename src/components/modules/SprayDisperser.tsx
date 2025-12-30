@@ -23,12 +23,12 @@ import {
   parseEther,
   parseUnits,
 } from "ethers";
-import { isENSName, validateAddress } from "@/lib/addressValidation";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
+import { isENSName, validateAddress } from "@/lib/addressValidation";
 import {
   DEFAULT_SPRAY_NETWORK_KEY,
   SPRAY_NETWORKS,

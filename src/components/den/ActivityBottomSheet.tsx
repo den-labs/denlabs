@@ -12,7 +12,7 @@ export default function ActivityBottomSheet() {
     surfacesCount: number;
     observing: "all" | "subset";
   } | null>(null);
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   // Detect active lab from cookie
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function ActivityBottomSheet() {
     } else {
       setLabData(null);
     }
-  }, [pathname]); // Re-check on route change
+  }, []); // Re-check on route change
 
   // Don't render if no active lab
   if (!labSlug || !labData) {

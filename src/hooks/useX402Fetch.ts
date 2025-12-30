@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useWalletClient } from "wagmi";
-import { createPaymentFromWalletClient } from "uvd-x402-sdk/wagmi";
 import { getChainByName } from "uvd-x402-sdk";
-import { getNetworkFromChainId } from "@/utils/network";
+import { createPaymentFromWalletClient } from "uvd-x402-sdk/wagmi";
 import { toHex, type WalletClient } from "viem";
+import { useWalletClient } from "wagmi";
+import { getNetworkFromChainId } from "@/utils/network";
 
 interface UseX402FetchReturn {
   fetchWithPayment: (

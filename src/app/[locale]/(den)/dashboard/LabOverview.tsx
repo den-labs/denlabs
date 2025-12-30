@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
 import { Link as NextLink } from "@/i18n/routing";

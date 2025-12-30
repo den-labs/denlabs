@@ -1,6 +1,5 @@
 "use client";
 
-import { Scan } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 

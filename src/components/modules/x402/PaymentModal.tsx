@@ -3,10 +3,10 @@
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { AlertCircle, CheckCircle2, Info, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EVMProvider } from "uvd-x402-sdk/evm";
 import { getChainById } from "uvd-x402-sdk";
-import type { PaymentInstructions } from "@/lib/x402Client";
+import { EVMProvider } from "uvd-x402-sdk/evm";
 import { validateAddress } from "@/lib/addressValidation";
+import type { PaymentInstructions } from "@/lib/x402Client";
 
 interface PaymentModalProps {
   isOpen: boolean;

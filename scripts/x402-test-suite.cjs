@@ -9,8 +9,8 @@
  * 4. Conformance (header validation)
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 // Load .env.local file
 function loadEnvFile() {
@@ -63,7 +63,7 @@ function log(message, color = "reset") {
 }
 
 function logSection(title) {
-  console.log("\n" + "━".repeat(50));
+  console.log(`\n${"━".repeat(50)}`);
   log(`  ${title}`, "cyan");
   console.log("━".repeat(50));
 }
@@ -320,7 +320,7 @@ async function runTests() {
     log(`   ${icon} ${test}`, color);
   }
 
-  console.log("\n" + "━".repeat(50));
+  console.log(`\n${"━".repeat(50)}`);
 
   if (passed === total) {
     log(`\n✅ All tests passed (${passed}/${total})`, "green");

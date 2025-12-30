@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  EmptyTabContent,
-  LibraryModuleTabs,
-} from "@/components/library/LibraryModuleTabs";
+import { LibraryModuleTabs } from "@/components/library/LibraryModuleTabs";
 import TrustScoringDemo from "./TrustScoringDemo";
 
 export default function TrustScoringPage() {

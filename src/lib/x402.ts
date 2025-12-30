@@ -43,8 +43,8 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  FacilitatorClient,
   extractPaymentFromHeaders,
+  FacilitatorClient,
   type PaymentRequirements,
 } from "uvd-x402-sdk/backend";
 import { getDefaultX402Token } from "@/config/x402Tokens";

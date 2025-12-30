@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDenUser } from "@/hooks/useDenUser";
 import { Link } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
 
 export function WalletMenu() {
   const t = useTranslations();
@@ -106,9 +105,7 @@ export function WalletMenu() {
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/15 bg-white/10">
             <Wallet className="h-3.5 w-3.5 text-[#8bea4e]" aria-hidden />
           </span>
-          <span className="text-sm font-medium">
-            {displayName}
-          </span>
+          <span className="text-sm font-medium">{displayName}</span>
         </Button>
       </DropdownMenuTrigger>
 
@@ -142,23 +139,33 @@ export function WalletMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild className="rounded-lg px-3 py-2.5 hover:bg-white/5">
+        <DropdownMenuItem
+          asChild
+          className="rounded-lg px-3 py-2.5 hover:bg-white/5"
+        >
           <Link
             href="/dashboard"
             className="flex items-center gap-3 cursor-pointer"
           >
             <LayoutDashboard className="h-4 w-4 text-[#8bea4e]" />
-            <span className="text-[0.8rem]">{t("sidebar.laboratory.dashboard")}</span>
+            <span className="text-[0.8rem]">
+              {t("sidebar.laboratory.dashboard")}
+            </span>
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild className="rounded-lg px-3 py-2.5 hover:bg-white/5">
+        <DropdownMenuItem
+          asChild
+          className="rounded-lg px-3 py-2.5 hover:bg-white/5"
+        >
           <Link
             href="/verification"
             className="flex items-center gap-3 cursor-pointer"
           >
             <ShieldCheck className="h-4 w-4 text-[#8bea4e]" />
-            <span className="text-[0.8rem]">{t("sidebar.account.verification")}</span>
+            <span className="text-[0.8rem]">
+              {t("sidebar.account.verification")}
+            </span>
             {!isVerified && (
               <Badge
                 variant="outline"
@@ -170,13 +177,18 @@ export function WalletMenu() {
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild className="rounded-lg px-3 py-2.5 hover:bg-white/5">
+        <DropdownMenuItem
+          asChild
+          className="rounded-lg px-3 py-2.5 hover:bg-white/5"
+        >
           <Link
             href="/settings"
             className="flex items-center gap-3 cursor-pointer"
           >
             <Settings className="h-4 w-4 text-[#8bea4e]" />
-            <span className="text-[0.8rem]">{t("sidebar.account.settings")}</span>
+            <span className="text-[0.8rem]">
+              {t("sidebar.account.settings")}
+            </span>
           </Link>
         </DropdownMenuItem>
 

@@ -116,7 +116,7 @@ export function getModuleConfig(pathname: string): ModuleConfig | null {
 
   // Try to find by prefix (for dynamic routes like /labs/[slug])
   const matchingKey = Object.keys(MODULE_KEYS).find((key) =>
-    pathname.startsWith(key + "/"),
+    pathname.startsWith(`${key}/`),
   );
 
   return matchingKey ? MODULE_KEYS[matchingKey] : null;

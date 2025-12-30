@@ -8,12 +8,12 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { useState } from "react";
+import { PaymentConfirmModal } from "@/components/modules/x402/PaymentConfirmModal";
 import { Button } from "@/components/ui/button";
 import { TrustIndicator } from "@/components/ui/TrustIndicator";
-import { PaymentConfirmModal } from "@/components/modules/x402/PaymentConfirmModal";
 import { useX402Fetch } from "@/hooks/useX402Fetch";
-import { PRICING } from "@/lib/x402";
 import type { RetroPack } from "@/lib/retroPack";
+import { PRICING } from "@/lib/x402";
 
 interface RetroPackViewProps {
   labSlug: string;

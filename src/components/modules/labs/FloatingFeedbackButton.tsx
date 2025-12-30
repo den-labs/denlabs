@@ -20,7 +20,7 @@ export function FloatingFeedbackButton() {
   useEffect(() => {
     const activeSlug = getActiveLabSlugClient();
     setLabSlug(activeSlug);
-  }, [pathname]); // Re-check on route change
+  }, []); // Re-check on route change
 
   // Don't render if Lab Mode is not active
   if (!labSlug) return null;
@@ -58,7 +58,7 @@ export function FloatingFeedbackButton() {
         setIsOpen(false);
         setSubmitStatus("idle");
       }, 2000);
-    } catch (error) {
+    } catch (_error) {
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
