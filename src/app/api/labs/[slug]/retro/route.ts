@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   build402Response,
   PRICING,
+  resolveX402Network,
   shouldGate,
   verifyPayment,
 } from "@/lib/x402";
@@ -36,14 +37,17 @@ export async function GET(
 
     // Check if premium gating required (markdown export)
     if (shouldGate(request, format === "markdown")) {
+      // Resolve network configuration from request params (chainId or network)
+      const { chainId, chainName, tokenAddress } = resolveX402Network(request);
+
       const verification = await verifyPayment(request, {
         price: PRICING.RETRO_MARKDOWN,
         endpoint: `/api/labs/${slug}/retro`,
         method: "GET",
         description: "Export retro pack as sponsor-ready markdown",
-        chainId: 43113, // Avalanche Fuji testnet (default for testing)
-        chainName: "avalanche-fuji",
-        tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65", // USDC on Fuji
+        chainId,
+        chainName,
+        tokenAddress,
         mimeType: "text/markdown",
       });
 
@@ -53,9 +57,9 @@ export async function GET(
           endpoint: `/api/labs/${slug}/retro?format=markdown`,
           method: "GET",
           description: "Export retro pack as sponsor-ready markdown",
-          chainId: 43113,
-          chainName: "avalanche-fuji",
-          tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
+          chainId,
+          chainName,
+          tokenAddress,
           mimeType: "text/markdown",
         });
       }

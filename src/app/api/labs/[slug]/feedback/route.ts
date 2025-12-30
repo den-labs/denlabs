@@ -13,6 +13,7 @@ import { calculateTrustScore } from "@/lib/trustScoring";
 import {
   build402Response,
   PRICING,
+  resolveX402Network,
   shouldGate,
   verifyPayment,
 } from "@/lib/x402";
@@ -60,14 +61,17 @@ export async function GET(
         );
       }
 
+      // Resolve network configuration from request params
+      const { chainId, chainName, tokenAddress } = resolveX402Network(request);
+
       const verification = await verifyPayment(request, {
         price: PRICING.FEEDBACK_CSV,
         endpoint: `/api/labs/${slug}/feedback`,
         method: "GET",
         description: "Export all feedback as CSV for analysis",
-        chainId: 43113, // Avalanche Fuji testnet
-        chainName: "avalanche-fuji",
-        tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65", // USDC on Fuji
+        chainId,
+        chainName,
+        tokenAddress,
         mimeType: "text/csv",
       });
 
@@ -77,9 +81,9 @@ export async function GET(
           endpoint: `/api/labs/${slug}/feedback?export=csv`,
           method: "GET",
           description: "Export all feedback as CSV for analysis",
-          chainId: 43113,
-          chainName: "avalanche-fuji",
-          tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
+          chainId,
+          chainName,
+          tokenAddress,
           mimeType: "text/csv",
         });
       }

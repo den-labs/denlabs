@@ -19,6 +19,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   build402Response,
   PRICING,
+  resolveX402Network,
   shouldGate,
   verifyPayment,
 } from "@/lib/x402";
@@ -66,14 +67,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Resolve network configuration from request params
+    const { chainId, chainName, tokenAddress } = resolveX402Network(request);
+
     const verification = await verifyPayment(request, {
       price,
       endpoint: `/api/labs/${slug}/activity`,
       method: "GET",
       description,
-      chainId: 43113, // Avalanche Fuji testnet
-      chainName: "avalanche-fuji",
-      tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65", // USDC on Fuji
+      chainId,
+      chainName,
+      tokenAddress,
       mimeType: exportFormat ? "text/csv" : "application/json",
     });
 
@@ -83,9 +87,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         endpoint: `/api/labs/${slug}/activity?window=${window_hours}h${exportFormat ? `&export=${exportFormat}` : ""}`,
         method: "GET",
         description,
-        chainId: 43113,
-        chainName: "avalanche-fuji",
-        tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
+        chainId,
+        chainName,
+        tokenAddress,
         mimeType: exportFormat ? "text/csv" : "application/json",
       });
     }
