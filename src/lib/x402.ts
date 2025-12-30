@@ -70,6 +70,9 @@ export interface PaymentRequirement {
   endpoint: string;
   method: string;
   description: string;
+  chainId?: number;
+  tokenAddress?: string;
+  payer?: string;
 }
 
 export interface PaymentVerificationResult {
@@ -158,38 +161,50 @@ export async function verifyPayment(
   }
 
   try {
-    // Call facilitator to verify payment
+    // Call facilitator to verify payment (transaction hash)
+    const verifyPayload = {
+      transactionHash: paymentSignature, // The on-chain tx hash
+      recipient: X402_CONFIG.recipient,
+      expectedAmount: requirement.price,
+      token: X402_CONFIG.token,
+      endpoint: requirement.endpoint,
+      method: requirement.method,
+      ...(requirement.chainId && { chainId: requirement.chainId }),
+      ...(requirement.tokenAddress && { tokenAddress: requirement.tokenAddress }),
+      ...(requirement.payer && { payer: requirement.payer }),
+    };
+
+    console.log("[x402] Verifying payment with facilitator:", verifyPayload);
+
     const response = await fetch(`${X402_CONFIG.facilitatorUrl}/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        signature: paymentSignature,
-        recipient: X402_CONFIG.recipient,
-        expectedAmount: requirement.price,
-        token: X402_CONFIG.token,
-        endpoint: requirement.endpoint,
-        method: requirement.method,
-      }),
+      body: JSON.stringify(verifyPayload),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[x402] Facilitator returned error:", response.status, errorText);
       return {
         valid: false,
-        error: `Facilitator verification failed: ${response.statusText}`,
+        error: `Facilitator verification failed: ${response.statusText} - ${errorText}`,
       };
     }
 
     const result = await response.json();
+    console.log("[x402] Facilitator response:", result);
 
     if (result.verified) {
+      console.log("[x402] Payment verified successfully!");
       return {
         valid: true,
         paidAmount: result.amount,
       };
     }
 
+    console.warn("[x402] Payment verification failed:", result.error);
     return {
       valid: false,
       error: result.error || "Payment verification failed",
