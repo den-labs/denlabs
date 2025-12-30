@@ -5,23 +5,20 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Droplets,
   FlaskConical,
-  Gamepad2,
-  Lock,
-  Puzzle,
+  Gift,
+  LayoutDashboard,
+  Library,
   Scan,
-  ScanQrCode,
-  ShieldCheck,
   Sparkles,
-  SquareStack,
-  Trophy,
-  Twitter,
   UsersRound,
   Workflow,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,49 +30,83 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { shouldExpandParent, MODULE_STATUS } from "@/config/moduleKeys";
 
-const labNavigation = [
+// Product navigation items
+const productNavigation = [
   { key: "eventLabs", href: "/labs", icon: FlaskConical },
-  { key: "labHome", href: "/lab", icon: FlaskConical },
-  { key: "trustIdentity", href: "/auth", icon: ShieldCheck },
-  { key: "spray", href: "/spray", icon: Droplets },
-  { key: "gooddollar", href: "/gooddollar", icon: BadgeDollarSign },
-  { key: "taberna", href: "/taberna", icon: UsersRound },
-] as const;
-
-const feedbackExperimentsNavigation = [
-  { key: "scan8004", href: "/scan-8004", icon: Scan },
-  { key: "x402", href: "/x402", icon: Sparkles },
-  { key: "a2a", href: "/a2a", icon: Workflow },
   {
-    key: "xAccount",
-    href: "https://x.com/akaDenLabs",
-    icon: Twitter,
-    external: true,
+    key: "rewards",
+    icon: Gift,
+    collapsible: true,
+    children: [
+      { key: "sprayDisperser", href: "/spray", icon: Droplets },
+      { key: "gooddollarClaim", href: "/gooddollar", icon: BadgeDollarSign },
+    ],
   },
+  { key: "mentorsSpace", href: "/mentors", icon: UsersRound },
 ] as const;
 
-const experimentsNavigation = [
-  { key: "checkin", icon: ScanQrCode },
-  { key: "miniGames", icon: Gamepad2 },
-  { key: "sponsor", icon: SquareStack },
-  { key: "builderExtensions", icon: Puzzle },
-  { key: "insights", icon: BarChart3 },
-  { key: "leaderboard", icon: Trophy },
+// Laboratory navigation items
+const laboratoryNavigation = [
+  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
 ] as const;
 
-// Temporary flag to hide experiments navigation until the module is ready.
-const SHOW_EXPERIMENTS = false;
+// Library navigation items (hero modules only)
+const libraryNavigation = [
+  { key: "trustScoring", href: "/library/trust-scoring", icon: Scan },
+  { key: "premiumAccess", href: "/library/x402", icon: Sparkles },
+  { key: "agentNetwork", href: "/library/a2a", icon: Workflow },
+  { key: "browseLibrary", href: "/library", icon: Library, isIndex: true },
+] as const;
+
+type StatusBadgeProps = {
+  status: 'ready' | 'experimental' | 'planned' | 'external';
+};
+
+function StatusBadge({ status }: StatusBadgeProps) {
+  if (status === 'ready') return null;
+
+  const config = {
+    experimental: { label: '🟡 Beta', variant: 'secondary' as const },
+    planned: { label: '🔵 Soon', variant: 'outline' as const },
+    external: { label: '🔗', variant: 'outline' as const },
+  };
+
+  const badge = config[status];
+  if (!badge) return null;
+
+  return (
+    <Badge variant={badge.variant} className="ml-auto text-[0.6rem] px-1.5 py-0">
+      {badge.label}
+    </Badge>
+  );
+}
 
 export default function SidebarNav() {
   const t = useTranslations("SidebarNav");
   const pathname = usePathname();
   const { open, isMobile } = useSidebar();
+
+  // Auto-expand Rewards if on Spray or GoodDollar pages
+  const [rewardsExpanded, setRewardsExpanded] = useState(() =>
+    shouldExpandParent(pathname || '', 'rewards')
+  );
+
+  useEffect(() => {
+    if (shouldExpandParent(pathname || '', 'rewards')) {
+      setRewardsExpanded(true);
+    }
+  }, [pathname]);
 
   if (isMobile) {
     return null;
@@ -83,10 +114,8 @@ export default function SidebarNav() {
 
   const collapsed = !open && !isMobile;
   const footerCopy = t("footer.copy").replace(". ", ".\n");
+
   const matchesPath = (href: string) => {
-    if (href === "/auth") {
-      return pathname?.startsWith("/auth");
-    }
     return pathname === href || pathname?.startsWith(`${href}/`);
   };
 
@@ -126,12 +155,113 @@ export default function SidebarNav() {
           </div>
         </Link>
       </SidebarHeader>
+
       <SidebarContent>
+        {/* PRODUCTO */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sections.lab.title")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sections.product.title")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {labNavigation.map((item) => {
+              {productNavigation.map((item) => {
+                const ItemIcon = item.icon;
+
+                // Collapsible item (Rewards)
+                if ('collapsible' in item && item.collapsible && item.children) {
+                  return (
+                    <SidebarMenuItem key={item.key}>
+                      <SidebarMenuButton
+                        onClick={() => setRewardsExpanded(!rewardsExpanded)}
+                        className="flex w-full items-center gap-3"
+                      >
+                        <ItemIcon
+                          className="h-4 w-4 text-[#8bea4e]"
+                          aria-hidden
+                        />
+                        <span
+                          className={cn(
+                            "truncate text-[0.72rem]",
+                            collapsed ? "hidden" : "inline",
+                          )}
+                        >
+                          {t(`sections.product.${item.key}`)}
+                        </span>
+                        {!collapsed && (
+                          <ChevronDown
+                            className={cn(
+                              "ml-auto h-3.5 w-3.5 transition-transform",
+                              rewardsExpanded ? "rotate-180" : ""
+                            )}
+                          />
+                        )}
+                      </SidebarMenuButton>
+                      {rewardsExpanded && !collapsed && (
+                        <SidebarMenuSub>
+                          {item.children.map((child) => {
+                            const ChildIcon = child.icon;
+                            const isActive = matchesPath(child.href);
+                            return (
+                              <SidebarMenuSubItem key={child.key}>
+                                <SidebarMenuSubButton asChild isActive={isActive}>
+                                  <Link
+                                    href={child.href}
+                                    aria-current={isActive ? "page" : undefined}
+                                    className="flex w-full items-center gap-3 pl-8"
+                                  >
+                                    <ChildIcon
+                                      className="h-4 w-4 text-[#8bea4e]"
+                                      aria-hidden
+                                    />
+                                    <span className="truncate text-[0.72rem]">
+                                      {t(`sections.product.${child.key}`)}
+                                    </span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                }
+
+                // Regular item
+                const isActive = 'href' in item && matchesPath(item.href);
+                return (
+                  <SidebarMenuItem key={item.key}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link
+                        href={'href' in item ? item.href : '#'}
+                        aria-current={isActive ? "page" : undefined}
+                        className="flex w-full items-center gap-3"
+                      >
+                        <ItemIcon
+                          className="h-4 w-4 text-[#8bea4e]"
+                          aria-hidden
+                        />
+                        <span
+                          className={cn(
+                            "truncate text-[0.72rem]",
+                            collapsed ? "hidden" : "inline",
+                          )}
+                        >
+                          {t(`sections.product.${item.key}`)}
+                        </span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* LABORATORIO */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("sections.laboratory.title")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {laboratoryNavigation.map((item) => {
                 const ItemIcon = item.icon;
                 const isActive = matchesPath(item.href);
                 return (
@@ -152,7 +282,7 @@ export default function SidebarNav() {
                             collapsed ? "hidden" : "inline",
                           )}
                         >
-                          {t(`sections.lab.items.${item.key}`)}
+                          {t(`sections.laboratory.${item.key}`)}
                         </span>
                       </Link>
                     </SidebarMenuButton>
@@ -162,64 +292,45 @@ export default function SidebarNav() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* BIBLIOTECA */}
         <SidebarGroup>
-          <SidebarGroupLabel>
-            {t("sections.feedbackExperiments.title")}
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sections.library.title")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {feedbackExperimentsNavigation.map((item) => {
+              {libraryNavigation.map((item) => {
                 const ItemIcon = item.icon;
-                const isExternal = "external" in item && item.external;
-                const isActive = !isExternal && matchesPath(item.href);
+                const isActive = matchesPath(item.href);
+                const isIndex = 'isIndex' in item && item.isIndex;
+                const status = MODULE_STATUS[item.key];
 
                 return (
                   <SidebarMenuItem key={item.key}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      {isExternal ? (
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex w-full items-center gap-3"
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className="flex w-full items-center gap-3"
+                      >
+                        <ItemIcon
+                          className="h-4 w-4 text-[#8bea4e]"
+                          aria-hidden
+                        />
+                        <span
+                          className={cn(
+                            "truncate text-[0.72rem]",
+                            collapsed ? "hidden" : "inline",
+                          )}
                         >
-                          <ItemIcon
-                            className="h-4 w-4 text-[#8bea4e]"
-                            aria-hidden
-                          />
-                          <span
-                            className={cn(
-                              "truncate text-[0.72rem]",
-                              collapsed ? "hidden" : "inline",
-                            )}
-                          >
-                            {t(
-                              `sections.feedbackExperiments.items.${item.key}`,
-                            )}
-                          </span>
-                        </a>
-                      ) : (
-                        <Link
-                          href={item.href}
-                          aria-current={isActive ? "page" : undefined}
-                          className="flex w-full items-center gap-3"
-                        >
-                          <ItemIcon
-                            className="h-4 w-4 text-[#8bea4e]"
-                            aria-hidden
-                          />
-                          <span
-                            className={cn(
-                              "truncate text-[0.72rem]",
-                              collapsed ? "hidden" : "inline",
-                            )}
-                          >
-                            {t(
-                              `sections.feedbackExperiments.items.${item.key}`,
-                            )}
-                          </span>
-                        </Link>
-                      )}
+                          {t(`sections.library.${item.key}`)}
+                        </span>
+                        {!collapsed && !isIndex && status && (
+                          <StatusBadge status={status} />
+                        )}
+                        {!collapsed && isIndex && (
+                          <span className="ml-auto text-white/50">→</span>
+                        )}
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -227,46 +338,8 @@ export default function SidebarNav() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {SHOW_EXPERIMENTS ? (
-          <SidebarGroup>
-            <SidebarGroupLabel
-              className={cn("justify-between", collapsed ? "hidden" : "flex")}
-            >
-              <span>{t("sections.experiments.title")}</span>
-              <span className="rounded-full border border-white/15 px-2 py-0.5 text-[0.6rem] text-white/70">
-                {t("sections.experiments.badge")}
-              </span>
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {experimentsNavigation.map((item) => {
-                  const ItemIcon = item.icon;
-                  return (
-                    <SidebarMenuItem key={item.key}>
-                      <SidebarMenuButton
-                        type="button"
-                        disabled
-                        className="cursor-not-allowed text-white/50"
-                      >
-                        <ItemIcon className="h-4 w-4" aria-hidden />
-                        <span
-                          className={cn(
-                            "truncate text-[0.7rem]",
-                            collapsed ? "hidden" : "inline",
-                          )}
-                        >
-                          {t(`sections.experiments.items.${item.key}`)}
-                        </span>
-                        <Lock className="ml-auto h-3.5 w-3.5" aria-hidden />
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : null}
       </SidebarContent>
+
       <SidebarFooter className="flex items-center gap-3">
         {collapsed ? null : (
           <span className="whitespace-pre-line text-[0.62rem] uppercase">

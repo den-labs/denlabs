@@ -59,6 +59,81 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  async redirects() {
+    return [
+      // Profile → Dashboard
+      {
+        source: "/:locale/lab",
+        destination: "/:locale/dashboard",
+        permanent: true,
+      },
+      // Taberna → Mentors
+      {
+        source: "/:locale/taberna",
+        destination: "/:locale/mentors",
+        permanent: true,
+      },
+      // Trust & Identity → Verification (temporary for education)
+      {
+        source: "/:locale/auth",
+        destination: "/:locale/verification",
+        permanent: false,
+      },
+      // Old experiments → Library
+      {
+        source: "/:locale/scan-8004",
+        destination: "/:locale/library/trust-scoring",
+        permanent: true,
+      },
+      {
+        source: "/:locale/x402",
+        destination: "/:locale/library/x402",
+        permanent: true,
+      },
+      {
+        source: "/:locale/a2a",
+        destination: "/:locale/library/a2a",
+        permanent: true,
+      },
+      {
+        source: "/:locale/mind-games",
+        destination: "/:locale/library/games",
+        permanent: true,
+      },
+      {
+        source: "/:locale/quests",
+        destination: "/:locale/library/quests",
+        permanent: true,
+      },
+      {
+        source: "/:locale/checkin",
+        destination: "/:locale/library/attendance",
+        permanent: true,
+      },
+      {
+        source: "/:locale/voting",
+        destination: "/:locale/library/voting",
+        permanent: true,
+      },
+      {
+        source: "/:locale/showcase",
+        destination: "/:locale/library/sponsors",
+        permanent: true,
+      },
+      // Stats/Insights → Dashboard tab
+      {
+        source: "/:locale/stats",
+        destination: "/:locale/dashboard?tab=insights",
+        permanent: true,
+      },
+      {
+        source: "/:locale/leaderboard",
+        destination: "/:locale/dashboard?tab=leaderboard",
+        permanent: true,
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {

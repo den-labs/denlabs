@@ -52,7 +52,100 @@
       "auth": {
         "title": "Self Auth",
         "description": "Verify staff and attendees with Self."
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "description": "Your metrics, insights, and leaderboard rankings."
+      },
+      "sprayDisperser": {
+        "title": "Spray Disperser",
+        "description": "Reward many wallets at once, in just one send."
+      },
+      "gooddollarClaim": {
+        "title": "GoodDollar Claim",
+        "description": "Claim your G$ rewards for verified builders."
+      },
+      "mentorsSpace": {
+        "title": "Mentors Space",
+        "description": "Schedule and manage mentorship sessions."
+      },
+      "eventLabs": {
+        "title": "Event Labs",
+        "description": "Create and manage feedback labs for your events."
+      },
+      "trustScoring": {
+        "title": "Trust Scoring (8004)",
+        "description": "Trust verification for Event Feedback Ops."
+      },
+      "premiumAccess": {
+        "title": "Premium Access (x402)",
+        "description": "Optional micropayment layer for premium features."
+      },
+      "agentNetwork": {
+        "title": "Agent Network (A2A)",
+        "description": "AI agent interoperability and capability discovery."
+      },
+      "browseLibrary": {
+        "title": "Browse Library",
+        "description": "Explore all modules and integrations."
+      },
+      "gamesLab": {
+        "title": "Games Lab",
+        "description": "Interactive game engines and mechanics."
+      },
+      "questsEngine": {
+        "title": "Quests Engine",
+        "description": "Mission and reward systems for builders."
+      },
+      "attendanceTools": {
+        "title": "Attendance Tools",
+        "description": "Event check-in and tracking utilities."
+      },
+      "votingSystem": {
+        "title": "Voting System",
+        "description": "On-chain and off-chain voting mechanisms."
+      },
+      "sponsorToolkit": {
+        "title": "Sponsor Toolkit",
+        "description": "Integration tools for event sponsors."
+      },
+      "verification": {
+        "title": "Verification",
+        "description": "Verify your identity with Self.xyz to unlock features."
       }
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "product": "Product",
+      "laboratory": "Laboratory",
+      "library": "Library",
+      "account": "Account"
+    },
+    "product": {
+      "eventLabs": "Event Labs",
+      "rewards": "Rewards",
+      "sprayDisperser": "Spray Disperser",
+      "gooddollarClaim": "GoodDollar Claim",
+      "mentorsSpace": "Mentors Space"
+    },
+    "laboratory": {
+      "dashboard": "Dashboard"
+    },
+    "library": {
+      "trustScoring": "Trust Scoring (8004)",
+      "premiumAccess": "Premium Access (x402)",
+      "agentNetwork": "Agent Network (A2A)",
+      "browseLibrary": "Browse Library",
+      "gamesLab": "Games Lab",
+      "questsEngine": "Quests Engine",
+      "attendanceTools": "Attendance Tools",
+      "votingSystem": "Voting System",
+      "sponsorToolkit": "Sponsor Toolkit"
+    },
+    "account": {
+      "verification": "Verification",
+      "settings": "Settings"
     }
   },
   "SidebarNav": {
@@ -70,6 +163,15 @@
       "helper": ""
     },
     "sections": {
+      "product": {
+        "title": "Product"
+      },
+      "laboratory": {
+        "title": "Laboratory"
+      },
+      "library": {
+        "title": "Library"
+      },
       "lab": {
         "title": "Lab",
         "items": {
