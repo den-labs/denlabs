@@ -3,22 +3,17 @@
 import { useCallback, useState } from "react";
 import { useWalletClient } from "wagmi";
 import { createPaymentFromWalletClient } from "uvd-x402-sdk/wagmi";
+import { getChainByName } from "uvd-x402-sdk";
 import { getNetworkFromChainId } from "@/utils/network";
+import { toHex, type WalletClient } from "viem";
 
 interface UseX402FetchReturn {
-  /**
-   * Fetch with automatic x402 payment handling.
-   * Uses wallet to sign payment if 402 response is received.
-   */
   fetchWithPayment: (
     url: string,
     options?: RequestInit,
   ) => Promise<Response | null>;
-  /** Whether a payment is currently being processed */
   isProcessing: boolean;
-  /** Error message if payment failed */
   error: string | null;
-  /** Clear the error state */
   clearError: () => void;
 }
 
@@ -41,22 +36,125 @@ interface X402Response {
   message?: string;
 }
 
+// EIP-3009 domain and types for USDC
+const getEIP3009Types = () => ({
+  TransferWithAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" },
+  ],
+});
+
+// USDC domain separators vary by chain
+const getUSDCDomain = (chainId: number, tokenAddress: string) => {
+  // Domain names for different USDC deployments
+  const domainNames: Record<number, string> = {
+    43113: "USD Coin", // Avalanche Fuji
+    84532: "USD Coin", // Base Sepolia
+    80002: "USD Coin", // Polygon Amoy
+  };
+
+  return {
+    name: domainNames[chainId] || "USD Coin",
+    version: "2",
+    chainId: BigInt(chainId),
+    verifyingContract: tokenAddress as `0x${string}`,
+  };
+};
+
 /**
- * Hook to handle x402 payment flow using uvd-x402-sdk.
- * Uses createPaymentFromWalletClient for native Wagmi integration.
- *
- * Usage:
- * ```tsx
- * const { fetchWithPayment, isProcessing, error } = useX402Fetch();
- *
- * const handleDownload = async () => {
- *   const response = await fetchWithPayment('/api/labs/demo/retro?format=markdown');
- *   if (response?.ok) {
- *     // Handle successful response
- *   }
- * };
- * ```
+ * Create EIP-3009 payment header manually for testnets not supported by SDK
  */
+async function createTestnetPaymentHeader(
+  walletClient: WalletClient,
+  recipient: string,
+  amount: string,
+  chainId: number,
+  tokenAddress: string,
+  network: string,
+): Promise<string> {
+  // Get address from wallet client account
+  const account = walletClient.account;
+  if (!account) {
+    throw new Error("Wallet account not available");
+  }
+  const address = account.address;
+
+  // Convert amount to atomic units (6 decimals for USDC)
+  const amountAtomic = BigInt(Math.floor(parseFloat(amount) * 1_000_000));
+
+  // Generate timestamps
+  const now = Math.floor(Date.now() / 1000);
+  const validAfter = BigInt(now - 60); // Valid from 1 minute ago
+  const validBefore = BigInt(now + 900); // Valid for 15 minutes
+
+  // Generate random nonce
+  const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
+  const nonce = toHex(nonceBytes);
+
+  const domain = getUSDCDomain(chainId, tokenAddress);
+  const types = getEIP3009Types();
+
+  const message = {
+    from: address,
+    to: recipient as `0x${string}`,
+    value: amountAtomic,
+    validAfter,
+    validBefore,
+    nonce: nonce as `0x${string}`,
+  };
+
+  console.log("[x402] Signing EIP-3009 authorization:", {
+    domain,
+    message,
+    chainId,
+  });
+
+  // Sign the typed data
+  const signature = await walletClient.signTypedData({
+    account,
+    domain,
+    types,
+    primaryType: "TransferWithAuthorization",
+    message,
+  });
+
+  // Build x402 payment header
+  const payload = {
+    x402Version: 1,
+    scheme: "exact",
+    network,
+    payload: {
+      signature,
+      authorization: {
+        from: address,
+        to: recipient,
+        value: amountAtomic.toString(),
+        validAfter: validAfter.toString(),
+        validBefore: validBefore.toString(),
+        nonce,
+      },
+    },
+  };
+
+  return btoa(JSON.stringify(payload));
+}
+
+/**
+ * Check if SDK supports this chain
+ */
+function isChainSupportedBySDK(chainName: string): boolean {
+  try {
+    const config = getChainByName(chainName);
+    return config !== undefined && config !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function useX402Fetch(): UseX402FetchReturn {
   const { data: walletClient } = useWalletClient();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,12 +191,11 @@ export function useX402Fetch(): UseX402FetchReturn {
         console.log("[x402] Making initial request to:", url);
         const initialResponse = await fetch(url, fetchOptions);
 
-        // If not 402, return the response directly
         if (initialResponse.status !== 402) {
           return initialResponse;
         }
 
-        // Parse 402 response to get payment requirements
+        // Parse 402 response
         let x402Data: X402Response;
         try {
           x402Data = await initialResponse.json();
@@ -116,7 +213,6 @@ export function useX402Fetch(): UseX402FetchReturn {
         const requirement = x402Data.accepts[0];
         console.log("[x402] Payment requirement:", requirement);
 
-        // Get chain name from wallet
         const chainId = walletClient.chain.id;
         const chainName = getNetworkFromChainId(chainId) || requirement.network;
 
@@ -128,31 +224,37 @@ export function useX402Fetch(): UseX402FetchReturn {
           return null;
         }
 
-        // Convert atomic amount to decimal (USDC has 6 decimals)
+        // Convert atomic amount to decimal
         const amountDecimal = (
           Number(requirement.maxAmountRequired) / 1_000_000
         ).toFixed(2);
 
-        console.log("[x402] Creating payment with uvd-x402-sdk:", {
-          recipient: requirement.payTo,
-          amount: amountDecimal,
-          chainName,
-          chainId,
-        });
+        let paymentHeader: string;
 
-        // Create payment header using uvd-x402-sdk
-        const paymentHeader = await createPaymentFromWalletClient(
-          walletClient,
-          {
+        // Check if SDK supports this chain
+        if (isChainSupportedBySDK(chainName)) {
+          console.log("[x402] Using uvd-x402-sdk for:", chainName);
+          paymentHeader = await createPaymentFromWalletClient(walletClient, {
             recipient: requirement.payTo,
             amount: amountDecimal,
             chainName,
-          },
-        );
+          });
+        } else {
+          // Use manual EIP-3009 signing for testnets
+          console.log("[x402] Using manual EIP-3009 signing for:", chainName);
+          paymentHeader = await createTestnetPaymentHeader(
+            walletClient as WalletClient,
+            requirement.payTo,
+            amountDecimal,
+            chainId,
+            requirement.asset,
+            chainName,
+          );
+        }
 
         console.log("[x402] Payment header created, retrying request...");
 
-        // Retry request with payment header
+        // Retry with payment header
         const paidResponse = await fetch(url, {
           ...fetchOptions,
           headers: {
@@ -162,7 +264,6 @@ export function useX402Fetch(): UseX402FetchReturn {
         });
 
         if (paidResponse.status === 402) {
-          // Payment was rejected
           try {
             const errorData = await paidResponse.clone().json();
             console.error("[x402] Payment rejected:", errorData);
@@ -178,7 +279,6 @@ export function useX402Fetch(): UseX402FetchReturn {
       } catch (err) {
         console.error("[x402] Payment error:", err);
 
-        // Handle user rejection
         if (
           err instanceof Error &&
           (err.message.includes("User rejected") ||
@@ -189,7 +289,6 @@ export function useX402Fetch(): UseX402FetchReturn {
           return null;
         }
 
-        // Handle specific SDK errors
         if (err instanceof Error) {
           if (err.message.includes("INSUFFICIENT_BALANCE")) {
             setError("Insufficient USDC balance for this payment.");
