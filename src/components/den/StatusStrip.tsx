@@ -236,14 +236,17 @@ export function StatusStrip({
             {link.icon}
           </a>
         ))}
-        <ConnectWalletButton
-          className={cn(
-            "inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-[#14181f] text-white/80 transition hover:border-white/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-70",
-          )}
-          connectLabel={walletButtonLabel}
-          connectedLabel={connectedWalletButtonLabel}
-          disabled={loading}
-        />
+        {/* Only show connect button when NOT connected - WalletMenu handles connected state */}
+        {!isConnected && (
+          <ConnectWalletButton
+            className={cn(
+              "inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-[#14181f] text-white/80 transition hover:border-white/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-70",
+            )}
+            connectLabel={walletButtonLabel}
+            connectedLabel={connectedWalletButtonLabel}
+            disabled={loading}
+          />
+        )}
       </div>
     );
   }
@@ -256,24 +259,27 @@ export function StatusStrip({
         className,
       )}
     >
-      <div
-        className={cn(
-          "order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto",
-          isWalletOnly && "w-auto",
-        )}
-      >
-        <ConnectWalletButton
+      {/* Only show connect button when NOT connected - WalletMenu handles connected state */}
+      {!isConnected && (
+        <div
           className={cn(
-            "inline-flex items-center justify-center gap-3 rounded-md border px-3 text-[0.75rem] font-semibold uppercase transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70",
-            isCompactWallet &&
-              "h-12 w-12 rounded-full border-white/25 bg-transparent p-0 uppercase",
-            !isWalletOnly && "w-full sm:w-auto",
+            "order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto",
+            isWalletOnly && "w-auto",
           )}
-          connectLabel={walletButtonLabel}
-          connectedLabel={connectedWalletButtonLabel}
-          disabled={loading}
-        />
-      </div>
+        >
+          <ConnectWalletButton
+            className={cn(
+              "inline-flex items-center justify-center gap-3 rounded-md border px-3 text-[0.75rem] font-semibold uppercase transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70",
+              isCompactWallet &&
+                "h-12 w-12 rounded-full border-white/25 bg-transparent p-0 uppercase",
+              !isWalletOnly && "w-full sm:w-auto",
+            )}
+            connectLabel={walletButtonLabel}
+            connectedLabel={connectedWalletButtonLabel}
+            disabled={loading}
+          />
+        </div>
+      )}
       {isWalletOnly ? null : (
         <div className="order-2 w-full sm:order-1 sm:w-auto">
           <div className="grid grid-cols-4 gap-2 sm:flex sm:items-center sm:gap-3">
