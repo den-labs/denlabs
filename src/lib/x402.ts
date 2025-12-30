@@ -49,7 +49,7 @@ const X402_CONFIG = {
     process.env.X402_FACILITATOR_URL ||
     "https://facilitator.ultravioletadao.xyz",
   recipient:
-    process.env.X402_RECIPIENT || "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+    process.env.X402_RECIPIENT || "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0", // ⚠️ CONFIGURE: Set your payment recipient address in .env.local
   maxPrice: Number.parseInt(process.env.X402_MAX_PRICE || "10", 10),
   token: process.env.X402_TOKEN || "usdc",
   devBypass: process.env.X402_DEV_BYPASS === "true",
