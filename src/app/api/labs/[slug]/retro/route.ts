@@ -41,6 +41,10 @@ export async function GET(
         endpoint: `/api/labs/${slug}/retro`,
         method: "GET",
         description: "Export retro pack as sponsor-ready markdown",
+        chainId: 43113, // Avalanche Fuji testnet (default for testing)
+        chainName: "avalanche-fuji",
+        tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65", // USDC on Fuji
+        mimeType: "text/markdown",
       });
 
       if (!verification.valid) {
@@ -49,6 +53,10 @@ export async function GET(
           endpoint: `/api/labs/${slug}/retro?format=markdown`,
           method: "GET",
           description: "Export retro pack as sponsor-ready markdown",
+          chainId: 43113,
+          chainName: "avalanche-fuji",
+          tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
+          mimeType: "text/markdown",
         });
       }
     }

@@ -71,6 +71,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       endpoint: `/api/labs/${slug}/activity`,
       method: "GET",
       description,
+      chainId: 43113, // Avalanche Fuji testnet
+      chainName: "avalanche-fuji",
+      tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65", // USDC on Fuji
+      mimeType: exportFormat ? "text/csv" : "application/json",
     });
 
     if (!verification.valid) {
@@ -79,6 +83,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         endpoint: `/api/labs/${slug}/activity?window=${window_hours}h${exportFormat ? `&export=${exportFormat}` : ""}`,
         method: "GET",
         description,
+        chainId: 43113,
+        chainName: "avalanche-fuji",
+        tokenAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
+        mimeType: exportFormat ? "text/csv" : "application/json",
       });
     }
   }
