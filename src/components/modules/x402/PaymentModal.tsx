@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useAppKitAccount,
-  useAppKitNetwork,
-} from "@reown/appkit/react";
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { AlertCircle, CheckCircle2, Info, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EVMProvider } from "uvd-x402-sdk/evm";
@@ -56,11 +53,14 @@ export function PaymentModal({
 
       // Check wallet connection
       if (!isConnected || !address || !chainId) {
-        throw new Error("Wallet not connected. Please connect your wallet first.");
+        throw new Error(
+          "Wallet not connected. Please connect your wallet first.",
+        );
       }
 
       // Get chain configuration from SDK
-      const chainIdNum = typeof chainId === "number" ? chainId : Number(chainId);
+      const chainIdNum =
+        typeof chainId === "number" ? chainId : Number(chainId);
       const chainConfig = getChainById(chainIdNum);
 
       if (!chainConfig) {
@@ -164,9 +164,7 @@ export function PaymentModal({
 
               <div className="flex justify-between">
                 <span className="text-sm text-white/70">Payment Token</span>
-                <span className="text-sm font-semibold text-white">
-                  USDC
-                </span>
+                <span className="text-sm font-semibold text-white">USDC</span>
               </div>
             </div>
 
@@ -175,10 +173,24 @@ export function PaymentModal({
               <div>
                 <p className="font-semibold">x402 Gasless Payment</p>
                 <p className="text-blue-200/80">
-                  Sign payment authorization. The facilitator will execute on-chain - no gas fees for you.
+                  Sign payment authorization. The facilitator will execute
+                  on-chain - no gas fees for you.
                 </p>
               </div>
             </div>
+
+            {/* Wallet Connection Warning */}
+            {!isConnected && (
+              <div className="mb-6 flex items-start gap-2 rounded-lg bg-yellow-500/10 p-3 text-sm text-yellow-300">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold">Wallet Required</p>
+                  <p className="text-yellow-200/80">
+                    Please connect your wallet to proceed with payment.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3">
               <button
@@ -191,9 +203,14 @@ export function PaymentModal({
               <button
                 type="button"
                 onClick={handleConfirmPayment}
-                className="flex-1 rounded-lg bg-wolf-emerald px-4 py-3 text-sm font-semibold text-black transition hover:bg-wolf-emerald/90"
+                disabled={!isConnected || !address}
+                className={`flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                  isConnected && address
+                    ? "bg-wolf-emerald text-black hover:bg-wolf-emerald/90"
+                    : "cursor-not-allowed bg-gray-600 text-gray-400"
+                }`}
               >
-                Sign Payment
+                {isConnected ? "Sign Payment" : "Connect Wallet First"}
               </button>
             </div>
           </>
