@@ -5,13 +5,13 @@ import {
   Check,
   Copy,
   Download,
+  Loader2,
   TrendingDown,
 } from "lucide-react";
 import { useState } from "react";
-import { PaymentModal } from "@/components/modules/x402/PaymentModal";
 import { Button } from "@/components/ui/button";
 import { TrustIndicator } from "@/components/ui/TrustIndicator";
-import { useX402Payment } from "@/hooks/useX402Payment";
+import { useX402Fetch } from "@/hooks/useX402Fetch";
 import type { RetroPack } from "@/lib/retroPack";
 
 interface RetroPackViewProps {
@@ -20,25 +20,20 @@ interface RetroPackViewProps {
 }
 
 export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
-  const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const {
-    fetchWithPayment,
-    isPaymentModalOpen,
-    paymentInstructions,
-    closePaymentModal,
-    handlePaymentComplete,
-  } = useX402Payment();
+  const { fetchWithPayment, isProcessing, error, clearError } = useX402Fetch();
 
   const handleDownloadMarkdown = async () => {
-    setIsExporting(true);
-    setError(null); // Clear previous errors
-    try {
-      const response = await fetchWithPayment(
-        `/api/labs/${labSlug}/retro?format=markdown`,
-      );
+    clearError();
+    const response = await fetchWithPayment(
+      `/api/labs/${labSlug}/retro?format=markdown`,
+    );
 
+    if (!response) {
+      return;
+    }
+
+    try {
       const markdown = await response.text();
       const blob = new Blob([markdown], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
@@ -49,34 +44,28 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to export markdown", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to download retro pack",
-      );
-    } finally {
-      setIsExporting(false);
+    } catch (err) {
+      console.error("Failed to export markdown", err);
     }
   };
 
   const handleCopyMarkdown = async () => {
-    setError(null); // Clear previous errors
-    try {
-      const response = await fetchWithPayment(
-        `/api/labs/${labSlug}/retro?format=markdown`,
-      );
+    clearError();
+    const response = await fetchWithPayment(
+      `/api/labs/${labSlug}/retro?format=markdown`,
+    );
 
+    if (!response) {
+      return;
+    }
+
+    try {
       const markdown = await response.text();
       await navigator.clipboard.writeText(markdown);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy markdown", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to copy retro pack",
-      );
+    } catch (err) {
+      console.error("Failed to copy markdown", err);
     }
   };
 
@@ -108,15 +97,11 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
             </div>
             <button
               type="button"
-              onClick={() => setError(null)}
+              onClick={clearError}
               className="text-red-400 hover:text-red-300"
             >
               <span className="sr-only">Dismiss</span>
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -143,6 +128,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
             variant="outline"
             size="sm"
             onClick={handleCopyMarkdown}
+            disabled={isProcessing}
             className="border-white/10 bg-white/5 text-white hover:bg-white/10"
           >
             {copied ? (
@@ -159,11 +145,11 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
           </Button>
           <Button
             onClick={handleDownloadMarkdown}
-            disabled={isExporting}
+            disabled={isProcessing}
             className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90"
           >
             <Download className="mr-2 h-4 w-4" />
-            {isExporting ? "Exporting..." : "Download Markdown"}
+            {isProcessing ? "Processing..." : "Download Markdown"}
           </Button>
         </div>
       </div>
@@ -324,16 +310,6 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
             </ul>
           </div>
         </div>
-      )}
-
-      {/* Payment Modal */}
-      {isPaymentModalOpen && paymentInstructions && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={closePaymentModal}
-          paymentInstructions={paymentInstructions}
-          onPaymentComplete={handlePaymentComplete}
-        />
       )}
     </div>
   );
