@@ -34,8 +34,7 @@ export function validateAddress(address: string): {
     return {
       valid: false,
       isENS: true,
-      error:
-        "ENS names are not supported. Please use a wallet address (0x...)",
+      error: "ENS names are not supported. Please use a wallet address (0x...)",
     };
   }
 
