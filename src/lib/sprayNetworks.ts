@@ -161,6 +161,29 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       },
     ],
   },
+  avalancheFuji: {
+    key: "avalancheFuji",
+    name: "Avalanche Fuji Testnet",
+    chainId: 43113,
+    chainHex: "0xa869",
+    sprayAddress: "0xe62c875ba6609E27c088F697dA16D47519b6B118",
+    nativeCurrency: {
+      name: "Avalanche",
+      symbol: "AVAX",
+      decimals: 18,
+    },
+    rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+    explorerUrls: ["https://testnet.snowtrace.io"],
+    trustedTokens: [
+      {
+        label: "USD Coin (USDC)",
+        symbol: "USDC",
+        address: "0x5425890298aed601595a70AB815c96711a31Bc65",
+        iconUrl: DEFAULT_TOKEN_ICON,
+        decimals: 6,
+      },
+    ],
+  },
 };
 
 export const DEFAULT_SPRAY_NETWORK_KEY = "celo";
