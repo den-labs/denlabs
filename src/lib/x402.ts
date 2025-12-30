@@ -410,7 +410,8 @@ export async function build402Response(
     );
   }
 
-  // Build payment requirements manually (SDK doesn't have Avalanche Fuji config)
+  // Build payment requirements in x402 format
+  // x402-fetch expects: { x402Version, accepts: [PaymentRequirements] }
   const atomicAmount = Math.floor(requirement.price * 1_000_000).toString();
 
   const paymentRequirements: PaymentRequirements = {
@@ -425,35 +426,18 @@ export async function build402Response(
     asset: requirement.tokenAddress,
   };
 
-  // Payment instructions for the client
-  const paymentInstructions = {
-    price: requirement.price,
-    currency: "USD",
-    recipient: X402_CONFIG.recipient,
-    endpoint: requirement.endpoint,
-    description: requirement.description,
-    facilitator: X402_CONFIG.facilitatorUrl,
-    chainId: requirement.chainId,
-    chainName: requirement.chainName,
-    tokenAddress: requirement.tokenAddress,
-    // Add payment requirements for SDK usage
-    requirements: paymentRequirements,
-    instructions:
-      "Sign payment with EIP-3009 and include in X-PAYMENT header to access this resource",
-  };
-
+  // x402 standard response format (required by x402-fetch)
   const response = NextResponse.json(
     {
+      x402Version: 1,
+      accepts: [paymentRequirements],
+      // Additional info for UI display
       error: "Payment Required",
       message: `This endpoint requires payment of $${requirement.price} USD`,
       description: requirement.description,
-      payment: paymentInstructions,
     },
     { status: 402 },
   );
-
-  // Add PAYMENT-REQUIRED header with instructions
-  response.headers.set("PAYMENT-REQUIRED", JSON.stringify(paymentInstructions));
 
   return response;
 }

@@ -58,14 +58,26 @@ export function useX402Fetch(): UseX402FetchReturn {
           );
         }
 
+        if (!walletClient.chain) {
+          throw new Error(
+            "Wallet chain not detected. Please ensure your wallet is connected to a supported network.",
+          );
+        }
+
         // Wrap fetch with payment handling using x402-fetch
         const wrappedFetch = wrapFetchWithPayment(
           fetch,
           walletClient as unknown as Signer,
         );
 
+        // Ensure options has at least method (required by x402-fetch on retry)
+        const fetchOptions: RequestInit = {
+          method: "GET",
+          ...options,
+        };
+
         // Make the request - x402-fetch handles 402 automatically
-        const response = await wrappedFetch(url, options);
+        const response = await wrappedFetch(url, fetchOptions);
 
         return response;
       } catch (err) {
