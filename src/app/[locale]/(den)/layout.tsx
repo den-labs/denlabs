@@ -12,6 +12,7 @@ import {
 import SidebarNav from "@/components/den/SidebarNav";
 import StatusStrip from "@/components/den/StatusStrip";
 import TopBar from "@/components/den/TopBar";
+import WalletMenu from "@/components/den/WalletMenu";
 import { FloatingFeedbackButton } from "@/components/modules/labs/FloatingFeedbackButton";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { EventLabInstrumentationProvider } from "@/providers/EventLabInstrumentationProvider";
@@ -67,11 +68,13 @@ function DesktopLayout({ children }: { children: ReactNode }) {
             <div className="min-w-0 flex-1">
               <TopBar />
             </div>
-            <div className="hidden md:flex lg:hidden">
+            <div className="hidden md:flex lg:hidden items-center gap-2">
+              <WalletMenu />
               <StatusStrip variant="icons-only" className="justify-end" />
             </div>
-            <div className="hidden lg:block lg:justify-self-end">
+            <div className="hidden lg:flex lg:justify-self-end items-center gap-3">
               <StatusStrip className="justify-end" />
+              <WalletMenu />
             </div>
           </header>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -96,7 +99,10 @@ function MobileLayout({ children }: { children: ReactNode }) {
               <div className="flex-1 min-w-0">
                 <TopBar />
               </div>
-              <StatusStrip variant="wallet-only" className="shrink-0" />
+              <div className="flex items-center gap-2 shrink-0">
+                <WalletMenu />
+                <StatusStrip variant="wallet-only" className="shrink-0" />
+              </div>
             </header>
             <section className="mt-6 space-y-6">{children}</section>
           </>
