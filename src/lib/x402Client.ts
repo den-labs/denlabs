@@ -6,7 +6,7 @@
  * 1. fetchWithPayment(url, price) attempts request
  * 2. If 402 → parse PAYMENT-REQUIRED header
  * 3. Trigger payment flow via facilitator
- * 4. Retry request with PAYMENT-SIGNATURE
+ * 4. Retry request with X-PAYMENT header
  * 5. Return resource or throw error
  */
 
@@ -49,12 +49,12 @@ export async function fetchWithPayment(
   if (response.status === 402) {
     const paymentResult = await handlePaymentRequired(response);
 
-    // Retry with payment signature
+    // Retry with payment header (X-PAYMENT is the standard header)
     const retryResponse = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
-        "PAYMENT-SIGNATURE": paymentResult.signature,
+        "X-PAYMENT": paymentResult.signature,
       },
     });
 
