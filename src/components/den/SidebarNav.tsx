@@ -2,7 +2,6 @@
 
 import {
   BadgeDollarSign,
-  BarChart3,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -11,10 +10,7 @@ import {
   Gift,
   LayoutDashboard,
   Library,
-  Scan,
-  Sparkles,
   UsersRound,
-  Workflow,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -61,11 +57,8 @@ const laboratoryNavigation = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
 ] as const;
 
-// Library navigation items (hero modules only)
+// Library navigation items
 const libraryNavigation = [
-  { key: "trustScoring", href: "/library/trust-scoring", icon: Scan },
-  { key: "premiumAccess", href: "/library/x402", icon: Sparkles },
-  { key: "agentNetwork", href: "/library/a2a", icon: Workflow },
   { key: "browseLibrary", href: "/library", icon: Library, isIndex: true },
 ] as const;
 
