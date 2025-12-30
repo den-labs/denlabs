@@ -22,6 +22,7 @@ interface RetroPackViewProps {
 export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const {
     fetchWithPayment,
     isPaymentModalOpen,
@@ -32,6 +33,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
 
   const handleDownloadMarkdown = async () => {
     setIsExporting(true);
+    setError(null); // Clear previous errors
     try {
       const response = await fetchWithPayment(
         `/api/labs/${labSlug}/retro?format=markdown`,
@@ -49,7 +51,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to export markdown", error);
-      alert(
+      setError(
         error instanceof Error
           ? error.message
           : "Failed to download retro pack",
@@ -60,6 +62,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
   };
 
   const handleCopyMarkdown = async () => {
+    setError(null); // Clear previous errors
     try {
       const response = await fetchWithPayment(
         `/api/labs/${labSlug}/retro?format=markdown`,
@@ -71,7 +74,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy markdown", error);
-      alert(
+      setError(
         error instanceof Error ? error.message : "Failed to copy retro pack",
       );
     }
@@ -92,6 +95,39 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-400" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-300">
+                Payment Error
+              </p>
+              <p className="mt-1 text-sm text-red-200">{error}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-300"
+            >
+              <span className="sr-only">Dismiss</span>
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header with Export */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
