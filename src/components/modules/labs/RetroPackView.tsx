@@ -33,6 +33,20 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
       return;
     }
 
+    // Check if payment was successful (not a 402 response)
+    if (!response.ok) {
+      if (response.status === 402) {
+        // Payment failed or was rejected by facilitator
+        try {
+          const errorData = await response.json();
+          console.error("[x402] Payment not completed:", errorData);
+        } catch {
+          // Ignore JSON parse errors
+        }
+      }
+      return;
+    }
+
     try {
       const markdown = await response.text();
       const blob = new Blob([markdown], { type: "text/markdown" });
@@ -56,6 +70,19 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
     );
 
     if (!response) {
+      return;
+    }
+
+    // Check if payment was successful (not a 402 response)
+    if (!response.ok) {
+      if (response.status === 402) {
+        try {
+          const errorData = await response.json();
+          console.error("[x402] Payment not completed:", errorData);
+        } catch {
+          // Ignore JSON parse errors
+        }
+      }
       return;
     }
 

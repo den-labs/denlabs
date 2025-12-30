@@ -79,6 +79,19 @@ export function useX402Fetch(): UseX402FetchReturn {
         // Make the request - x402-fetch handles 402 automatically
         const response = await wrappedFetch(url, fetchOptions);
 
+        // If still 402 after payment attempt, the payment failed
+        if (response.status === 402) {
+          try {
+            const errorData = await response.clone().json();
+            console.error("[x402] Payment failed, received 402:", errorData);
+            setError(
+              "Payment could not be completed. The facilitator may have rejected the transaction.",
+            );
+          } catch {
+            setError("Payment failed. Please try again.");
+          }
+        }
+
         return response;
       } catch (err) {
         console.error("[x402] Payment error:", err);
