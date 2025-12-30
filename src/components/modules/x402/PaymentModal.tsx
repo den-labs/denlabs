@@ -101,13 +101,19 @@ export function PaymentModal({
       });
 
       if (!response.ok) {
-        let errorMessage = "Unknown error";
+        // Read body as text first (can only read once)
+        const errorText = await response.text();
+        let errorMessage = errorText;
+
+        // Try to parse as JSON for better error messages
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || JSON.stringify(errorData);
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.message || errorText;
         } catch {
-          errorMessage = await response.text();
+          // Use raw text if not JSON
+          errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
         }
+
         throw new Error(`Payment creation failed: ${errorMessage}`);
       }
 
