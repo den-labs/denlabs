@@ -124,11 +124,11 @@ export default function SidebarNav() {
   };
 
   return (
-    <Sidebar collapsible="icon" aria-label={t("aria.navigation")}>
+    <Sidebar collapsible="icon" aria-label={tNav("aria.navigation")}>
       <SidebarHeader>
         <Link
           href="/"
-          aria-label={t("aria.homeLink")}
+          aria-label={tNav("aria.homeLink")}
           className={cn(
             "flex flex-1 items-center gap-3 rounded-xl px-2 py-2 transition",
             collapsed
@@ -360,7 +360,7 @@ export default function SidebarNav() {
           </span>
         )}
         <SidebarTrigger
-          aria-label={t("aria.toggle")}
+          aria-label={tNav("aria.toggle")}
           className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-white/30 hover:bg-white/10"
         >
           {collapsed ? (
@@ -368,7 +368,7 @@ export default function SidebarNav() {
           ) : (
             <ChevronLeft className="h-4 w-4" aria-hidden />
           )}
-          <span className="sr-only">{t("aria.toggle")}</span>
+          <span className="sr-only">{tNav("aria.toggle")}</span>
         </SidebarTrigger>
       </SidebarFooter>
     </Sidebar>
