@@ -96,7 +96,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 export default function SidebarNav() {
-  const t = useTranslations("SidebarNav");
+  const t = useTranslations();
   const pathname = usePathname();
   const { open, isMobile } = useSidebar();
 
