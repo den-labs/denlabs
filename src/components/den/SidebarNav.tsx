@@ -139,7 +139,7 @@ export default function SidebarNav() {
           <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0f141d]">
             <Image
               src="/denlabs.png"
-              alt={t("branding.badgeAlt")}
+              alt={tNav("branding.badgeAlt")}
               fill
               className="object-contain"
             />
@@ -151,10 +151,10 @@ export default function SidebarNav() {
             )}
           >
             <p className="text-[0.62rem] font-semibold uppercase text-white/65">
-              {t("branding.subtitle")}
+              {tNav("branding.subtitle")}
             </p>
             <h1 className="text-[0.95rem] font-semibold uppercase text-white">
-              {t("branding.title")}
+              {tNav("branding.title")}
             </h1>
           </div>
         </Link>
