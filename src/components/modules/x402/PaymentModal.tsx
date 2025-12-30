@@ -1,6 +1,11 @@
 "use client";
 
-import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
+import {
+  useAppKitAccount,
+  useAppKitNetwork,
+  useAppKitProvider,
+} from "@reown/appkit/react";
+import { BrowserProvider, Contract, type Eip1193Provider } from "ethers";
 import { AlertCircle, CheckCircle2, Info, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -10,6 +15,7 @@ import {
 } from "@/config/x402Tokens";
 import type { PaymentInstructions } from "@/lib/x402Client";
 import { validateAddress } from "@/lib/addressValidation";
+import { EIP3009_ABI } from "@/lib/eip3009Abi";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -24,6 +30,7 @@ export function PaymentModal({
   paymentInstructions,
   onPaymentComplete,
 }: PaymentModalProps) {
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>("eip155");
   const { address, isConnected } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
   const [status, setStatus] = useState<
@@ -58,7 +65,7 @@ export function PaymentModal({
     setErrorMessage(null);
 
     try {
-      // Validate recipient address is not an ENS name
+      // Validate recipient address
       const recipientValidation = validateAddress(
         paymentInstructions.recipient,
       );
@@ -69,65 +76,104 @@ export function PaymentModal({
         );
       }
 
-      // Check if wallet is connected
-      if (!isConnected || !address || !chainId) {
-        throw new Error(
-          "Wallet not connected. Please connect your wallet first.",
-        );
+      // Check wallet connection
+      if (!isConnected || !address || !chainId || !walletProvider) {
+        throw new Error("Wallet not connected. Please connect your wallet first.");
       }
 
-      // Use selected token
+      // Validate token selection
       if (!selectedToken) {
         throw new Error("Please select a payment token");
       }
 
-      // Call facilitator to create payment
-      const response = await fetch(`${paymentInstructions.facilitator}/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: paymentInstructions.price,
-          token: paymentInstructions.token,
-          tokenAddress: selectedToken.address, // Add token contract address
-          recipient: paymentInstructions.recipient,
-          payer: address, // Add payer wallet address
-          chainId: chainId, // Add chain ID
-          endpoint: paymentInstructions.endpoint,
-          method: paymentInstructions.method,
-          description: paymentInstructions.description,
-        }),
-      });
+      // Create ethers provider and signer
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
 
-      if (!response.ok) {
-        // Read body as text first (can only read once)
-        const errorText = await response.text();
-        let errorMessage = errorText;
+      // Create contract instance
+      const tokenContract = new Contract(
+        selectedToken.address,
+        EIP3009_ABI,
+        signer,
+      );
 
-        // Try to parse as JSON for better error messages
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || errorData.message || errorText;
-        } catch {
-          // Use raw text if not JSON
-          errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
-        }
+      // Calculate amount in token units
+      const amountInWei = BigInt(
+        Math.floor(paymentInstructions.price * 10 ** selectedToken.decimals),
+      );
 
-        throw new Error(`Payment creation failed: ${errorMessage}`);
-      }
+      // Generate unique nonce (using timestamp + random)
+      const nonce = `0x${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`.padEnd(66, "0");
 
-      const result = await response.json();
+      // Set validity window (valid for 1 hour)
+      const validAfter = 0;
+      const validBefore = Math.floor(Date.now() / 1000) + 3600;
 
-      if (!result.signature) {
-        throw new Error("Payment response missing signature");
+      // Get domain separator
+      const domainSeparator = await tokenContract.DOMAIN_SEPARATOR();
+
+      // Create EIP-712 message for transferWithAuthorization
+      const domain = {
+        name: "USD Coin",
+        version: "2",
+        chainId: chainId,
+        verifyingContract: selectedToken.address,
+      };
+
+      const types = {
+        TransferWithAuthorization: [
+          { name: "from", type: "address" },
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "validAfter", type: "uint256" },
+          { name: "validBefore", type: "uint256" },
+          { name: "nonce", type: "bytes32" },
+        ],
+      };
+
+      const value = {
+        from: address,
+        to: paymentInstructions.recipient,
+        value: amountInWei,
+        validAfter: validAfter,
+        validBefore: validBefore,
+        nonce: nonce,
+      };
+
+      // Sign the authorization
+      const signature = await signer.signTypedData(domain, types, value);
+
+      // Split signature into v, r, s
+      const sig = signature.slice(2);
+      const r = `0x${sig.slice(0, 64)}`;
+      const s = `0x${sig.slice(64, 128)}`;
+      const v = parseInt(sig.slice(128, 130), 16);
+
+      // Execute transferWithAuthorization
+      const tx = await tokenContract.transferWithAuthorization(
+        address,
+        paymentInstructions.recipient,
+        amountInWei,
+        validAfter,
+        validBefore,
+        nonce,
+        v,
+        r,
+        s,
+      );
+
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+
+      if (!receipt || !receipt.hash) {
+        throw new Error("Transaction failed - no receipt");
       }
 
       setStatus("success");
 
-      // Wait a moment to show success state
+      // Use transaction hash as payment signature
       setTimeout(() => {
-        onPaymentComplete(result.signature);
+        onPaymentComplete(receipt.hash);
       }, 1000);
     } catch (error) {
       setStatus("error");
