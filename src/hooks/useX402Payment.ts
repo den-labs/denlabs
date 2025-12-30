@@ -48,7 +48,7 @@ export function useX402Payment(): UseX402PaymentReturn {
   }, []);
 
   const handlePaymentComplete = useCallback(
-    async (signature: string) => {
+    async (xPaymentHeader: string) => {
       if (!pendingRequest || !paymentPromiseRef.current) return;
 
       const { resolve, reject } = paymentPromiseRef.current;
@@ -57,14 +57,18 @@ export function useX402Payment(): UseX402PaymentReturn {
         // Close modal
         setIsPaymentModalOpen(false);
 
-        // Retry request with payment signature
+        console.log("[x402] Retrying request with X-PAYMENT header");
+
+        // Retry request with X-PAYMENT header
         const retryResponse = await fetch(pendingRequest.url, {
           ...pendingRequest.options,
           headers: {
             ...pendingRequest.options?.headers,
-            "PAYMENT-SIGNATURE": signature,
+            "X-PAYMENT": xPaymentHeader,
           },
         });
+
+        console.log("[x402] Retry response status:", retryResponse.status);
 
         // Clear pending state
         setPendingRequest(null);
@@ -74,6 +78,7 @@ export function useX402Payment(): UseX402PaymentReturn {
         // Resolve the promise with the response
         resolve(retryResponse);
       } catch (error) {
+        console.error("[x402] Payment completion error:", error);
         reject(error instanceof Error ? error : new Error("Payment failed"));
       }
     },
