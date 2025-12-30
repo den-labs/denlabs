@@ -5,13 +5,14 @@ import {
   Check,
   Copy,
   Download,
-  Loader2,
   TrendingDown,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TrustIndicator } from "@/components/ui/TrustIndicator";
+import { PaymentConfirmModal } from "@/components/modules/x402/PaymentConfirmModal";
 import { useX402Fetch } from "@/hooks/useX402Fetch";
+import { PRICING } from "@/lib/x402";
 import type { RetroPack } from "@/lib/retroPack";
 
 interface RetroPackViewProps {
@@ -19,52 +20,26 @@ interface RetroPackViewProps {
   retro: RetroPack;
 }
 
+type PendingAction = "download" | "copy" | null;
+
 export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
   const [copied, setCopied] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const { fetchWithPayment, isProcessing, error, clearError } = useX402Fetch();
 
-  const handleDownloadMarkdown = async () => {
+  const handleOpenModal = (action: PendingAction) => {
     clearError();
-    const response = await fetchWithPayment(
-      `/api/labs/${labSlug}/retro?format=markdown`,
-    );
-
-    if (!response) {
-      return;
-    }
-
-    // Check if payment was successful (not a 402 response)
-    if (!response.ok) {
-      if (response.status === 402) {
-        // Payment failed or was rejected by facilitator
-        try {
-          const errorData = await response.json();
-          console.error("[x402] Payment not completed:", errorData);
-        } catch {
-          // Ignore JSON parse errors
-        }
-      }
-      return;
-    }
-
-    try {
-      const markdown = await response.text();
-      const blob = new Blob([markdown], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `retro-${labSlug}-${Date.now()}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Failed to export markdown", err);
-    }
+    setPendingAction(action);
+    setIsModalOpen(true);
   };
 
-  const handleCopyMarkdown = async () => {
-    clearError();
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setPendingAction(null);
+  };
+
+  const handleConfirmPayment = async () => {
     const response = await fetchWithPayment(
       `/api/labs/${labSlug}/retro?format=markdown`,
     );
@@ -88,11 +63,26 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
 
     try {
       const markdown = await response.text();
-      await navigator.clipboard.writeText(markdown);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+
+      if (pendingAction === "download") {
+        const blob = new Blob([markdown], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `retro-${labSlug}-${Date.now()}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else if (pendingAction === "copy") {
+        await navigator.clipboard.writeText(markdown);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+
+      handleCloseModal();
     } catch (err) {
-      console.error("Failed to copy markdown", err);
+      console.error("Failed to process metrics", err);
     }
   };
 
@@ -154,7 +144,7 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleCopyMarkdown}
+            onClick={() => handleOpenModal("copy")}
             disabled={isProcessing}
             className="border-white/10 bg-white/5 text-white hover:bg-white/10"
           >
@@ -171,15 +161,25 @@ export function RetroPackView({ labSlug, retro }: RetroPackViewProps) {
             )}
           </Button>
           <Button
-            onClick={handleDownloadMarkdown}
+            onClick={() => handleOpenModal("download")}
             disabled={isProcessing}
             className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90"
           >
             <Download className="mr-2 h-4 w-4" />
-            {isProcessing ? "Processing..." : "Download Markdown"}
+            Download Metrics
           </Button>
         </div>
       </div>
+
+      {/* Payment Confirmation Modal */}
+      <PaymentConfirmModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmPayment}
+        isProcessing={isProcessing}
+        price={PRICING.RETRO_MARKDOWN}
+        description="Export Retro Pack Metrics"
+      />
 
       {/* Summary Stats */}
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
