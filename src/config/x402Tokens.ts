@@ -51,7 +51,15 @@ export const X402_TOKENS: X402TokensByChain = {
 
   // Avalanche Fuji Testnet (43113)
   43113: [
-    // Add Fuji testnet tokens here after verification
+    {
+      symbol: "USDC",
+      name: "USD Coin (Testnet)",
+      address: "0x5425890298aed601595a70AB815c96711a31Bc65",
+      decimals: 6,
+      isEip3009Likely: true, // ⚠️ TESTNET - Enabled for testing. Verify at /tools/eip3009 if payment fails
+      iconUrl: "/tokens-usdc.png",
+      verifiedAt: "2025-12-30",
+    },
   ],
 
   // Base Mainnet (8453)
