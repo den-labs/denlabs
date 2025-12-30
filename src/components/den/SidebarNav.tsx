@@ -162,7 +162,7 @@ export default function SidebarNav() {
       <SidebarContent>
         {/* PRODUCTO */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sections.product.title")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.sections.product")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {productNavigation.map((item) => {
@@ -190,7 +190,7 @@ export default function SidebarNav() {
                             collapsed ? "hidden" : "inline",
                           )}
                         >
-                          {t(`sections.product.${item.key}`)}
+                          {t(`sidebar.product.${item.key}`)}
                         </span>
                         {!collapsed && (
                           <ChevronDown
@@ -222,7 +222,7 @@ export default function SidebarNav() {
                                       aria-hidden
                                     />
                                     <span className="truncate text-[0.72rem]">
-                                      {t(`sections.product.${child.key}`)}
+                                      {t(`sidebar.product.${child.key}`)}
                                     </span>
                                   </Link>
                                 </SidebarMenuSubButton>
@@ -255,7 +255,7 @@ export default function SidebarNav() {
                             collapsed ? "hidden" : "inline",
                           )}
                         >
-                          {t(`sections.product.${item.key}`)}
+                          {t(`sidebar.product.${item.key}`)}
                         </span>
                       </Link>
                     </SidebarMenuButton>
@@ -269,7 +269,7 @@ export default function SidebarNav() {
         {/* LABORATORIO */}
         <SidebarGroup>
           <SidebarGroupLabel>
-            {t("sections.laboratory.title")}
+            {t("sidebar.sections.laboratory")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -294,7 +294,7 @@ export default function SidebarNav() {
                             collapsed ? "hidden" : "inline",
                           )}
                         >
-                          {t(`sections.laboratory.${item.key}`)}
+                          {t(`sidebar.laboratory.${item.key}`)}
                         </span>
                       </Link>
                     </SidebarMenuButton>
@@ -307,7 +307,7 @@ export default function SidebarNav() {
 
         {/* BIBLIOTECA */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sections.library.title")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.sections.library")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {libraryNavigation.map((item) => {
@@ -334,7 +334,7 @@ export default function SidebarNav() {
                             collapsed ? "hidden" : "inline",
                           )}
                         >
-                          {t(`sections.library.${item.key}`)}
+                          {t(`sidebar.library.${item.key}`)}
                         </span>
                         {!collapsed && !isIndex && status && (
                           <StatusBadge status={status} />
