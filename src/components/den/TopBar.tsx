@@ -3,51 +3,28 @@
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-
-type ModuleKey =
-  | "profile"
-  | "quests"
-  | "checkin"
-  | "mentorship"
-  | "showcase"
-  | "voting"
-  | "stats"
-  | "leaderboard"
-  | "settings"
-  | "mindGames"
-  | "auth"
-  | "spray";
-
-const moduleKeys: Record<string, ModuleKey> = {
-  "/lab": "profile",
-  "/quests": "quests",
-  "/checkin": "checkin",
-  "/mentorship": "mentorship",
-  "/showcase": "showcase",
-  "/voting": "voting",
-  "/stats": "stats",
-  "/leaderboard": "leaderboard",
-  "/settings": "settings",
-  "/mind-games": "mindGames",
-  "/spray": "spray",
-  "/auth": "auth",
-};
+import { getModuleConfig, getBreadcrumbKeys, getTitleKey } from "@/config/moduleKeys";
 
 export function TopBar() {
-  const t = useTranslations("TopBar");
+  const t = useTranslations();
   const pathname = usePathname();
-  const activeKey = Object.keys(moduleKeys).find(
-    (path) => pathname === path || pathname?.startsWith(`${path}/`),
-  );
-  const meta = activeKey
-    ? {
-        title: t(`modules.${moduleKeys[activeKey]}.title`),
-        description: t(`modules.${moduleKeys[activeKey]}.description`),
-      }
-    : {
-        title: t("fallback.title"),
-        description: t("fallback.description"),
-      };
+
+  const config = getModuleConfig(pathname || '');
+  const titleKey = getTitleKey(pathname || '');
+  const breadcrumbKeys = getBreadcrumbKeys(pathname || '');
+
+  const title = titleKey ? t(titleKey) : t("TopBar.fallback.title");
+  const description = titleKey
+    ? t(`${titleKey.replace('sidebar', 'TopBar.modules')}.description`, {
+        default: "",
+      })
+    : t("TopBar.fallback.description");
+
+  // Generate breadcrumb text
+  const breadcrumb = breadcrumbKeys
+    .map((key) => t(key, { default: "" }))
+    .filter(Boolean)
+    .join(" > ");
 
   return (
     <div className="flex w-full flex-col gap-4 text-wolf-foreground">
@@ -59,10 +36,17 @@ export function TopBar() {
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
         </Link>
         <div className="text-left">
+          {breadcrumb && (
+            <div className="text-xs text-wolf-text-subtle mb-0.5">
+              {breadcrumb}
+            </div>
+          )}
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-white">{meta.title}</h1>
+            <h1 className="text-xl font-semibold text-white">{title}</h1>
           </div>
-          <p className="text-sm text-wolf-text-subtle">{meta.description}</p>
+          {description && (
+            <p className="text-sm text-wolf-text-subtle">{description}</p>
+          )}
         </div>
       </div>
     </div>
