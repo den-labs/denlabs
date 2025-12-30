@@ -40,7 +40,7 @@ export default async function TabernaPage({
             <div className="space-y-5">
               <iframe
                 src={tabernaUrl}
-                title="Wolf Den Taberna"
+                title="DenLabs Taberna"
                 allow={iframeAllow}
                 className="aspect-[16/10] w-full rounded-lg border border-wolf-border bg-wolf-charcoal-75 sm:min-h-[420px]"
               />

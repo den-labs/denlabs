@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const THEME_STORAGE_KEY = "wolf-den-theme";
+const THEME_STORAGE_KEY = "denlabs-theme";
 
 export default function ThemeInitializer() {
   useEffect(() => {

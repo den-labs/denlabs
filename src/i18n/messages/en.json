@@ -150,13 +150,13 @@
   },
   "SidebarNav": {
     "branding": {
-      "badgeAlt": "Wolf Den emblem",
+      "badgeAlt": "DenLabs emblem",
       "title": "'{' Den Labs '}'",
       "subtitle": ""
     },
     "aria": {
-      "navigation": "Wolf Den navigation",
-      "homeLink": "Go to Wolf Den home",
+      "navigation": "DenLabs navigation",
+      "homeLink": "Go to DenLabs home",
       "toggle": "Toggle sidebar"
     },
     "statusBar": {
@@ -219,7 +219,7 @@
       "gooddollar": "GoodDollar"
     },
     "aria": {
-      "navigation": "Wolf Den mobile navigation"
+      "navigation": "DenLabs mobile navigation"
     }
   },
   "HowlBadge": {
@@ -332,7 +332,7 @@
       "items": [
         {
           "id": "event-1",
-          "name": "Demo Day • Wolf Den",
+          "name": "Demo Day • DenLabs",
           "date": "Today • 18:00",
           "location": "Main Stage",
           "status": "live"
@@ -554,7 +554,7 @@
   "SelfAuth": {
     "success": {
       "title": "Verification complete",
-      "body": "Your identity is confirmed. Explore Wolf Den without limits."
+      "body": "Your identity is confirmed. Explore DenLabs without limits."
     },
     "intro": {
       "title": "Verify with Self",
@@ -973,7 +973,7 @@
     "metrics": {
       "label": "KPIs we're locking in",
       "title": "Pilot targets grounded in product vision",
-      "description": "Wolf Den Labs measures success through automated payouts, satisfied organizers, activated sponsors, and mentors verified with Self.xyz.",
+      "description": "DenLabs measures success through automated payouts, satisfied organizers, activated sponsors, and mentors verified with Self.xyz.",
       "items": [
         {
           "value": "95%",
@@ -1004,7 +1004,7 @@
     "pillars": {
       "label": "Strategic Pillars",
       "title": "How the lab delivers the vision",
-      "description": "Wolf Den Labs merges our builder DNA with live operations so payouts, mentorship, and sponsor value stay in the same flow.",
+      "description": "DenLabs merges our builder DNA with live operations so payouts, mentorship, and sponsor value stay in the same flow.",
       "items": [
         {
           "title": "Instant Rewards Engine",
@@ -1022,7 +1022,7 @@
     },
     "modulesLabel": "Lab Modules",
     "modulesTitle": "What the lab includes today",
-    "modulesDescription": "Operate events, automate payouts, activate sponsors, and guide community follow-ups without leaving Wolf Den Labs.",
+    "modulesDescription": "Operate events, automate payouts, activate sponsors, and guide community follow-ups without leaving DenLabs.",
     "modules": [
       {
         "id": "events",
@@ -1090,7 +1090,7 @@
     ],
     "flows": {
       "label": "End-to-end Journey",
-      "title": "How Ops Leads run Wolf Den Labs",
+      "title": "How Ops Leads run DenLabs",
       "items": [
         {
           "title": "Configure & verify",

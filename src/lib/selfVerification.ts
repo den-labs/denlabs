@@ -1,5 +1,5 @@
-const SELF_VERIFICATION_STORAGE_KEY = "wolf-den:self-verified";
-const SELF_VERIFICATION_EVENT = "wolf-den:self-verified-change";
+const SELF_VERIFICATION_STORAGE_KEY = "denlabs:self-verified";
+const SELF_VERIFICATION_EVENT = "denlabs:self-verified-change";
 
 type SelfVerificationEventDetail = {
   verified: boolean;

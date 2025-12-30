@@ -48,7 +48,7 @@ function LottieShim({
       aria-live="polite"
       role="img"
     >
-      Wolf Den
+      DenLabs
     </div>
   );
 }

@@ -29,8 +29,8 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://denlabs.vercel.app";
 
 export const appKitMetadata = {
-  name: "Wolf Den",
-  description: "Wallet onboarding for Wolf Den",
+  name: "DenLabs",
+  description: "Wallet onboarding for DenLabs",
   url: siteUrl,
   icons: [`${siteUrl}/android-chrome-512x512.png`],
 };

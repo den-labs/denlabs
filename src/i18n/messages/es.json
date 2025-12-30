@@ -150,13 +150,13 @@
   },
   "SidebarNav": {
     "branding": {
-      "badgeAlt": "Emblema de Wolf Den",
+      "badgeAlt": "Emblema de DenLabs",
       "title": "'{' Den Labs '}'",
       "subtitle": ""
     },
     "aria": {
-      "navigation": "Navegación de Wolf Den",
-      "homeLink": "Ir al inicio de Wolf Den",
+      "navigation": "Navegación de DenLabs",
+      "homeLink": "Ir al inicio de DenLabs",
       "toggle": "Alternar barra lateral"
     },
     "statusBar": {
@@ -210,7 +210,7 @@
       "gooddollar": "GoodDollar"
     },
     "aria": {
-      "navigation": "Navegación móvil de Wolf Den"
+      "navigation": "Navegación móvil de DenLabs"
     }
   },
   "HowlBadge": {
@@ -323,7 +323,7 @@
       "items": [
         {
           "id": "event-1",
-          "name": "Demo Day • Wolf Den",
+          "name": "Demo Day • DenLabs",
           "date": "Hoy • 18:00",
           "location": "Escenario principal",
           "status": "live"
@@ -545,7 +545,7 @@
   "SelfAuth": {
     "success": {
       "title": "Verificación completada",
-      "body": "Tu identidad está confirmada. ¡Explora Wolf Den sin límites!"
+      "body": "Tu identidad está confirmada. ¡Explora DenLabs sin límites!"
     },
     "intro": {
       "title": "Verifica con Self",
@@ -964,7 +964,7 @@
     "metrics": {
       "label": "KPIs que blindamos",
       "title": "Metas del piloto alineadas al PRD",
-      "description": "Wolf Den Labs mide el éxito con payouts automatizados, organizadores satisfechos, patrocinadores activados y mentores verificados con Self.xyz.",
+      "description": "DenLabs mide el éxito con payouts automatizados, organizadores satisfechos, patrocinadores activados y mentores verificados con Self.xyz.",
       "items": [
         {
           "value": "95%",
@@ -995,7 +995,7 @@
     "pillars": {
       "label": "Pilares estratégicos",
       "title": "Cómo el laboratorio cumple la visión",
-      "description": "Wolf Den Labs combina el ADN builder con operaciones en vivo para que payouts, mentoría y valor de patrocinio vivan en un mismo flujo.",
+      "description": "DenLabs combina el ADN builder con operaciones en vivo para que payouts, mentoría y valor de patrocinio vivan en un mismo flujo.",
       "items": [
         {
           "title": "Motor de recompensas instantáneas",
@@ -1013,7 +1013,7 @@
     },
     "modulesLabel": "Módulos del laboratorio",
     "modulesTitle": "Lo que el laboratorio ofrece hoy",
-    "modulesDescription": "Opera eventos, automatiza payouts, activa patrocinadores y guía la comunidad sin salir de Wolf Den Labs.",
+    "modulesDescription": "Opera eventos, automatiza payouts, activa patrocinadores y guía la comunidad sin salir de DenLabs.",
     "modules": [
       {
         "id": "events",
@@ -1081,7 +1081,7 @@
     ],
     "flows": {
       "label": "Recorrido end-to-end",
-      "title": "Cómo las Ops Leads corren Wolf Den Labs",
+      "title": "Cómo las Ops Leads corren DenLabs",
       "items": [
         {
           "title": "Configura y verifica",

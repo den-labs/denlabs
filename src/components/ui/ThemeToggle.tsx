@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "wolf-den-theme";
+const STORAGE_KEY = "denlabs-theme";
 type ThemeMode = "light" | "dark";
 
 function resolveInitialTheme(): ThemeMode {

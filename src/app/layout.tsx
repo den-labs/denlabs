@@ -17,8 +17,8 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "Wolf Den",
-  description: "Control center for the Wolf Den builder collective.",
+  title: "DenLabs",
+  description: "Control center for the DenLabs builder collective.",
 };
 
 export default async function RootLayout({
