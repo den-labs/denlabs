@@ -90,7 +90,10 @@ export function PaymentModal({
         body: JSON.stringify({
           amount: paymentInstructions.price,
           token: paymentInstructions.token,
+          tokenAddress: selectedToken.address, // Add token contract address
           recipient: paymentInstructions.recipient,
+          payer: address, // Add payer wallet address
+          chainId: chainId, // Add chain ID
           endpoint: paymentInstructions.endpoint,
           method: paymentInstructions.method,
           description: paymentInstructions.description,
@@ -98,8 +101,14 @@ export function PaymentModal({
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Payment creation failed: ${error}`);
+        let errorMessage = "Unknown error";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || JSON.stringify(errorData);
+        } catch {
+          errorMessage = await response.text();
+        }
+        throw new Error(`Payment creation failed: ${errorMessage}`);
       }
 
       const result = await response.json();
