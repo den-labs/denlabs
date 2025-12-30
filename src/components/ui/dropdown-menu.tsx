@@ -47,9 +47,11 @@ export function DropdownMenuTrigger({
 
 export function DropdownMenuContent({
   align = "end",
+  className,
   children,
 }: {
   align?: "start" | "center" | "end";
+  className?: string;
   children: ReactNode;
 }) {
   const { isOpen, setIsOpen } = useContext(DropdownContext);
@@ -69,6 +71,7 @@ export function DropdownMenuContent({
         className={cn(
           "absolute top-full z-50 mt-2 min-w-[160px] rounded-lg border border-white/10 bg-black/95 p-1 shadow-lg",
           alignClass,
+          className,
         )}
       >
         {children}
@@ -79,9 +82,13 @@ export function DropdownMenuContent({
 
 export function DropdownMenuItem({
   onClick,
+  asChild,
+  className,
   children,
 }: {
   onClick?: () => void;
+  asChild?: boolean;
+  className?: string;
   children: ReactNode;
 }) {
   const { setIsOpen } = useContext(DropdownContext);
@@ -91,13 +98,37 @@ export function DropdownMenuItem({
     setIsOpen(false);
   };
 
+  if (asChild && typeof children === "object" && children !== null && "props" in children) {
+    const child = children as React.ReactElement;
+    return (
+      <div onClick={handleClick} className={cn("w-full", className)}>
+        {child}
+      </div>
+    );
+  }
+
   return (
     <button
       type="button"
       onClick={handleClick}
-      className="w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white"
+      className={cn(
+        "w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white",
+        className,
+      )}
     >
       {children}
     </button>
   );
+}
+
+export function DropdownMenuLabel({ children }: { children: ReactNode }) {
+  return (
+    <div className="px-3 py-2 text-xs font-semibold text-white/50">
+      {children}
+    </div>
+  );
+}
+
+export function DropdownMenuSeparator() {
+  return <div className="my-1 h-px bg-white/10" />;
 }

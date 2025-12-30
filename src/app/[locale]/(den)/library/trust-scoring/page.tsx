@@ -158,7 +158,7 @@ function ConceptsTab() {
             quality feedback, participating in events, and avoiding spam increase trust.
           </p>
           <p>
-            <strong className="text-white">4. Rate Limiting:</strong> Excessive submissions (>10
+            <strong className="text-white">4. Rate Limiting:</strong> Excessive submissions ({">"}10
             per session) trigger penalties to prevent abuse.
           </p>
         </div>

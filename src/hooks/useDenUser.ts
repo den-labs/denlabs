@@ -12,11 +12,15 @@ export type DenUser = {
   walletAddress: `0x${string}` | null;
   selfVerified: boolean;
   selfDid?: string | null;
+  role: string;
   roles: string[];
   isBuilder: boolean;
   isMember: boolean;
   isAdmin: boolean;
   holdScore: number | null;
+  handle?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
 };
 
 export function useDenUser(): DenUser {
@@ -71,10 +75,14 @@ export function useDenUser(): DenUser {
     walletAddress: normalizedAddress,
     selfVerified,
     selfDid: null,
+    role: "player",
     roles,
     isBuilder,
     isMember: isBuilder && selfVerified,
     isAdmin: false,
     holdScore,
+    handle: session?.handle ?? null,
+    displayName: null,
+    avatarUrl: null,
   };
 }
