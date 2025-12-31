@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Droplets,
+  FileCheck,
   FlaskConical,
   Home,
   Library,
@@ -40,6 +41,7 @@ const laboratoryNavigation = [
 const toolsNavigation = [
   { key: "spray", href: "/spray", icon: Droplets },
   { key: "gooddollar", href: "/gooddollar", icon: BadgeDollarSign },
+  { key: "eip3009", href: "/tools/eip3009", icon: FileCheck },
 ] as const;
 
 // Library navigation items (LIBRARY section)
