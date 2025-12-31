@@ -77,6 +77,10 @@
         "title": "Browse",
         "description": "Explore all modules and integrations."
       },
+      "eip3009Checker": {
+        "title": "EIP-3009 Checker",
+        "description": "Detect EIP-3009 support for gasless transfers."
+      },
       "trustScoring": {
         "title": "Trust Scoring (8004)",
         "description": "Trust verification for Event Feedback Ops."
@@ -140,6 +144,7 @@
       "trustScoring": "Trust Scoring (8004)",
       "premiumAccess": "Premium Access (x402)",
       "agentNetwork": "Agent Network (A2A)",
+      "eip3009Checker": "EIP-3009 Checker",
       "gamesLab": "Games Lab",
       "questsEngine": "Quests Engine",
       "attendanceTools": "Attendance Tools",
