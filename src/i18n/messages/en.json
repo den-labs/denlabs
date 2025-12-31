@@ -746,7 +746,7 @@
         "capabilities": "Components",
         "howItWorks": "How It Works",
         "faq": "FAQ",
-        "enterLab": "Enter Console"
+        "console": "Console"
       },
       "aria": {
         "navigation": "Main navigation",
@@ -761,7 +761,7 @@
         "label": "Powered by"
       },
       "primaryCta": {
-        "label": "Create a Lab",
+        "label": "Create Your Lab",
         "href": "/labs/create"
       },
       "secondaryCta": {

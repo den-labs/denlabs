@@ -26,7 +26,7 @@ import { fetchUserSession } from "@/lib/userClient";
 
 export default function HomeLanding() {
   const t = useTranslations("HomeLanding");
-  const [enterLabHref, setEnterLabHref] = useState("/access");
+  const [consoleHref, setConsoleHref] = useState("/access");
   const [createLabHref, setCreateLabHref] = useState("/access");
   const [finalCtaHref, setFinalCtaHref] = useState("/access");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,8 +38,8 @@ export default function HomeLanding() {
     fetchUserSession()
       .then((session) => {
         if (!cancelled && session?.hasProfile) {
-          // User has wallet + handle, go directly to host console
-          setEnterLabHref("/labs");
+          // User has wallet + handle, go directly to dashboard/create
+          setConsoleHref("/dashboard");
           setCreateLabHref("/labs/create");
           setFinalCtaHref("/labs/create");
         }
@@ -142,11 +142,10 @@ export default function HomeLanding() {
                 {t("navbar.links.faq")}
               </a>
               <Link
-                href={enterLabHref}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#baff5c] px-5 py-2.5 text-sm font-semibold text-[#09140a] transition hover:bg-[#89e24a] hover:shadow-[0_0_20px_rgba(186,255,92,0.35)]"
+                href={consoleHref}
+                className="text-sm font-medium text-white/70 transition hover:text-white"
               >
-                {t("navbar.links.enterLab")}
-                <ArrowRight className="h-4 w-4" />
+                {t("navbar.links.console")}
               </Link>
             </div>
 
@@ -193,12 +192,11 @@ export default function HomeLanding() {
                 {t("navbar.links.faq")}
               </a>
               <Link
-                href={enterLabHref}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#baff5c] px-5 py-2.5 text-sm font-semibold text-[#09140a] transition hover:bg-[#89e24a]"
+                href={consoleHref}
+                className="text-sm font-medium text-white/70 transition hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t("navbar.links.enterLab")}
-                <ArrowRight className="h-4 w-4" />
+                {t("navbar.links.console")}
               </Link>
             </div>
           )}

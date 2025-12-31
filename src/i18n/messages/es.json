@@ -737,7 +737,7 @@
         "capabilities": "Componentes",
         "howItWorks": "Cómo Funciona",
         "faq": "Preguntas Frecuentes",
-        "enterLab": "Entrar a Consola"
+        "console": "Consola"
       },
       "aria": {
         "navigation": "Navegación principal",
@@ -752,7 +752,7 @@
         "label": "Impulsado por"
       },
       "primaryCta": {
-        "label": "Crear un Lab",
+        "label": "Crea Tu Lab",
         "href": "/labs/create"
       },
       "secondaryCta": {
