@@ -718,21 +718,6 @@
     "language": {
       "title": "Language",
       "description": "Choose the locale for navigation and content copy."
-    },
-    "privacy": {
-      "title": "Privacy",
-      "items": [
-        {
-          "label": "Share streak with the pack",
-          "status": "On",
-          "tone": "cyan"
-        },
-        {
-          "label": "Show public repos",
-          "status": "Custom",
-          "tone": "violet"
-        }
-      ]
     }
   },
   "ThemeToggle": {

@@ -709,21 +709,6 @@
     "language": {
       "title": "Idioma",
       "description": "Elige el idioma para navegación y contenido."
-    },
-    "privacy": {
-      "title": "Privacidad",
-      "items": [
-        {
-          "label": "Compartir streak con la manada",
-          "status": "Activo",
-          "tone": "cyan"
-        },
-        {
-          "label": "Mostrar repos públicos",
-          "status": "Personalizado",
-          "tone": "violet"
-        }
-      ]
     }
   },
   "ThemeToggle": {
