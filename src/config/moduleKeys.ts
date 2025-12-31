@@ -5,7 +5,7 @@
  * Used by TopBar, SidebarNav, and breadcrumb generation.
  */
 
-export type Section = "product" | "laboratory" | "library" | "account";
+export type Section = "laboratory" | "tools" | "library" | "account";
 export type ModuleStatus = "ready" | "experimental" | "planned" | "external";
 
 export interface ModuleConfig {
@@ -22,26 +22,22 @@ export interface ModuleConfig {
  * Value: module configuration
  */
 export const MODULE_KEYS: Record<string, ModuleConfig> = {
-  // Producto
-  "/labs": { section: "product", module: "eventLabs" },
+  // Laboratory
+  "/dashboard": { section: "laboratory", module: "home" },
+  "/labs": { section: "laboratory", module: "myLabs" },
   "/labs/create": {
-    section: "product",
-    module: "eventLabs",
+    section: "laboratory",
+    module: "myLabs",
     subpage: "create",
   },
-  "/spray": { section: "product", module: "sprayDisperser", parent: "rewards" },
-  "/gooddollar": {
-    section: "product",
-    module: "gooddollarClaim",
-    parent: "rewards",
-  },
-  "/mentors": { section: "product", module: "mentorsSpace" },
 
-  // Laboratorio
-  "/dashboard": { section: "laboratory", module: "dashboard" },
+  // Tools
+  "/spray": { section: "tools", module: "spray" },
+  "/gooddollar": { section: "tools", module: "gooddollar" },
+  "/mentors": { section: "tools", module: "mentors" },
 
-  // Biblioteca
-  "/library": { section: "library", module: "browseLibrary" },
+  // Library
+  "/library": { section: "library", module: "browse" },
   "/library/trust-scoring": { section: "library", module: "trustScoring" },
   "/library/x402": { section: "library", module: "premiumAccess" },
   "/library/a2a": { section: "library", module: "agentNetwork" },
@@ -70,6 +66,7 @@ export const MODULE_KEYS: Record<string, ModuleConfig> = {
     module: "sponsorToolkit",
     onlyInIndex: true,
   },
+  "/tools/eip3009": { section: "library", module: "eip3009Checker" },
 
   // Account
   "/verification": { section: "account", module: "verification" },
@@ -81,19 +78,21 @@ export const MODULE_KEYS: Record<string, ModuleConfig> = {
  * Defines the state badge for each module
  */
 export const MODULE_STATUS: Record<string, ModuleStatus> = {
-  // Producto - all ready
-  eventLabs: "ready",
-  sprayDisperser: "ready",
-  gooddollarClaim: "ready",
-  mentorsSpace: "ready",
+  // Laboratory
+  home: "ready",
+  myLabs: "ready",
 
-  // Laboratorio
-  dashboard: "ready",
+  // Tools
+  spray: "ready",
+  gooddollar: "ready",
+  mentors: "ready",
 
-  // Biblioteca
+  // Library
+  browse: "ready",
   trustScoring: "experimental",
   premiumAccess: "experimental",
   agentNetwork: "planned",
+  eip3009Checker: "experimental",
   gamesLab: "experimental",
   questsEngine: "planned",
   attendanceTools: "experimental",
@@ -156,14 +155,3 @@ export function getTitleKey(pathname: string): string | null {
   return `sidebar.${config.section}.${config.module}`;
 }
 
-/**
- * Check if a module should auto-expand its parent collapsible
- * Used for Rewards (Spray/GoodDollar)
- */
-export function shouldExpandParent(
-  pathname: string,
-  parentKey: string,
-): boolean {
-  const config = getModuleConfig(pathname);
-  return config?.parent === parentKey;
-}
