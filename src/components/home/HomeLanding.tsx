@@ -26,8 +26,9 @@ import { fetchUserSession } from "@/lib/userClient";
 
 export default function HomeLanding() {
   const t = useTranslations("HomeLanding");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [consoleHref, setConsoleHref] = useState("/access");
-  const [createLabHref, setCreateLabHref] = useState("/access");
+  const [heroCtaHref, setHeroCtaHref] = useState("/access");
   const [finalCtaHref, setFinalCtaHref] = useState("/access");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
@@ -38,9 +39,9 @@ export default function HomeLanding() {
     fetchUserSession()
       .then((session) => {
         if (!cancelled && session?.hasProfile) {
-          // User has wallet + handle, go directly to dashboard/create
+          setIsAuthenticated(true);
           setConsoleHref("/dashboard");
-          setCreateLabHref("/labs/create");
+          setHeroCtaHref("/dashboard");
           setFinalCtaHref("/labs/create");
         }
       })
@@ -143,9 +144,11 @@ export default function HomeLanding() {
               </a>
               <Link
                 href={consoleHref}
-                className="text-sm font-medium text-white/70 transition hover:text-white"
+                className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
               >
-                {t("navbar.links.console")}
+                {consoleHref === "/dashboard"
+                  ? t("navbar.links.dashboard")
+                  : t("navbar.links.signIn")}
               </Link>
             </div>
 
@@ -193,10 +196,12 @@ export default function HomeLanding() {
               </a>
               <Link
                 href={consoleHref}
-                className="text-sm font-medium text-white/70 transition hover:text-white"
+                className="inline-flex w-fit rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t("navbar.links.console")}
+                {consoleHref === "/dashboard"
+                  ? t("navbar.links.dashboard")
+                  : t("navbar.links.signIn")}
               </Link>
             </div>
           )}
@@ -220,10 +225,14 @@ export default function HomeLanding() {
             {/* CTAs */}
             <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                href={createLabHref}
+                href={heroCtaHref}
                 className="inline-flex items-center gap-3 rounded-xl bg-[#baff5c] px-8 py-4 text-base font-semibold text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:bg-[#89e24a] hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c]"
               >
-                <span>{t("hero.primaryCta.label")}</span>
+                <span>
+                  {isAuthenticated
+                    ? t("hero.primaryCta.labelAuth")
+                    : t("hero.primaryCta.label")}
+                </span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <button
