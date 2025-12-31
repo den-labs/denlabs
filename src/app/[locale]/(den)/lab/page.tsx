@@ -1,105 +1,12 @@
-import {
-  Award,
-  BarChart3,
-  Droplets,
-  Gamepad2,
-  Grid3X3,
-  LayoutGrid,
-  Lock,
-  Puzzle,
-  Search,
-  ShieldCheck,
-  ShieldQuestion,
-  Store,
-  Trophy,
-  UserCircle,
-} from "lucide-react";
+import { ShieldCheck, ShieldQuestion, UserCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { ComponentType, ReactNode } from "react";
-import { DenMain, DenRightRail } from "@/components/den/RailSlots";
+import type { ReactNode } from "react";
+import { DenMain } from "@/components/den/RailSlots";
 import { requireProfile } from "@/lib/accessGuards";
 import type { LabUserProfile } from "@/lib/userProfile";
 
 const LAB_TABS = ["Overview", "Activity", "Rewards", "Signals"];
-
-type MiniApp = {
-  id: string;
-  label: string;
-  status: "LIVE" | "SOON";
-  href?: string;
-  icon: ComponentType<{ className?: string }>;
-  description: string;
-};
-
-const MINI_APPS: MiniApp[] = [
-  {
-    id: "spray",
-    label: "Spray Disperser",
-    status: "LIVE",
-    href: "/spray",
-    icon: Droplets,
-    description: "Send rewards in bulk.",
-  },
-  {
-    id: "taberna",
-    label: "Taberna Mentorship",
-    status: "LIVE",
-    href: "/taberna",
-    icon: Store,
-    description: "Join live rooms.",
-  },
-  {
-    id: "self",
-    label: "Self.xyz Auth",
-    status: "LIVE",
-    href: "/auth",
-    icon: ShieldCheck,
-    description: "Verify your identity.",
-  },
-  {
-    id: "mini-games",
-    label: "Mini-Games Lab",
-    status: "SOON",
-    icon: Gamepad2,
-    description: "Play and earn inside runs.",
-  },
-  {
-    id: "sponsor",
-    label: "Sponsor Showcase",
-    status: "SOON",
-    icon: Award,
-    description: "Highlights for partners.",
-  },
-  {
-    id: "extensions",
-    label: "Builder Extensions",
-    status: "SOON",
-    icon: Puzzle,
-    description: "Custom experiences.",
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    status: "SOON",
-    icon: BarChart3,
-    description: "Metrics and KPIs.",
-  },
-  {
-    id: "leaderboard",
-    label: "Leaderboard",
-    status: "SOON",
-    icon: Trophy,
-    description: "Top builders per run.",
-  },
-  {
-    id: "coming-soon",
-    label: "More coming soon",
-    status: "SOON",
-    icon: Lock,
-    description: "Reserved slot.",
-  },
-];
 
 export default async function LabPage({
   params,
@@ -109,14 +16,9 @@ export default async function LabPage({
   const { locale } = await params;
   const profile = await requireProfile({ locale, nextPath: "/lab" });
   return (
-    <>
-      <DenMain>
-        <LabMain locale={locale} profile={profile} />
-      </DenMain>
-      <DenRightRail>
-        <LabRightSidebar locale={locale} />
-      </DenRightRail>
-    </>
+    <DenMain>
+      <LabMain locale={locale} profile={profile} />
+    </DenMain>
   );
 }
 
@@ -154,9 +56,6 @@ function LabMain({ locale, profile }: LabMainProps) {
     profile.display_name ||
     formatWalletFallback(profile.wallet_address ?? null) ||
     "Den Builder";
-  const liveMiniApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self",
-  );
   const avatarSrc = profile.avatar_url ?? "/avatar.png";
 
   return (
@@ -206,24 +105,6 @@ function LabMain({ locale, profile }: LabMainProps) {
           stats={stats}
         />
         <QuestList items={quests} />
-      </section>
-      <section className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-5 lg:hidden">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-semibold text-white">Shortcuts</p>
-          <LayoutGrid className="h-4 w-4 text-white/60" aria-hidden />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {liveMiniApps.map((app) => (
-            <Link
-              key={app.id}
-              href={`${localePrefix}${app.href ?? "#"}`}
-              className="rounded-xl border border-wolf-border-soft bg-wolf-panel/70 p-3 text-center text-xs text-white transition hover:bg-wolf-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
-            >
-              <app.icon className="mx-auto mb-2 h-5 w-5 text-white/60" />
-              <span className="font-medium">{app.label}</span>
-            </Link>
-          ))}
-        </div>
       </section>
     </div>
   );
@@ -379,98 +260,6 @@ function QuestAction({ quest }: { quest: QuestItem }) {
     >
       {quest.actionLabel}
     </Link>
-  );
-}
-
-function LabRightSidebar({ locale }: { locale: string }) {
-  const localePrefix = `/${locale}`;
-  const liveApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self",
-  );
-  return (
-    <aside className="hidden flex-col gap-6 lg:flex text-wolf-foreground">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-        <input
-          type="text"
-          placeholder="Search experiments"
-          className="w-full rounded-full border border-wolf-border bg-wolf-panel/80 py-2.5 pl-10 pr-14 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
-        />
-        <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-wolf-border bg-wolf-panel px-2 py-0.5 text-[10px] text-white/60">
-          ⌘K
-        </kbd>
-      </div>
-      <section className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-5">
-        <div className="mb-1 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-white">Shortcuts</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              className="rounded-md p-1.5 text-white/60 hover:bg-white/10"
-            >
-              <Grid3X3 className="h-4 w-4" aria-hidden />
-              <span className="sr-only">Open apps grid</span>
-            </button>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {liveApps.map((app) => {
-            const Icon = app.icon;
-            const isLive = app.status === "LIVE";
-            const href =
-              isLive && app.href ? `${localePrefix}${app.href}` : null;
-            const content = (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-wolf-border-soft bg-wolf-panel/60 p-3 text-center text-xs text-white transition hover:bg-wolf-panel">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-wolf-neutral-soft">
-                  <Icon
-                    className={`h-5 w-5 ${
-                      isLive ? "text-[#89e24a]" : "text-white/40"
-                    }`}
-                  />
-                </div>
-                <span className="leading-tight">{app.label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    isLive
-                      ? "bg-[#89e24a]/20 text-[#89e24a]"
-                      : "bg-white/10 text-white/50"
-                  }`}
-                >
-                  {app.status}
-                </span>
-              </div>
-            );
-            if (href) {
-              return (
-                <Link key={app.id} href={href}>
-                  {content}
-                </Link>
-              );
-            }
-            return (
-              <div key={app.id} className="cursor-not-allowed opacity-70">
-                {content}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-      <div className="mt-auto flex flex-wrap gap-2 text-[11px] text-white/50">
-        <Link href="#" className="hover:text-white">
-          Support
-        </Link>
-        <span>•</span>
-        <Link href="#" className="hover:text-white">
-          Privacy
-        </Link>
-        <span>•</span>
-        <Link href="#" className="hover:text-white">
-          Terms
-        </Link>
-      </div>
-    </aside>
   );
 }
 

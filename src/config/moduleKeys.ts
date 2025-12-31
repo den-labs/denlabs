@@ -154,4 +154,3 @@ export function getTitleKey(pathname: string): string | null {
 
   return `sidebar.${config.section}.${config.module}`;
 }
-

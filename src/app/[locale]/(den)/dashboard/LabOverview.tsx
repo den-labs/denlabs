@@ -2,104 +2,20 @@
 
 import {
   ArrowRight,
-  Award,
-  BarChart3,
-  Droplets,
   FlaskConical,
-  Gamepad2,
-  Grid3X3,
-  LayoutGrid,
-  Lock,
-  Puzzle,
-  Search,
   ShieldCheck,
   ShieldQuestion,
-  Store,
-  Trophy,
   UserCircle,
 } from "lucide-react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
-import { DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
 import { Link as NextLink } from "@/i18n/routing";
 import type { EventLab } from "@/lib/eventLabs";
 import { listEventLabs } from "@/lib/eventLabsClient";
 
-const MINI_APPS = [
-  {
-    id: "spray",
-    label: "Spray Disperser",
-    status: "LIVE" as const,
-    href: "/spray",
-    icon: Droplets,
-    description: "Send rewards in bulk.",
-  },
-  {
-    id: "taberna",
-    label: "Mentors Space",
-    status: "LIVE" as const,
-    href: "/mentors",
-    icon: Store,
-    description: "Join live rooms.",
-  },
-  {
-    id: "self",
-    label: "Verification",
-    status: "LIVE" as const,
-    href: "/verification",
-    icon: ShieldCheck,
-    description: "Verify your identity.",
-  },
-  {
-    id: "mini-games",
-    label: "Mini-Games Lab",
-    status: "SOON" as const,
-    icon: Gamepad2,
-    description: "Play and earn inside runs.",
-  },
-  {
-    id: "sponsor",
-    label: "Sponsor Showcase",
-    status: "SOON" as const,
-    icon: Award,
-    description: "Highlights for partners.",
-  },
-  {
-    id: "extensions",
-    label: "Builder Extensions",
-    status: "SOON" as const,
-    icon: Puzzle,
-    description: "Custom experiences.",
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    status: "SOON" as const,
-    icon: BarChart3,
-    description: "Metrics and KPIs.",
-  },
-  {
-    id: "leaderboard",
-    label: "Leaderboard",
-    status: "SOON" as const,
-    icon: Trophy,
-    description: "Top builders per run.",
-  },
-  {
-    id: "coming-soon",
-    label: "More coming soon",
-    status: "SOON" as const,
-    icon: Lock,
-    description: "Reserved slot.",
-  },
-];
-
 export default function LabOverview() {
   const user = useDenUser();
-  const params = useParams();
-  const locale = params.locale as string;
   const [labs, setLabs] = useState<EventLab[]>([]);
   const [labsLoading, setLabsLoading] = useState(true);
 
@@ -148,104 +64,72 @@ export default function LabOverview() {
     user.displayName ||
     formatWalletFallback(user.walletAddress ?? null) ||
     "Den Builder";
-  const liveMiniApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self",
-  );
   const avatarSrc = user.avatarUrl ?? "/avatar.png";
 
   return (
-    <>
-      <div className="space-y-6 text-wolf-foreground">
-        {/* Labs CTA Card */}
-        {!labsLoading && (
-          <section className="wolf-card rounded-2xl border border-wolf-border bg-gradient-to-r from-[#89e24a]/10 to-transparent p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#89e24a]/30 bg-[#89e24a]/10">
-                  <FlaskConical
-                    className="h-6 w-6 text-[#89e24a]"
-                    aria-hidden
-                  />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    {hasLabs ? "My Labs" : "Get Started"}
-                  </h2>
-                  <p className="text-sm text-white/70">
-                    {hasLabs
-                      ? `You have ${labs.length} lab${labs.length > 1 ? "s" : ""} — continue managing feedback.`
-                      : "Create your first lab to start collecting feedback."}
-                  </p>
-                </div>
-              </div>
-              <NextLink
-                href={hasLabs ? "/labs" : "/labs/create"}
-                className="inline-flex items-center gap-2 rounded-full bg-[#89e24a] px-5 py-2.5 text-sm font-semibold text-[#05090f] transition hover:bg-[#7ad93e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05090f]"
-              >
-                {hasLabs ? "Continue to My Labs" : "Create your first Lab"}
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </NextLink>
-            </div>
-          </section>
-        )}
-
-        <section className="wolf-card rounded-3xl border border-wolf-border p-6 text-white">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center">
+    <div className="space-y-6 text-wolf-foreground">
+      {/* Labs CTA Card */}
+      {!labsLoading && (
+        <section className="wolf-card rounded-2xl border border-wolf-border bg-gradient-to-r from-[#89e24a]/10 to-transparent p-5">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <ProfileAvatar
-                src={avatarSrc}
-                verified={Boolean(user.selfVerified)}
-              />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#89e24a]/30 bg-[#89e24a]/10">
+                <FlaskConical className="h-6 w-6 text-[#89e24a]" aria-hidden />
+              </div>
               <div>
-                <h1 className="text-2xl font-semibold">{displayName}</h1>
-                <p className="text-sm text-white/70">{handle}</p>
+                <h2 className="text-lg font-semibold text-white">
+                  {hasLabs ? "My Labs" : "Get Started"}
+                </h2>
+                <p className="text-sm text-white/70">
+                  {hasLabs
+                    ? `You have ${labs.length} lab${labs.length > 1 ? "s" : ""} — continue managing feedback.`
+                    : "Create your first lab to start collecting feedback."}
+                </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 md:ml-auto">
-              <StatusBadge
-                icon={<UserCircle className="h-3.5 w-3.5" aria-hidden />}
-                label={`ROLE: ${
-                  user.role === "organizer" ? "OPERATOR" : "PLAYER"
-                }`}
-              />
+            <NextLink
+              href={hasLabs ? "/labs" : "/labs/create"}
+              className="inline-flex items-center gap-2 rounded-full bg-[#89e24a] px-5 py-2.5 text-sm font-semibold text-[#05090f] transition hover:bg-[#7ad93e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05090f]"
+            >
+              {hasLabs ? "Continue to My Labs" : "Create your first Lab"}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </NextLink>
+          </div>
+        </section>
+      )}
+
+      <section className="wolf-card rounded-3xl border border-wolf-border p-6 text-white">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center">
+          <div className="flex items-center gap-4">
+            <ProfileAvatar
+              src={avatarSrc}
+              verified={Boolean(user.selfVerified)}
+            />
+            <div>
+              <h1 className="text-2xl font-semibold">{displayName}</h1>
+              <p className="text-sm text-white/70">{handle}</p>
             </div>
           </div>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-2">
-          <LabStats
-            holdProgress={holdProgress}
-            holdScore={holdScore}
-            stats={stats}
-          />
-          <QuestList items={quests} />
-        </section>
-
-        <section className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-5 lg:hidden">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-semibold text-white">Shortcuts</p>
-            <LayoutGrid className="h-4 w-4 text-white/60" aria-hidden />
+          <div className="flex flex-wrap gap-2 md:ml-auto">
+            <StatusBadge
+              icon={<UserCircle className="h-3.5 w-3.5" aria-hidden />}
+              label={`ROLE: ${
+                user.role === "organizer" ? "OPERATOR" : "PLAYER"
+              }`}
+            />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {liveMiniApps.map((app) => (
-              <NextLink
-                key={app.id}
-                href={app.href ?? "#"}
-                className="rounded-xl border border-wolf-border-soft bg-wolf-panel/70 p-3 text-center text-xs text-white transition hover:bg-wolf-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
-              >
-                <app.icon className="mx-auto mb-2 h-5 w-5 text-white/60" />
-                <span className="font-medium">{app.label}</span>
-              </NextLink>
-            ))}
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
-      {/* Right Sidebar for Desktop */}
-      <DenRightRail>
-        <LabRightSidebar locale={locale} />
-      </DenRightRail>
-    </>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <LabStats
+          holdProgress={holdProgress}
+          holdScore={holdScore}
+          stats={stats}
+        />
+        <QuestList items={quests} />
+      </section>
+    </div>
   );
 }
 
@@ -402,99 +286,6 @@ function QuestAction({ quest }: { quest: QuestItem }) {
     >
       {quest.actionLabel}
     </NextLink>
-  );
-}
-
-function LabRightSidebar({ locale }: { locale: string }) {
-  const liveApps = MINI_APPS.filter(
-    (app) => app.status === "LIVE" && app.id !== "self",
-  );
-
-  return (
-    <aside className="hidden flex-col gap-6 lg:flex text-wolf-foreground">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-        <input
-          type="text"
-          placeholder="Search experiments"
-          className="w-full rounded-full border border-wolf-border bg-wolf-panel/80 py-2.5 pl-10 pr-14 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
-        />
-        <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-wolf-border bg-wolf-panel px-2 py-0.5 text-[10px] text-white/60">
-          ⌘K
-        </kbd>
-      </div>
-
-      <section className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-5">
-        <div className="mb-1 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-white">Shortcuts</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              className="rounded-md p-1.5 text-white/60 hover:bg-white/10"
-            >
-              <Grid3X3 className="h-4 w-4" aria-hidden />
-              <span className="sr-only">Open apps grid</span>
-            </button>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {liveApps.map((app) => {
-            const Icon = app.icon;
-            const isLive = app.status === "LIVE";
-            const href = isLive && app.href ? app.href : null;
-            const content = (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-wolf-border-soft bg-wolf-panel/60 p-3 text-center text-xs text-white transition hover:bg-wolf-panel">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-wolf-neutral-soft">
-                  <Icon
-                    className={`h-5 w-5 ${
-                      isLive ? "text-[#89e24a]" : "text-white/40"
-                    }`}
-                  />
-                </div>
-                <span className="leading-tight">{app.label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    isLive
-                      ? "bg-[#89e24a]/20 text-[#89e24a]"
-                      : "bg-white/10 text-white/50"
-                  }`}
-                >
-                  {app.status}
-                </span>
-              </div>
-            );
-            if (href) {
-              return (
-                <NextLink key={app.id} href={href}>
-                  {content}
-                </NextLink>
-              );
-            }
-            return (
-              <div key={app.id} className="cursor-not-allowed opacity-70">
-                {content}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <div className="mt-auto flex flex-wrap gap-2 text-[11px] text-white/50">
-        <NextLink href="#" className="hover:text-white">
-          Support
-        </NextLink>
-        <span>•</span>
-        <NextLink href="#" className="hover:text-white">
-          Privacy
-        </NextLink>
-        <span>•</span>
-        <NextLink href="#" className="hover:text-white">
-          Terms
-        </NextLink>
-      </div>
-    </aside>
   );
 }
 
