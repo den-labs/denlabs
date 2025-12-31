@@ -54,11 +54,6 @@ export default function DenLayout({ children }: { children: ReactNode }) {
 function DesktopLayout({ children }: { children: ReactNode }) {
   const attachRight = useRailSlotTarget("right");
   const rightActive = useRailSlotActive("right");
-  const rightPlaceholder = (
-    <div className="hidden rounded-2xl border border-dashed border-border/60 bg-muted/30 px-4 py-6 text-center text-xs font-semibold uppercase text-muted-foreground lg:flex lg:flex-col lg:items-center lg:justify-center">
-      Right rail
-    </div>
-  );
 
   return (
     <div className="hidden md:flex md:flex-1 md:flex-col">
@@ -77,11 +72,17 @@ function DesktopLayout({ children }: { children: ReactNode }) {
               <WalletMenu />
             </div>
           </header>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div
+            className={`grid gap-6 ${
+              rightActive
+                ? "lg:grid-cols-[minmax(0,1fr)_300px]"
+                : "lg:grid-cols-1"
+            }`}
+          >
             <div className="min-w-0">{children}</div>
-            <div ref={attachRight} className="hidden lg:block">
-              {rightActive ? null : rightPlaceholder}
-            </div>
+            {rightActive && (
+              <div ref={attachRight} className="hidden lg:block" />
+            )}
           </div>
         </section>
       </div>
