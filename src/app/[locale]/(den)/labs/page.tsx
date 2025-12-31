@@ -1,43 +1,43 @@
-"use client";
+'use client'
 
-import { FlaskConical, Loader2, Plus } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { LabCard } from "@/components/modules/labs/LabCard";
-import { Button } from "@/components/ui/button";
-import type { EventLab } from "@/lib/eventLabs";
-import { listEventLabs } from "@/lib/eventLabsClient";
+import { FlaskConical, Loader2, Plus } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { LabCard } from '@/components/modules/labs/LabCard'
+import { Button } from '@/components/ui/button'
+import type { EventLab } from '@/lib/eventLabs'
+import { listEventLabs } from '@/lib/eventLabsClient'
 
 export default function LabsPage() {
-  const [labs, setLabs] = useState<EventLab[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [labs, setLabs] = useState<EventLab[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<
-    "all" | "active" | "paused" | "completed"
-  >("all");
+    'all' | 'active' | 'paused' | 'completed'
+  >('all')
 
   useEffect(() => {
     async function fetchLabs() {
-      setIsLoading(true);
-      setError(null);
+      setIsLoading(true)
+      setError(null)
 
       try {
-        const fetchedLabs = await listEventLabs();
-        setLabs(fetchedLabs);
+        const fetchedLabs = await listEventLabs()
+        setLabs(fetchedLabs)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch labs");
+        setError(err instanceof Error ? err.message : 'Failed to fetch labs')
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    fetchLabs();
-  }, []);
+    fetchLabs()
+  }, [])
 
   const filteredLabs = labs.filter((lab) => {
-    if (filter === "all") return true;
-    return lab.status === filter;
-  });
+    if (filter === 'all') return true
+    return lab.status === filter
+  })
 
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
@@ -60,7 +60,8 @@ export default function LabsPage() {
 
         <Link href="/labs/create">
           <Button className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90">
-            <Plus className="mr-2 h-4 w-4" />+ New Lab
+            <Plus className="mr-2 h-4 w-4" />
+            New Lab
           </Button>
         </Link>
       </div>
@@ -69,44 +70,44 @@ export default function LabsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => setFilter("all")}
+          onClick={() => setFilter('all')}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            filter === "all"
-              ? "bg-wolf-emerald text-black"
-              : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+            filter === 'all'
+              ? 'bg-wolf-emerald text-black'
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
           All
         </button>
         <button
           type="button"
-          onClick={() => setFilter("active")}
+          onClick={() => setFilter('active')}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            filter === "active"
-              ? "bg-wolf-emerald text-black"
-              : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+            filter === 'active'
+              ? 'bg-wolf-emerald text-black'
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
           Active
         </button>
         <button
           type="button"
-          onClick={() => setFilter("paused")}
+          onClick={() => setFilter('paused')}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            filter === "paused"
-              ? "bg-wolf-emerald text-black"
-              : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+            filter === 'paused'
+              ? 'bg-wolf-emerald text-black'
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
           Paused
         </button>
         <button
           type="button"
-          onClick={() => setFilter("completed")}
+          onClick={() => setFilter('completed')}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            filter === "completed"
-              ? "bg-wolf-emerald text-black"
-              : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+            filter === 'completed'
+              ? 'bg-wolf-emerald text-black'
+              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
           Completed
@@ -129,14 +130,14 @@ export default function LabsPage() {
             aria-hidden="true"
           />
           <h3 className="mt-4 text-lg font-semibold text-white">
-            {filter === "all" ? "No labs yet" : `No ${filter} labs`}
+            {filter === 'all' ? 'No labs yet' : `No ${filter} labs`}
           </h3>
           <p className="mt-2 text-sm text-white/60">
-            {filter === "all"
-              ? "Create your first lab to start collecting feedback"
+            {filter === 'all'
+              ? 'Create your first lab to start collecting feedback'
               : `You don't have any ${filter} labs`}
           </p>
-          {filter === "all" && (
+          {filter === 'all' && (
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link href="/labs/create">
                 <Button className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90">
@@ -164,5 +165,5 @@ export default function LabsPage() {
         </div>
       )}
     </div>
-  );
+  )
 }
