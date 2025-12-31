@@ -53,25 +53,29 @@
         "title": "Self Auth",
         "description": "Verify staff and attendees with Self."
       },
-      "dashboard": {
-        "title": "Dashboard",
+      "home": {
+        "title": "Home",
         "description": "Your metrics, insights, and leaderboard rankings."
       },
-      "sprayDisperser": {
-        "title": "Spray Disperser",
+      "myLabs": {
+        "title": "My Labs",
+        "description": "Create and manage feedback for your events."
+      },
+      "spray": {
+        "title": "Spray",
         "description": "Reward many wallets at once, in just one send."
       },
-      "gooddollarClaim": {
-        "title": "GoodDollar Claim",
+      "gooddollar": {
+        "title": "GoodDollar",
         "description": "Claim your G$ rewards for verified builders."
       },
-      "mentorsSpace": {
-        "title": "Mentors Space",
+      "mentors": {
+        "title": "Mentors",
         "description": "Schedule and manage mentorship sessions."
       },
-      "eventLabs": {
-        "title": "Event Labs",
-        "description": "Create and manage feedback labs for your events."
+      "browse": {
+        "title": "Browse",
+        "description": "Explore all modules and integrations."
       },
       "trustScoring": {
         "title": "Trust Scoring (8004)",
@@ -117,26 +121,25 @@
   },
   "sidebar": {
     "sections": {
-      "product": "Product",
       "laboratory": "Laboratory",
+      "tools": "Tools",
       "library": "Library",
       "account": "Account"
     },
-    "product": {
-      "eventLabs": "Event Labs",
-      "rewards": "Rewards",
-      "sprayDisperser": "Spray",
-      "gooddollarClaim": "GoodDollar",
-      "mentorsSpace": "Mentors Space"
-    },
     "laboratory": {
-      "dashboard": "Dashboard"
+      "home": "Home",
+      "myLabs": "My Labs"
+    },
+    "tools": {
+      "spray": "Spray",
+      "gooddollar": "GoodDollar",
+      "mentors": "Mentors"
     },
     "library": {
+      "browse": "Browse",
       "trustScoring": "Trust Scoring (8004)",
       "premiumAccess": "Premium Access (x402)",
       "agentNetwork": "Agent Network (A2A)",
-      "browseLibrary": "Browse Library",
       "gamesLab": "Games Lab",
       "questsEngine": "Quests Engine",
       "attendanceTools": "Attendance Tools",

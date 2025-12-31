@@ -53,25 +53,29 @@
         "title": "Self Auth",
         "description": "Verifica staff y asistentes con Self."
       },
-      "dashboard": {
-        "title": "Dashboard",
+      "home": {
+        "title": "Inicio",
         "description": "Tus métricas, insights y rankings de leaderboard."
       },
-      "sprayDisperser": {
-        "title": "Dispersor Spray",
+      "myLabs": {
+        "title": "Mis Labs",
+        "description": "Crea y gestiona feedback para tus eventos."
+      },
+      "spray": {
+        "title": "Spray",
         "description": "Recompensa múltiples wallets de una sola vez, en un solo envío."
       },
-      "gooddollarClaim": {
-        "title": "Reclamo GoodDollar",
+      "gooddollar": {
+        "title": "GoodDollar",
         "description": "Reclama tus recompensas G$ como builder verificado."
       },
-      "mentorsSpace": {
-        "title": "Espacio de Mentores",
+      "mentors": {
+        "title": "Mentores",
         "description": "Programa y gestiona sesiones de mentoría."
       },
-      "eventLabs": {
-        "title": "Event Labs",
-        "description": "Crea y gestiona laboratorios de feedback para tus eventos."
+      "browse": {
+        "title": "Explorar",
+        "description": "Explora todos los módulos e integraciones."
       },
       "trustScoring": {
         "title": "Trust Scoring (8004)",
@@ -117,26 +121,25 @@
   },
   "sidebar": {
     "sections": {
-      "product": "Producto",
-      "laboratory": "Laboratorio",
-      "library": "Biblioteca",
+      "laboratory": "Laboratory",
+      "tools": "Tools",
+      "library": "Library",
       "account": "Cuenta"
     },
-    "product": {
-      "eventLabs": "Event Labs",
-      "rewards": "Recompensas",
-      "sprayDisperser": "Spray",
-      "gooddollarClaim": "GoodDollar",
-      "mentorsSpace": "Espacio de Mentores"
-    },
     "laboratory": {
-      "dashboard": "Dashboard"
+      "home": "Home",
+      "myLabs": "My Labs"
+    },
+    "tools": {
+      "spray": "Spray",
+      "gooddollar": "GoodDollar",
+      "mentors": "Mentors"
     },
     "library": {
+      "browse": "Browse",
       "trustScoring": "Trust Scoring (8004)",
       "premiumAccess": "Acceso Premium (x402)",
       "agentNetwork": "Red de Agentes (A2A)",
-      "browseLibrary": "Explorar Biblioteca",
       "gamesLab": "Laboratorio de Juegos",
       "questsEngine": "Motor de Quests",
       "attendanceTools": "Herramientas de Asistencia",
