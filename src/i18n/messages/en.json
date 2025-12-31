@@ -739,6 +739,85 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "DemoHub": {
+    "badge": "DEMO MODE",
+    "title": "Try Event Feedback Ops in 60 seconds",
+    "subtitle": "Submit a test feedback and see how signals are captured. No account required.",
+    "steps": {
+      "label": "What you'll do",
+      "step1": "Submit a test feedback (like reporting a bug or suggesting a feature)",
+      "step2": "See how DenLabs captures signals (tags, priority, quality score)",
+      "step3": "Understand how hosts triage and act on feedback"
+    },
+    "cta": {
+      "primary": "Start Demo as Participant",
+      "secondary": "View Host Dashboard",
+      "loginRequired": "login"
+    },
+    "timeEstimate": "Takes about 60 seconds"
+  },
+  "DemoParticipant": {
+    "breadcrumb": {
+      "demo": "Demo",
+      "participant": "Participant View"
+    },
+    "title": "Demo Lab: Event Feedback",
+    "sandbox": "This is a sandbox. No real organizers are notified.",
+    "stepper": {
+      "write": "Write",
+      "submit": "Submit",
+      "results": "Results"
+    },
+    "quickPrompts": "Quick prompts (optional)",
+    "prompts": {
+      "bug": "Report a bug",
+      "bugPlaceholder": "I found an issue with...",
+      "improvement": "Suggest improvement",
+      "improvementPlaceholder": "It would be better if...",
+      "praise": "Share praise",
+      "praisePlaceholder": "I really liked..."
+    },
+    "placeholder": "Describe what you experienced, what worked well, or what could be improved...",
+    "helper": "Your feedback helps improve the experience",
+    "charsRemaining": "characters remaining",
+    "trustNote": "Quality scoring available with optional verification.",
+    "learnMore": "Learn how scoring works",
+    "submitButton": "Submit Demo Feedback",
+    "submitting": "Processing...",
+    "backToDemo": "← Back to Demo Hub"
+  },
+  "DemoComplete": {
+    "title": "Feedback Submitted!",
+    "subtitle": "Here's what DenLabs captured from your signal",
+    "signals": {
+      "title": "Captured Signals",
+      "tags": "Detected Tags",
+      "priority": "Estimated Priority",
+      "quality": "Quality Score"
+    },
+    "meaning": {
+      "title": "What this means for hosts",
+      "description": "Event organizers see this analysis in their dashboard. They can quickly triage feedback by priority, filter by tags, and export insights into a retro pack for their team."
+    },
+    "nextSteps": {
+      "title": "What's next?",
+      "dashboard": {
+        "title": "See Host Dashboard",
+        "description": "View how organizers manage feedback"
+      },
+      "create": {
+        "title": "Create Your Own Lab",
+        "description": "Start collecting feedback for your event"
+      },
+      "another": "Submit another demo feedback"
+    },
+    "noFeedback": {
+      "title": "No feedback found",
+      "description": "Looks like you haven't submitted any demo feedback yet.",
+      "cta": "Go to Demo"
+    },
+    "backToDemo": "← Back to Demo Hub"
+  },
   "HomeLanding": {
     "navbar": {
       "logo": "DenLabs",
