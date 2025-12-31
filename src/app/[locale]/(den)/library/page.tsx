@@ -2,10 +2,11 @@
 
 import {
   Gamepad2,
+  Lock,
   Puzzle,
   Scan,
   ScanQrCode,
-  Search,
+  Shield,
   Sparkles,
   Store,
   Vote,
@@ -25,6 +26,7 @@ type LibraryModule = {
   icon: React.ComponentType<{ className?: string }>;
   status: ModuleStatus;
   category: string;
+  available: boolean;
 };
 
 const LIBRARY_MODULES: LibraryModule[] = [
@@ -36,15 +38,7 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Scan,
     status: MODULE_STATUS.trustScoring,
     category: "Infrastructure",
-  },
-  {
-    key: "premiumAccess",
-    title: "Premium Access (x402)",
-    description: "HTTP 402 Payment Required implementation",
-    href: "/library/x402",
-    icon: Sparkles,
-    status: MODULE_STATUS.premiumAccess,
-    category: "Monetization",
+    available: true,
   },
   {
     key: "agentNetwork",
@@ -54,6 +48,27 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Workflow,
     status: MODULE_STATUS.agentNetwork,
     category: "Infrastructure",
+    available: true,
+  },
+  {
+    key: "premiumAccess",
+    title: "Premium Access (x402)",
+    description: "HTTP 402 Payment Required implementation",
+    href: "/library/x402",
+    icon: Sparkles,
+    status: MODULE_STATUS.premiumAccess,
+    category: "Monetization",
+    available: true,
+  },
+  {
+    key: "eip3009Checker",
+    title: "EIP-3009 Token Checker",
+    description: "Detect EIP-3009 support for gasless transfers",
+    href: "/tools/eip3009",
+    icon: Shield,
+    status: MODULE_STATUS.eip3009Checker ?? "experimental",
+    category: "Tools",
+    available: true,
   },
   {
     key: "gamesLab",
@@ -63,6 +78,7 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Gamepad2,
     status: MODULE_STATUS.gamesLab,
     category: "Engagement",
+    available: false,
   },
   {
     key: "questsEngine",
@@ -72,6 +88,7 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Puzzle,
     status: MODULE_STATUS.questsEngine,
     category: "Engagement",
+    available: false,
   },
   {
     key: "attendanceTools",
@@ -81,6 +98,7 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: ScanQrCode,
     status: MODULE_STATUS.attendanceTools,
     category: "Events",
+    available: false,
   },
   {
     key: "votingSystem",
@@ -90,6 +108,7 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Vote,
     status: MODULE_STATUS.votingSystem,
     category: "Governance",
+    available: false,
   },
   {
     key: "sponsorToolkit",
@@ -99,35 +118,18 @@ const LIBRARY_MODULES: LibraryModule[] = [
     icon: Store,
     status: MODULE_STATUS.sponsorToolkit,
     category: "Monetization",
+    available: false,
   },
 ];
 
-const STATUS_CONFIG = {
-  ready: { label: "🟢 Ready", color: "text-green-500" },
-  experimental: { label: "🟡 Experimental", color: "text-yellow-500" },
-  planned: { label: "🔵 Planned", color: "text-blue-500" },
-  external: { label: "🔗 External", color: "text-gray-500" },
-};
+const categories = Array.from(new Set(LIBRARY_MODULES.map((m) => m.category)));
 
 export default function LibraryIndexPage() {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<ModuleStatus | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string | "all">("all");
 
   const filtered = LIBRARY_MODULES.filter((module) => {
-    const matchesSearch =
-      search === "" ||
-      module.title.toLowerCase().includes(search.toLowerCase()) ||
-      module.description.toLowerCase().includes(search.toLowerCase()) ||
-      module.category.toLowerCase().includes(search.toLowerCase());
-
-    const matchesFilter = filter === "all" || module.status === filter;
-
-    return matchesSearch && matchesFilter;
+    return categoryFilter === "all" || module.category === categoryFilter;
   });
-
-  const categories = Array.from(
-    new Set(LIBRARY_MODULES.map((m) => m.category)),
-  );
 
   return (
     <div className="space-y-6">
@@ -139,105 +141,101 @@ export default function LibraryIndexPage() {
         </p>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-          <input
-            type="text"
-            placeholder="Search modules..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-wolf-border bg-wolf-panel/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a]"
-          />
-        </div>
-
-        <div className="flex gap-2">
+      {/* Category Filters */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setCategoryFilter("all")}
+          className={cn(
+            "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+            categoryFilter === "all"
+              ? "bg-[#89e24a] text-black"
+              : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
+          )}
+        >
+          All
+        </button>
+        {categories.map((category) => (
           <button
-            onClick={() => setFilter("all")}
+            key={category}
+            type="button"
+            onClick={() => setCategoryFilter(category)}
             className={cn(
-              "rounded-lg border px-4 py-2 text-sm font-medium transition",
-              filter === "all"
-                ? "border-[#89e24a] bg-[#89e24a]/10 text-[#89e24a]"
-                : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white",
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              categoryFilter === category
+                ? "bg-[#89e24a] text-black"
+                : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
             )}
           >
-            All
+            {category}
           </button>
-          {(Object.keys(STATUS_CONFIG) as ModuleStatus[]).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={cn(
-                "rounded-lg border px-4 py-2 text-sm font-medium transition",
-                filter === status
-                  ? "border-[#89e24a] bg-[#89e24a]/10 text-[#89e24a]"
-                  : "border-wolf-border bg-wolf-panel text-white/70 hover:text-white",
-              )}
-            >
-              {STATUS_CONFIG[status].label}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Module Grid */}
-      {categories.map((category) => {
-        const categoryModules = filtered.filter((m) => m.category === category);
-        if (categoryModules.length === 0) return null;
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((module) => {
+          const Icon = module.icon;
 
-        return (
-          <div key={category} className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase text-wolf-text-subtle">
-              {category}
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {categoryModules.map((module) => {
-                const Icon = module.icon;
-                const statusConfig = STATUS_CONFIG[module.status];
+          // Unavailable modules: grayscale, no link
+          if (!module.available) {
+            return (
+              <div
+                key={module.key}
+                className="wolf-card--muted cursor-not-allowed rounded-2xl border border-wolf-border-mid p-5 opacity-60 grayscale"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-wolf-neutral-soft">
+                    <Lock className="h-6 w-6 text-white/40" />
+                  </div>
+                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white/50">
+                    {module.category}
+                  </span>
+                </div>
+                <h4 className="mt-4 font-semibold text-white/50">
+                  {module.title}
+                </h4>
+                <p className="mt-1 text-sm text-white/30">
+                  {module.description}
+                </p>
+                <div className="mt-3 flex items-center gap-1.5 text-xs text-white/40">
+                  <Lock className="h-3 w-3" />
+                  Coming Soon
+                </div>
+              </div>
+            );
+          }
 
-                return (
-                  <Link
-                    key={module.key}
-                    href={module.href}
-                    className="group wolf-card--muted rounded-2xl border border-wolf-border-mid p-5 text-white transition hover:border-wolf-border-strong hover:bg-wolf-panel"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-wolf-neutral-soft transition group-hover:bg-[#89e24a]/10">
-                        <Icon className="h-6 w-6 text-[#89e24a]" />
-                      </div>
-                      <span
-                        className={cn(
-                          "text-xs font-medium",
-                          statusConfig.color,
-                        )}
-                      >
-                        {statusConfig.label}
-                      </span>
-                    </div>
-                    <h4 className="mt-4 font-semibold text-white">
-                      {module.title}
-                    </h4>
-                    <p className="mt-1 text-sm text-white/60">
-                      {module.description}
-                    </p>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+          // Available modules: full color, with link
+          return (
+            <Link
+              key={module.key}
+              href={module.href}
+              className="group wolf-card--muted rounded-2xl border border-wolf-border-mid p-5 text-white transition hover:border-wolf-border-strong hover:bg-wolf-panel"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-wolf-neutral-soft transition group-hover:bg-[#89e24a]/10">
+                  <Icon className="h-6 w-6 text-[#89e24a]" />
+                </div>
+                <span className="rounded-full bg-[#89e24a]/10 px-2.5 py-0.5 text-xs font-medium text-[#89e24a]">
+                  {module.category}
+                </span>
+              </div>
+              <h4 className="mt-4 font-semibold text-white">{module.title}</h4>
+              <p className="mt-1 text-sm text-white/60">{module.description}</p>
+            </Link>
+          );
+        })}
+      </div>
 
       {/* Empty State */}
       {filtered.length === 0 && (
         <div className="wolf-card--muted rounded-2xl border border-wolf-border-mid p-12 text-center">
-          <Search className="mx-auto mb-4 h-12 w-12 text-white/20" />
           <h3 className="text-lg font-semibold text-white/60">
             No modules found
           </h3>
           <p className="mt-2 text-sm text-white/40">
-            Try adjusting your search or filters
+            Try selecting a different category
           </p>
         </div>
       )}
