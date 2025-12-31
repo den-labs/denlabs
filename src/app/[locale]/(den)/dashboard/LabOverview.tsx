@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  ArrowRight,
   Award,
   BarChart3,
   Droplets,
+  FlaskConical,
   Gamepad2,
   Grid3X3,
   LayoutGrid,
@@ -18,10 +20,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { DenRightRail } from "@/components/den/RailSlots";
 import { useDenUser } from "@/hooks/useDenUser";
 import { Link as NextLink } from "@/i18n/routing";
+import type { EventLab } from "@/lib/eventLabs";
+import { listEventLabs } from "@/lib/eventLabsClient";
 
 const MINI_APPS = [
   {
@@ -96,7 +100,24 @@ export default function LabOverview() {
   const user = useDenUser();
   const params = useParams();
   const locale = params.locale as string;
+  const [labs, setLabs] = useState<EventLab[]>([]);
+  const [labsLoading, setLabsLoading] = useState(true);
 
+  useEffect(() => {
+    async function fetchLabs() {
+      try {
+        const fetchedLabs = await listEventLabs();
+        setLabs(fetchedLabs);
+      } catch {
+        // Ignore error, just show empty state
+      } finally {
+        setLabsLoading(false);
+      }
+    }
+    fetchLabs();
+  }, []);
+
+  const hasLabs = labs.length > 0;
   const holdScore = Number(user.holdScore ?? 0);
   const holdMax = 120;
   const holdProgress = Math.min(
@@ -135,6 +156,39 @@ export default function LabOverview() {
   return (
     <>
       <div className="space-y-6 text-wolf-foreground">
+        {/* Labs CTA Card */}
+        {!labsLoading && (
+          <section className="wolf-card rounded-2xl border border-wolf-border bg-gradient-to-r from-[#89e24a]/10 to-transparent p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#89e24a]/30 bg-[#89e24a]/10">
+                  <FlaskConical
+                    className="h-6 w-6 text-[#89e24a]"
+                    aria-hidden
+                  />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    {hasLabs ? "My Labs" : "Get Started"}
+                  </h2>
+                  <p className="text-sm text-white/70">
+                    {hasLabs
+                      ? `You have ${labs.length} lab${labs.length > 1 ? "s" : ""} — continue managing feedback.`
+                      : "Create your first lab to start collecting feedback."}
+                  </p>
+                </div>
+              </div>
+              <NextLink
+                href={hasLabs ? "/labs" : "/labs/create"}
+                className="inline-flex items-center gap-2 rounded-full bg-[#89e24a] px-5 py-2.5 text-sm font-semibold text-[#05090f] transition hover:bg-[#7ad93e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89e24a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05090f]"
+              >
+                {hasLabs ? "Continue to My Labs" : "Create your first Lab"}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </NextLink>
+            </div>
+          </section>
+        )}
+
         <section className="wolf-card rounded-3xl border border-wolf-border p-6 text-white">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-4">
