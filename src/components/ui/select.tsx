@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 interface SelectContextValue {
   value?: string;
   onValueChange?: (value: string) => void;
+  children?: React.ReactNode;
 }
 
 const SelectContext = createContext<SelectContextValue>({});
@@ -39,7 +40,7 @@ export function Select({
 
   return (
     <SelectContext.Provider
-      value={{ value, onValueChange, children: selectOptions } as any}
+      value={{ value, onValueChange, children: selectOptions }}
     >
       {children}
     </SelectContext.Provider>
@@ -52,8 +53,7 @@ export interface SelectTriggerProps
 export const SelectTrigger = forwardRef<HTMLSelectElement, SelectTriggerProps>(
   ({ className, children, ...props }, ref) => {
     const context = useContext(SelectContext);
-    const { value, onValueChange } = context;
-    const options = (context as any).children;
+    const { value, onValueChange, children: options } = context;
 
     return (
       <select
@@ -74,11 +74,11 @@ export const SelectTrigger = forwardRef<HTMLSelectElement, SelectTriggerProps>(
 
 SelectTrigger.displayName = "SelectTrigger";
 
-export function SelectValue({}: { placeholder?: string }) {
+export function SelectValue(_props: { placeholder?: string }) {
   return null; // Value is handled by select element
 }
 
-export function SelectContent({ children }: { children: React.ReactNode }) {
+export function SelectContent(_props: { children: React.ReactNode }) {
   // This component's children are extracted by the Select component
   // and passed to SelectTrigger, so we return null here to avoid
   // rendering the options twice

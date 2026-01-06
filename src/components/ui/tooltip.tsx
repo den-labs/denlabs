@@ -17,10 +17,13 @@ export function Tooltip({ children }: { children: ReactNode }) {
 
   return (
     <TooltipContext.Provider value={{ isVisible, setIsVisible }}>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: Tooltip wrapper requires mouse/focus events */}
       <div
         className="relative inline-flex"
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
+        onFocus={() => setIsVisible(true)}
+        onBlur={() => setIsVisible(false)}
       >
         {children}
       </div>
@@ -29,7 +32,6 @@ export function Tooltip({ children }: { children: ReactNode }) {
 }
 
 export function TooltipTrigger({
-  asChild,
   children,
 }: {
   asChild?: boolean;
