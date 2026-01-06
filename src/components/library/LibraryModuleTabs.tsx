@@ -1,19 +1,25 @@
 "use client";
 
-import { Book, BookOpen, FileText, Lightbulb } from "lucide-react";
+import { Book, BookOpen, FileText, Lightbulb, Shield } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-export type DiátaxisTab = "tutorial" | "demo" | "reference" | "concepts";
+export type DiátaxisTab =
+  | "tutorial"
+  | "demo"
+  | "reference"
+  | "concepts"
+  | "best-practices";
 
 const TABS = [
   { key: "tutorial" as const, label: "Tutorial", icon: BookOpen },
   { key: "demo" as const, label: "Demo", icon: Lightbulb },
   { key: "reference" as const, label: "Reference", icon: FileText },
   { key: "concepts" as const, label: "Concepts", icon: Book },
+  { key: "best-practices" as const, label: "Best Practices", icon: Shield },
 ];
 
 type LibraryModuleTabsProps = {
@@ -22,6 +28,7 @@ type LibraryModuleTabsProps = {
   demoContent?: ReactNode;
   referenceContent?: ReactNode;
   conceptsContent?: ReactNode;
+  bestPracticesContent?: ReactNode;
   defaultTab?: DiátaxisTab;
 };
 
@@ -31,6 +38,7 @@ function LibraryModuleTabsContent({
   demoContent,
   referenceContent,
   conceptsContent,
+  bestPracticesContent,
   defaultTab = "demo",
 }: LibraryModuleTabsProps) {
   const searchParams = useSearchParams();
@@ -49,7 +57,8 @@ function LibraryModuleTabsContent({
             (tab.key === "tutorial" && tutorialContent) ||
             (tab.key === "demo" && demoContent) ||
             (tab.key === "reference" && referenceContent) ||
-            (tab.key === "concepts" && conceptsContent);
+            (tab.key === "concepts" && conceptsContent) ||
+            (tab.key === "best-practices" && bestPracticesContent);
 
           if (!hasContent) return null;
 
@@ -78,6 +87,7 @@ function LibraryModuleTabsContent({
         {activeTab === "demo" && demoContent}
         {activeTab === "reference" && referenceContent}
         {activeTab === "concepts" && conceptsContent}
+        {activeTab === "best-practices" && bestPracticesContent}
       </div>
     </div>
   );
