@@ -289,10 +289,13 @@ export default function HomeLanding() {
                   </defs>
                 </svg>
                 {/* Facilitator logo */}
-                <img
+                <Image
                   src="https://facilitator.ultravioletadao.xyz/logo.png"
                   alt="Facilitator"
+                  width={32}
+                  height={32}
                   className="h-8 w-auto opacity-80 self-center"
+                  unoptimized
                 />
               </div>
             </div>
