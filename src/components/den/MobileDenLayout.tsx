@@ -2,7 +2,7 @@
 
 import { Droplets, FlaskConical, Home, Library } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import LimelightNav from "@/components/ui/LimelightNav";
 import { usePathname, useRouter } from "@/i18n/routing";
 
@@ -31,15 +31,18 @@ export function MobileDenLayout({ main }: MobileDenLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const getLabel = (key: NavigationItemKey) => {
-    const sectionMap: Record<NavigationItemKey, string> = {
-      home: "sidebar.laboratory.home",
-      myLabs: "sidebar.laboratory.myLabs",
-      spray: "sidebar.tools.spray",
-      library: "sidebar.library.browse",
-    };
-    return t(sectionMap[key]);
-  };
+  const getLabel = useCallback(
+    (key: NavigationItemKey) => {
+      const sectionMap: Record<NavigationItemKey, string> = {
+        home: "sidebar.laboratory.home",
+        myLabs: "sidebar.laboratory.myLabs",
+        spray: "sidebar.tools.spray",
+        library: "sidebar.library.browse",
+      };
+      return t(sectionMap[key]);
+    },
+    [t],
+  );
 
   const navItems = useMemo(() => {
     return navigationItems.map(({ key, icon: Icon }) => ({
@@ -47,7 +50,7 @@ export function MobileDenLayout({ main }: MobileDenLayoutProps) {
       icon: <Icon className="h-5 w-5" aria-hidden />,
       label: getLabel(key),
     }));
-  }, [t]);
+  }, [getLabel]);
   const activeKey = useMemo(() => {
     if (!pathname) {
       return "library";
