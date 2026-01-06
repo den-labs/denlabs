@@ -3,6 +3,8 @@ export type UserSession = {
   labUserId: string | null;
   walletAddress: `0x${string}` | null;
   handle: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
   hasProfile: boolean;
   isSelfVerified: boolean;
   holdScore: number;

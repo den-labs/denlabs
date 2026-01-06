@@ -8,6 +8,8 @@ type SessionResponse =
       labUserId: null;
       walletAddress: null;
       handle: null;
+      displayName: null;
+      avatarUrl: null;
       hasProfile: false;
       isSelfVerified: false;
       holdScore: 0;
@@ -17,6 +19,8 @@ type SessionResponse =
       labUserId: string;
       walletAddress: string | null;
       handle: string | null;
+      displayName: string | null;
+      avatarUrl: string | null;
       hasProfile: boolean;
       isSelfVerified: boolean;
       holdScore: number;
@@ -27,6 +31,8 @@ const ANONYMOUS_SESSION: SessionResponse = {
   labUserId: null,
   walletAddress: null,
   handle: null,
+  displayName: null,
+  avatarUrl: null,
   hasProfile: false,
   isSelfVerified: false,
   holdScore: 0,
@@ -54,6 +60,8 @@ export async function GET() {
     labUserId: profile.id,
     walletAddress: profile.wallet_address,
     handle: profile.handle,
+    displayName: profile.display_name,
+    avatarUrl: profile.avatar_url ?? null,
     hasProfile: Boolean(profile.handle),
     isSelfVerified: Boolean(profile.self_verified),
     holdScore: Number(profile.hold_score ?? 0),

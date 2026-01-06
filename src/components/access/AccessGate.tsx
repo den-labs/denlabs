@@ -135,6 +135,8 @@ export default function AccessGate({ nextPath }: AccessGateProps) {
           walletAddress: (result.walletAddress ??
             address.toLowerCase()) as `0x${string}`,
           handle: result.handle as string | null,
+          displayName: null,
+          avatarUrl: null,
           hasProfile: result.hasProfile,
           isSelfVerified: result.isSelfVerified,
           holdScore: result.holdScore,
