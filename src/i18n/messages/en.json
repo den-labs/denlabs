@@ -471,6 +471,11 @@
       "title": "Moon rewards",
       "description": "Vote on Demo Day and participate in events to unlock perks."
     },
+    "empty": {
+      "title": "No stats available yet",
+      "description": "Complete missions and participate in events to see your performance metrics here.",
+      "cta": "Start building your stats"
+    },
     "metrics": {
       "title": "Metrics dashboard",
       "description": "Track your momentum inside the pack and project your impact.",

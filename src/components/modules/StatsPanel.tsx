@@ -1,4 +1,30 @@
+import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+function StatsPanelEmpty() {
+  const t = useTranslations("StatsPanel");
+
+  return (
+    <div className="space-y-5 text-wolf-foreground">
+      <div className="wolf-card rounded-lg border border-wolf-border-strong p-6">
+        <div className="wolf-card--muted flex flex-col items-center justify-center rounded-lg border border-wolf-border-mid px-6 py-12 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-wolf-emerald-tint">
+            <BarChart3 className="h-8 w-8 text-wolf-emerald" />
+          </div>
+          <h3 className="mb-2 text-lg font-medium text-white/85">
+            {t("empty.title")}
+          </h3>
+          <p className="mb-4 max-w-sm text-sm text-wolf-text-subtle">
+            {t("empty.description")}
+          </p>
+          <p className="text-sm font-medium text-wolf-emerald">
+            {t("empty.cta")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function StatsPanelSkeleton() {
   const skeletonItems = Array.from({ length: 3 }, (_, i) => ({
@@ -42,6 +68,10 @@ export function StatsPanel() {
     value: string;
     helper: string;
   }>;
+
+  if (stats.length === 0) {
+    return <StatsPanelEmpty />;
+  }
 
   return (
     <div className="space-y-5 text-wolf-foreground">

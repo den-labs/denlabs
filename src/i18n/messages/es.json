@@ -471,6 +471,11 @@
       "title": "Recompensas de la Luna",
       "description": "Vota en Demo Day y participa en eventos para desbloquear perks."
     },
+    "empty": {
+      "title": "Aún no hay estadísticas disponibles",
+      "description": "Completa misiones y participa en eventos para ver tus métricas de desempeño aquí.",
+      "cta": "Comienza a construir tus estadísticas"
+    },
     "metrics": {
       "title": "Panel de métricas",
       "description": "Revisa tu progreso dentro de la manada y proyecta tu impacto.",
