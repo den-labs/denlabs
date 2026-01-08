@@ -569,6 +569,14 @@
       "submitFailed": "Failed to submit feedback"
     }
   },
+  "FeedbackItem": {
+    "spamDialog": {
+      "title": "Mark as Spam?",
+      "description": "This will mark the feedback as spam and hide it from the list. This action cannot be undone easily.",
+      "cancel": "Cancel",
+      "confirm": "Mark as Spam"
+    }
+  },
   "SelfAuth": {
     "success": {
       "title": "Verification complete",

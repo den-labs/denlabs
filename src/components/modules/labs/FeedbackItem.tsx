@@ -1,7 +1,9 @@
 "use client";
 
-import { Flag, MapPin, MoreVertical, Tag } from "lucide-react";
-import { useState } from "react";
+import { Flag, MapPin, MoreVertical, Tag, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +25,82 @@ interface FeedbackItemProps {
   labSlug: string;
   isCreator?: boolean;
   onUpdate?: () => void;
+}
+
+interface ConfirmSpamDialogProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmSpamDialog({
+  isOpen,
+  onConfirm,
+  onCancel,
+}: ConfirmSpamDialogProps) {
+  const t = useTranslations("FeedbackItem");
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCancel();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onCancel]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div
+        ref={dialogRef}
+        className="relative w-full max-w-md rounded-lg border border-white/10 bg-[#0a0a0a] p-6 shadow-2xl"
+      >
+        <button
+          type="button"
+          onClick={onCancel}
+          className="absolute right-4 top-4 text-white/60 hover:text-white"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-white">
+              {t("spamDialog.title")}
+            </h2>
+            <p className="text-sm text-white/60">
+              {t("spamDialog.description")}
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              onClick={onCancel}
+              variant="outline"
+              className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10"
+            >
+              {t("spamDialog.cancel")}
+            </Button>
+            <Button
+              onClick={onConfirm}
+              className="flex-1 bg-red-500 text-white hover:bg-red-600"
+            >
+              {t("spamDialog.confirm")}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
 }
 
 export function FeedbackItemSkeleton() {
@@ -68,6 +146,7 @@ export function FeedbackItem({
   onUpdate,
 }: FeedbackItemProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showSpamDialog, setShowSpamDialog] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -101,6 +180,11 @@ export function FeedbackItem({
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleConfirmSpam = async () => {
+    setShowSpamDialog(false);
+    await handleUpdateStatus("spam");
   };
 
   const getPriorityConfig = (priority: FeedbackPriority | null) => {
@@ -197,7 +281,7 @@ export function FeedbackItem({
                   <DropdownMenuItem onClick={() => handleUpdateStatus("done")}>
                     Mark as Done
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleUpdateStatus("spam")}>
+                  <DropdownMenuItem onClick={() => setShowSpamDialog(true)}>
                     Mark as Spam
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleUpdatePriority("P0")}>
@@ -261,6 +345,12 @@ export function FeedbackItem({
             ))}
         </div>
       </div>
+
+      <ConfirmSpamDialog
+        isOpen={showSpamDialog}
+        onConfirm={handleConfirmSpam}
+        onCancel={() => setShowSpamDialog(false)}
+      />
     </div>
   );
 }

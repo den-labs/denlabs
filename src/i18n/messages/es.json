@@ -569,6 +569,14 @@
       "submitFailed": "Error al enviar el feedback"
     }
   },
+  "FeedbackItem": {
+    "spamDialog": {
+      "title": "¿Marcar como Spam?",
+      "description": "Esto marcará el feedback como spam y lo ocultará de la lista. Esta acción no se puede deshacer fácilmente.",
+      "cancel": "Cancelar",
+      "confirm": "Marcar como Spam"
+    }
+  },
   "SelfAuth": {
     "success": {
       "title": "Verificación completada",
