@@ -68,17 +68,6 @@ export default function Eip3009CheckerPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-white">
-          EIP-3009 Token Checker
-        </h1>
-        <p className="text-white/60">
-          Detect if an ERC-20 token supports EIP-3009 (Transfer With
-          Authorization) for gasless/authorized transfers.
-        </p>
-      </div>
-
       {/* Info Card */}
       <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
         <div className="flex gap-3">
