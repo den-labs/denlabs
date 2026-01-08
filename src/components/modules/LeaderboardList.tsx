@@ -1,5 +1,28 @@
 import { useTranslations } from "next-intl";
 
+export function LeaderboardSkeleton() {
+  const skeletonItems = Array.from({ length: 5 }, (_, i) => ({
+    id: `skeleton-entry-${i}`,
+  }));
+
+  return (
+    <div className="space-y-3 animate-pulse">
+      {skeletonItems.map((item) => (
+        <div
+          key={item.id}
+          className="wolf-card--muted flex items-center justify-between rounded-lg border border-wolf-border-mid px-5 py-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-2xl bg-white/10" />
+            <div className="h-4 w-32 rounded bg-white/10" />
+          </div>
+          <div className="h-4 w-20 rounded bg-white/10" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function LeaderboardList() {
   const t = useTranslations("LeaderboardList");
   const leaderboard = t.raw("entries") as Array<{
