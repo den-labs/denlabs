@@ -1,14 +1,80 @@
 "use client";
 
-import { BarChart3, LayoutDashboard, Trophy } from "lucide-react";
+import {
+  AlertTriangle,
+  BarChart3,
+  LayoutDashboard,
+  Trophy,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Component, type ReactNode, Suspense } from "react";
 import { useDenUser } from "@/hooks/useDenUser";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 // Import components from old /lab page
 import LabOverview from "./LabOverview";
+
+// Error Boundary for Dashboard
+type ErrorBoundaryProps = {
+  children: ReactNode;
+};
+
+type ErrorBoundaryState = {
+  hasError: boolean;
+  error: Error | null;
+};
+
+class DashboardErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Dashboard Error:", error, errorInfo);
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4 text-center">
+          <div className="rounded-full bg-red-500/10 p-4">
+            <AlertTriangle className="h-12 w-12 text-red-400" aria-hidden />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-white">
+              Something went wrong
+            </h2>
+            <p className="text-sm text-white/60">
+              The dashboard encountered an error. Please try again.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={this.handleReset}
+            className="rounded-lg bg-wolf-emerald px-6 py-2 text-sm font-semibold text-black transition hover:bg-wolf-emerald/90"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 type Tab = {
   key: string;
@@ -134,14 +200,16 @@ function LeaderboardTab() {
 
 export default function DashboardPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[400px] items-center justify-center text-white/60">
-          Loading dashboard...
-        </div>
-      }
-    >
-      <DashboardContent />
-    </Suspense>
+    <DashboardErrorBoundary>
+      <Suspense
+        fallback={
+          <div className="flex min-h-[400px] items-center justify-center text-white/60">
+            Loading dashboard...
+          </div>
+        }
+      >
+        <DashboardContent />
+      </Suspense>
+    </DashboardErrorBoundary>
   );
 }
