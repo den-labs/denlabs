@@ -25,6 +25,42 @@ interface FeedbackItemProps {
   onUpdate?: () => void;
 }
 
+export function FeedbackItemSkeleton() {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+      <div className="space-y-3 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-24 bg-white/10 rounded" />
+            <div className="h-3 w-20 bg-white/10 rounded" />
+          </div>
+          <div className="h-6 w-6 bg-white/10 rounded-full" />
+        </div>
+
+        {/* Message Skeleton */}
+        <div className="space-y-2">
+          <div className="h-4 w-full bg-white/10 rounded" />
+          <div className="h-4 w-5/6 bg-white/10 rounded" />
+          <div className="h-4 w-4/6 bg-white/10 rounded" />
+        </div>
+
+        {/* Metadata Skeleton */}
+        <div className="flex items-center gap-3">
+          <div className="h-3 w-16 bg-white/10 rounded" />
+          <div className="h-3 w-20 bg-white/10 rounded" />
+        </div>
+
+        {/* Tags Skeleton */}
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-12 bg-white/10 rounded-full" />
+          <div className="h-5 w-16 bg-white/10 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FeedbackItem({
   feedback,
   labSlug,
