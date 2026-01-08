@@ -145,6 +145,7 @@ export function FeedbackItem({
   isCreator = false,
   onUpdate,
 }: FeedbackItemProps) {
+  const t = useTranslations("FeedbackItem");
   const [isUpdating, setIsUpdating] = useState(false);
   const [showSpamDialog, setShowSpamDialog] = useState(false);
 
@@ -191,22 +192,22 @@ export function FeedbackItem({
     switch (priority) {
       case "P0":
         return {
-          label: "P0",
+          label: t("priority.P0"),
           className: "bg-red-500/10 text-red-400 border-red-500/20",
         };
       case "P1":
         return {
-          label: "P1",
+          label: t("priority.P1"),
           className: "bg-orange-500/10 text-orange-400 border-orange-500/20",
         };
       case "P2":
         return {
-          label: "P2",
+          label: t("priority.P2"),
           className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
         };
       case "P3":
         return {
-          label: "P3",
+          label: t("priority.P3"),
           className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
         };
       default:
@@ -217,13 +218,13 @@ export function FeedbackItem({
   const getStatusConfig = (status: FeedbackStatus) => {
     switch (status) {
       case "new":
-        return { label: "New", className: "text-emerald-400" };
+        return { label: t("status.new"), className: "text-emerald-400" };
       case "triaged":
-        return { label: "Triaged", className: "text-blue-400" };
+        return { label: t("status.triaged"), className: "text-blue-400" };
       case "done":
-        return { label: "Done", className: "text-white/60" };
+        return { label: t("status.done"), className: "text-white/60" };
       case "spam":
-        return { label: "Spam", className: "text-red-400" };
+        return { label: t("status.spam"), className: "text-red-400" };
       default:
         return { label: status, className: "text-white/40" };
     }
@@ -276,22 +277,22 @@ export function FeedbackItem({
                   <DropdownMenuItem
                     onClick={() => handleUpdateStatus("triaged")}
                   >
-                    Mark as Triaged
+                    {t("actions.markAsTriaged")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleUpdateStatus("done")}>
-                    Mark as Done
+                    {t("actions.markAsDone")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowSpamDialog(true)}>
-                    Mark as Spam
+                    {t("actions.markAsSpam")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleUpdatePriority("P0")}>
-                    Set Priority: P0
+                    {t("actions.setPriorityP0")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleUpdatePriority("P1")}>
-                    Set Priority: P1
+                    {t("actions.setPriorityP1")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleUpdatePriority("P2")}>
-                    Set Priority: P2
+                    {t("actions.setPriorityP2")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -575,6 +575,26 @@
     }
   },
   "FeedbackItem": {
+    "status": {
+      "new": "New",
+      "triaged": "Triaged",
+      "done": "Done",
+      "spam": "Spam"
+    },
+    "priority": {
+      "P0": "P0",
+      "P1": "P1",
+      "P2": "P2",
+      "P3": "P3"
+    },
+    "actions": {
+      "markAsTriaged": "Mark as Triaged",
+      "markAsDone": "Mark as Done",
+      "markAsSpam": "Mark as Spam",
+      "setPriorityP0": "Set Priority: P0",
+      "setPriorityP1": "Set Priority: P1",
+      "setPriorityP2": "Set Priority: P2"
+    },
     "spamDialog": {
       "title": "Mark as Spam?",
       "description": "This will mark the feedback as spam and hide it from the list. This action cannot be undone easily.",

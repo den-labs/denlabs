@@ -575,6 +575,26 @@
     }
   },
   "FeedbackItem": {
+    "status": {
+      "new": "Nuevo",
+      "triaged": "Triado",
+      "done": "Completado",
+      "spam": "Spam"
+    },
+    "priority": {
+      "P0": "P0",
+      "P1": "P1",
+      "P2": "P2",
+      "P3": "P3"
+    },
+    "actions": {
+      "markAsTriaged": "Marcar como Triado",
+      "markAsDone": "Marcar como Completado",
+      "markAsSpam": "Marcar como Spam",
+      "setPriorityP0": "Establecer Prioridad: P0",
+      "setPriorityP1": "Establecer Prioridad: P1",
+      "setPriorityP2": "Establecer Prioridad: P2"
+    },
     "spamDialog": {
       "title": "¿Marcar como Spam?",
       "description": "Esto marcará el feedback como spam y lo ocultará de la lista. Esta acción no se puede deshacer fácilmente.",
