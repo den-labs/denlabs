@@ -1190,8 +1190,11 @@
       "createButton": "Crear Nuevo Lab",
       "empty": {
         "title": "Sin labs aún",
+        "titleFiltered": "No hay labs {filter}",
         "description": "Crea tu primer lab de feedback para comenzar a capturar señales.",
-        "cta": "Crear Lab"
+        "descriptionFiltered": "No tienes labs {filter}",
+        "cta": "Crea Tu Primer Lab",
+        "demoLab": "Abrir Demo Lab"
       },
       "filters": {
         "all": "Todos",

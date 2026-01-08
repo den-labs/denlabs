@@ -2,6 +2,7 @@
 
 import { FlaskConical, Loader2, Plus } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LabCard } from "@/components/modules/labs/LabCard";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import type { EventLab } from "@/lib/eventLabs";
 import { listEventLabs } from "@/lib/eventLabsClient";
 
 export default function LabsPage() {
+  const t = useTranslations("Labs.list");
   const [labs, setLabs] = useState<EventLab[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,19 +132,21 @@ export default function LabsPage() {
             aria-hidden="true"
           />
           <h3 className="mt-4 text-lg font-semibold text-white">
-            {filter === "all" ? "No labs yet" : `No ${filter} labs`}
+            {filter === "all"
+              ? t("empty.title")
+              : t("empty.titleFiltered", { filter })}
           </h3>
           <p className="mt-2 text-sm text-white/60">
             {filter === "all"
-              ? "Create your first lab to start collecting feedback"
-              : `You don't have any ${filter} labs`}
+              ? t("empty.description")
+              : t("empty.descriptionFiltered", { filter })}
           </p>
           {filter === "all" && (
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link href="/labs/create">
                 <Button className="bg-wolf-emerald text-black hover:bg-wolf-emerald/90">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Lab
+                  {t("empty.cta")}
                 </Button>
               </Link>
               <Link href="/labs/demo-event">
@@ -151,7 +155,7 @@ export default function LabsPage() {
                   className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                 >
                   <FlaskConical className="mr-2 h-4 w-4" />
-                  Open Demo Lab
+                  {t("empty.demoLab")}
                 </Button>
               </Link>
             </div>
