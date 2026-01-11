@@ -74,7 +74,7 @@ Built for speed, type safety, and modern web standards.
 ### Prerequisites
 
 - Node.js 20.11+
-- npm 10+ or pnpm 9+
+- pnpm 9+
 - Supabase Project
 
 ### 1. Installation
@@ -83,8 +83,7 @@ Built for speed, type safety, and modern web standards.
 # Clone and install
 git clone https://github.com/your-org/denlabs.git
 cd denlabs
-npm install
-
+pnpm install
 ```
 
 ### 2. Environment Setup
@@ -116,9 +115,8 @@ DenLabs relies on specific SQL schemas for the Labs functionality.
 ### 4. Run Development Server
 
 ```bash
-npm run dev
+pnpm dev
 # Visit http://localhost:3000
-
 ```
 
 > **Note:** The app redirects to `/en` (English) or `/es` (Spanish) automatically.
@@ -151,7 +149,6 @@ Before processing payments, the system checks the UVDAO facilitator.
 
 ```bash
 pnpm x402:smoke
-
 ```
 
 **Integration Tests:**
@@ -159,7 +156,6 @@ Validate the payment gating logic (returns 402 vs 200).
 
 ```bash
 pnpm x402:test
-
 ```
 
 _Set `X402_DEV_BYPASS=true` in .env to skip payments during development._
@@ -173,10 +169,10 @@ Key directories for contributors:
 ```
 src/
 ├── app/[locale]/
-│   ├── labs/            # Creator Dashboard (Protected)
-│   ├── lab/             # Public Participation (Anonymous/Session)
-│   ├── 8004-scan/       # Trust Verification Logic
-│   └── x402/            # Payment Layer Experiments
+│   ├── (den)/labs/      # Creator Dashboard (Protected)
+│   ├── (den)/lab/       # Public Participation (Anonymous/Session)
+│   ├── (den)/scan-8004/ # Trust Verification Logic
+│   └── (den)/x402/      # Payment Layer Experiments
 ├── components/
 │   ├── modules/labs/    # Core Lab Components (Forms, Lists, Retro)
 │   └── ui/              # Design System
@@ -198,8 +194,8 @@ We follow a **Split Documentation** model:
 
 **Workflow:**
 
-1. Run `npm run doc:delta` to check for documentation drift.
-2. Run `npm run lint` and `npm run build` before committing.
+1. Run `pnpm doc:delta` to check for documentation drift.
+2. Run `pnpm lint` and `pnpm build` before committing.
 3. Use Conventional Commits (e.g., `feat: add trust score filter`).
 
 ---
