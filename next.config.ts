@@ -15,46 +15,52 @@ const lottieReactAliasWebpack = path.resolve(
   "src/shims/lottie-react.tsx",
 );
 
+const securityHeaders = [
+  // Prevent clickjacking
+  { key: "X-Frame-Options", value: "DENY" },
+
+  // Prevent MIME sniffing
+  { key: "X-Content-Type-Options", value: "nosniff" },
+
+  // Safer referrer behavior
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+
+  // Reduce exposure to powerful APIs (baseline; adjust if you later need them)
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
+  },
+
+  // CSP Report-Only: monitor violations without blocking
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com https://*.self.xyz",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com wss://*.walletconnect.com https://*.self.xyz https://rpc.walletconnect.com wss://relay.walletconnect.com https://*.celo-testnet.org https://*.celo.org",
+      "frame-src 'self' https://*.self.xyz https://*.walletconnect.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests",
+    ].join("; "),
+  },
+];
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/",
+        headers: securityHeaders,
+      },
+      {
         source: "/:path*",
-        headers: [
-          // Prevent clickjacking
-          { key: "X-Frame-Options", value: "DENY" },
-
-          // Prevent MIME sniffing
-          { key: "X-Content-Type-Options", value: "nosniff" },
-
-          // Safer referrer behavior
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-
-          // Reduce exposure to powerful APIs (baseline; adjust if you later need them)
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-
-          // CSP Report-Only: monitor violations without blocking
-          {
-            key: "Content-Security-Policy-Report-Only",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com https://*.self.xyz",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://verify.walletconnect.com https://verify.walletconnect.org https://*.reown.com https://*.walletconnect.com wss://*.walletconnect.com https://*.self.xyz https://rpc.walletconnect.com wss://relay.walletconnect.com https://*.celo-testnet.org https://*.celo.org",
-              "frame-src 'self' https://*.self.xyz https://*.walletconnect.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests",
-            ].join("; "),
-          },
-        ],
+        headers: securityHeaders,
       },
     ];
   },
