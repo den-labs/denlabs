@@ -3,6 +3,7 @@ const CELO_DOLLAR_ICON = "/tokens-celodollar.png";
 const CELO_CCOP_ICON = "/tokens-ccop.png";
 const CELO_GOOD_ICON = "/tokens-gooddollar.png";
 const OPTIMISM_OP_ICON = "/tokens-op.png";
+const WCT_ICON = "https://basescan.org/token/images/WCT_64.png";
 
 export type SprayNetworkConfig = {
   key: string;
@@ -150,6 +151,13 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
         iconUrl: OPTIMISM_OP_ICON,
         decimals: 18,
       },
+      {
+        label: "WalletConnect (WCT)",
+        symbol: "WCT",
+        address: "0xeF4461891DfB3AC8572cCf7C794664A8DD927945",
+        iconUrl: WCT_ICON,
+        decimals: 18,
+      },
     ],
   },
   base: {
@@ -172,6 +180,13 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
         address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         iconUrl: DEFAULT_TOKEN_ICON,
         decimals: 6,
+      },
+      {
+        label: "WalletConnect (WCT)",
+        symbol: "WCT",
+        address: "0xeF4461891DfB3AC8572cCf7C794664A8DD927945",
+        iconUrl: WCT_ICON,
+        decimals: 18,
       },
     ],
   },
