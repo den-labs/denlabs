@@ -3,7 +3,7 @@ const CELO_DOLLAR_ICON = "/tokens-celodollar.png";
 const CELO_CCOP_ICON = "/tokens-ccop.png";
 const CELO_GOOD_ICON = "/tokens-gooddollar.png";
 const OPTIMISM_OP_ICON = "/tokens-op.png";
-const WCT_ICON = "https://basescan.org/token/images/WCT_64.png";
+const WCT_ICON = "/tokens-wct.png";
 
 export type SprayNetworkConfig = {
   key: string;
