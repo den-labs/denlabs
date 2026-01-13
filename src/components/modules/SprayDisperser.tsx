@@ -36,6 +36,7 @@ import { isENSName, validateAddress } from "@/lib/addressValidation";
 import {
   type AmountMode,
   computeTotals,
+  type DedupeStrategy,
   dedupe,
   findDuplicateAddresses,
   isValidAmount,
@@ -999,8 +1000,8 @@ export default function SprayDisperser() {
     setRows((prev) => (replace ? mapped : [...prev, ...mapped]));
   }
 
-  function removeDuplicates() {
-    setRows((prev) => dedupe(prev));
+  function removeDuplicates(strategy: DedupeStrategy) {
+    setRows((prev) => dedupe(prev, strategy, amountMode, activeTokenDecimals));
   }
 
   function removeInvalidRows() {

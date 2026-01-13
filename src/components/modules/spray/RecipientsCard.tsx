@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   AmountMode,
+  DedupeStrategy,
   ParsedRecipient,
   RecipientRowInput,
   RecipientStatus,
@@ -29,7 +30,7 @@ type RecipientsCardProps = {
   onAddRow: () => void;
   onClearRows: () => void;
   onApplyParsedRows: (rows: ParsedRecipient[], replace: boolean) => void;
-  onRemoveDuplicates: () => void;
+  onRemoveDuplicates: (strategy: DedupeStrategy) => void;
   onRemoveInvalidRows: () => void;
   onFillMissingAmounts: () => void;
   canFillMissing: boolean;
@@ -68,6 +69,17 @@ export function RecipientsCard({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewText, setPreviewText] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [dedupeStrategy, setDedupeStrategy] =
+    useState<DedupeStrategy>("keep_first");
+
+  useEffect(() => {
+    if (
+      amountMode === "same" &&
+      (dedupeStrategy === "merge_sum" || dedupeStrategy === "merge_max")
+    ) {
+      setDedupeStrategy("keep_first");
+    }
+  }, [amountMode, dedupeStrategy]);
 
   const openPasteModal = () => {
     setPreviewText("");
@@ -166,12 +178,62 @@ export function RecipientsCard({
               <span className="text-amber-200">
                 {`${duplicateCount} duplicate(s)`}
               </span>
+              <div className="flex flex-wrap items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1 text-[10px] uppercase text-white/60">
+                <button
+                  type="button"
+                  onClick={() => setDedupeStrategy("keep_first")}
+                  className={`rounded px-2 py-1 transition ${
+                    dedupeStrategy === "keep_first"
+                      ? "bg-wolf-neutral-soft text-white"
+                      : ""
+                  }`}
+                >
+                  Keep first
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDedupeStrategy("keep_last")}
+                  className={`rounded px-2 py-1 transition ${
+                    dedupeStrategy === "keep_last"
+                      ? "bg-wolf-neutral-soft text-white"
+                      : ""
+                  }`}
+                >
+                  Keep last
+                </button>
+                {amountMode === "custom" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setDedupeStrategy("merge_sum")}
+                      className={`rounded px-2 py-1 transition ${
+                        dedupeStrategy === "merge_sum"
+                          ? "bg-wolf-neutral-soft text-white"
+                          : ""
+                      }`}
+                    >
+                      Merge amounts (sum)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDedupeStrategy("merge_max")}
+                      className={`rounded px-2 py-1 transition ${
+                        dedupeStrategy === "merge_max"
+                          ? "bg-wolf-neutral-soft text-white"
+                          : ""
+                      }`}
+                    >
+                      Merge amounts (max)
+                    </button>
+                  </>
+                ) : null}
+              </div>
               <button
                 type="button"
-                onClick={onRemoveDuplicates}
+                onClick={() => onRemoveDuplicates(dedupeStrategy)}
                 className="rounded-md border border-amber-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-amber-200 transition hover:border-amber-300 hover:text-amber-100"
               >
-                Remove duplicates
+                Resolve duplicates
               </button>
             </>
           ) : null}
@@ -183,7 +245,7 @@ export function RecipientsCard({
                 onClick={onRemoveInvalidRows}
                 className="rounded-md border border-rose-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-rose-200 transition hover:border-rose-300 hover:text-rose-100"
               >
-                Remove invalid
+                Remove invalid rows
               </button>
             </>
           ) : null}
@@ -206,7 +268,7 @@ export function RecipientsCard({
                 disabled={!canFillMissing}
                 className="rounded-md border border-amber-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-amber-200 transition hover:border-amber-300 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Fill missing
+                Fill missing amounts
               </button>
             </>
           ) : null}

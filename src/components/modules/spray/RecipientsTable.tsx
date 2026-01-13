@@ -18,6 +18,8 @@ type RecipientsTableProps = {
   footer?: React.ReactNode;
 };
 
+type RecipientFilter = "all" | "issues" | "duplicates" | "invalid" | "missing";
+
 const ROW_HEIGHT = 44;
 const OVERSCAN = 6;
 
@@ -58,10 +60,70 @@ export function RecipientsTable({
   footer,
 }: RecipientsTableProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const filterInitRef = useRef(false);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
-  const useVirtual = rows.length > 100;
+  const [filter, setFilter] = useState<RecipientFilter>("all");
   const footerOffset = footer ? 96 : 0;
+
+  const hasIssues = useMemo(
+    () =>
+      rows.some((row) => {
+        const status = statusById[row.id];
+        return status && status !== "valid";
+      }),
+    [rows, statusById],
+  );
+
+  useEffect(() => {
+    if (!filterInitRef.current && hasIssues) {
+      setFilter("issues");
+      filterInitRef.current = true;
+    }
+  }, [hasIssues]);
+
+  useEffect(() => {
+    if (amountMode === "same" && filter === "missing") {
+      setFilter("all");
+    }
+  }, [amountMode, filter]);
+
+  const filteredRows = useMemo(() => {
+    if (filter === "all") {
+      return rows;
+    }
+    return rows.filter((row) => {
+      const status = statusById[row.id] ?? "invalid";
+      if (filter === "issues") {
+        return status !== "valid";
+      }
+      if (filter === "duplicates") {
+        return status === "duplicate";
+      }
+      if (filter === "invalid") {
+        return status === "invalid";
+      }
+      if (filter === "missing") {
+        return status === "missing_amount";
+      }
+      return true;
+    });
+  }, [filter, rows, statusById]);
+
+  const filterOptions = useMemo(() => {
+    const base: Array<{ id: RecipientFilter; label: string }> = [
+      { id: "all", label: "All" },
+      { id: "issues", label: "Issues" },
+      { id: "duplicates", label: "Duplicates" },
+      { id: "invalid", label: "Invalid" },
+    ];
+    if (amountMode === "custom") {
+      base.push({ id: "missing", label: "Missing amount" });
+    }
+    return base;
+  }, [amountMode]);
+
+  const useVirtual = filteredRows.length > 100;
 
   useEffect(() => {
     const node = scrollRef.current;
@@ -77,25 +139,27 @@ export function RecipientsTable({
     if (!useVirtual || containerHeight === 0) {
       return {
         startIndex: 0,
-        endIndex: rows.length,
+        endIndex: filteredRows.length,
         offsetY: 0,
-        totalHeight: rows.length * ROW_HEIGHT,
+        totalHeight: filteredRows.length * ROW_HEIGHT,
       };
     }
     const start = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN);
     const end = Math.min(
-      rows.length,
+      filteredRows.length,
       Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
     );
     return {
       startIndex: start,
       endIndex: end,
       offsetY: start * ROW_HEIGHT,
-      totalHeight: rows.length * ROW_HEIGHT,
+      totalHeight: filteredRows.length * ROW_HEIGHT,
     };
-  }, [containerHeight, rows.length, scrollTop, useVirtual]);
+  }, [containerHeight, filteredRows.length, scrollTop, useVirtual]);
 
-  const visibleRows = useVirtual ? rows.slice(startIndex, endIndex) : rows;
+  const visibleRows = useVirtual
+    ? filteredRows.slice(startIndex, endIndex)
+    : filteredRows;
 
   const gridTemplate =
     amountMode === "custom"
@@ -104,6 +168,22 @@ export function RecipientsTable({
 
   return (
     <div className="rounded-2xl border border-wolf-border bg-[#0b111a]">
+      <div className="flex flex-wrap items-center gap-2 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/60">
+        {filterOptions.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            onClick={() => setFilter(option.id)}
+            className={`rounded-md border border-white/10 px-2 py-1 transition ${
+              filter === option.id
+                ? "border-wolf-emerald text-wolf-emerald"
+                : "text-white/60 hover:border-white/30 hover:text-white/80"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
       <div
         className={`grid ${gridTemplate} items-center gap-3 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/40`}
       >
@@ -130,6 +210,17 @@ export function RecipientsTable({
                 Add recipient
               </button>
             ) : null}
+          </div>
+        ) : filteredRows.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 px-6 py-10 text-center text-sm text-white/60">
+            <p>No recipients match this filter.</p>
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className="rounded-md border border-wolf-border px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-wolf-border-strong hover:text-white"
+            >
+              Clear filter
+            </button>
           </div>
         ) : (
           <div
