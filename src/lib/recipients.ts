@@ -1,4 +1,4 @@
-import { isAddress } from "ethers";
+import { formatUnits, parseUnits } from "ethers";
 
 export type AmountMode = "same" | "custom";
 
@@ -10,6 +10,8 @@ export type ParsedRecipient = {
   addressNorm: string;
   amountNormalized?: string;
   issues: string[];
+  status: RecipientStatus;
+  reason?: string;
 };
 
 export type RecipientParseIssue = {
@@ -20,15 +22,26 @@ export type RecipientParseIssue = {
 
 export type ParsedLine = ParsedRecipient;
 
-export type DedupeStrategy = "keep_first" | "keep_last";
+export type DedupeStrategy =
+  | "keep_first"
+  | "keep_last"
+  | "merge_sum"
+  | "merge_max";
 
 export type ParseRecipientsResult = {
   lines: ParsedLine[];
+  rows: ParsedLine[];
   uniqueRecipients: ParsedRecipient[];
   issues: RecipientParseIssue[];
   ignoredAmountCount: number;
+  ignoredAmountRows: number;
   headerIgnored: boolean;
   decimalNormalizedCount: number;
+  linesTotal: number;
+  uniqueAddresses: number;
+  duplicatesExtraRows: number;
+  invalidRows: number;
+  missingAmountRows: number;
   counts: {
     lines: number;
     uniqueAddresses: number;
@@ -69,14 +82,25 @@ export function normalizeRecipientAddress(address: string) {
 }
 
 function parseLineParts(line: string) {
-  const match = line.match(/^[^,\s]+/);
-  const address = match ? match[0] : "";
-  const rest = line.slice(address.length).trim();
-  if (!rest) {
-    return { address, amount: undefined };
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return { address: "", amount: undefined };
   }
-  const amount = rest.replace(/^[,\s]+/, "");
-  return { address, amount: amount || undefined };
+
+  const commaIndex = trimmed.indexOf(",");
+  if (commaIndex >= 0) {
+    const address = trimmed.slice(0, commaIndex).trim();
+    const amount = trimmed.slice(commaIndex + 1).trim();
+    return { address, amount: amount || undefined };
+  }
+
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) {
+    return { address: parts[0] ?? "", amount: undefined };
+  }
+  const [address, ...rest] = parts;
+  const amount = rest.join(" ").trim();
+  return { address: address ?? "", amount: amount || undefined };
 }
 
 function isHeaderRow(address: string, amount?: string) {
@@ -89,16 +113,41 @@ function normalizeAmount(value: string) {
   if (!value) {
     return { normalized: value, changed: false };
   }
-  if (value.includes(",") && !value.includes(".")) {
-    return { normalized: value.replace(/,/g, "."), changed: true };
+  const trimmed = value.trim();
+  if (trimmed.includes(",") && !trimmed.includes(".")) {
+    return { normalized: trimmed.replace(/,/g, "."), changed: true };
   }
-  return { normalized: value, changed: false };
+  return { normalized: trimmed, changed: trimmed !== value };
 }
 
-function buildUniqueRecipients(lines: ParsedLine[], strategy: DedupeStrategy) {
+function isValidRecipientAddress(value: string) {
+  return /^0x[a-fA-F0-9]{40}$/.test(value.trim());
+}
+
+function resolveStatus(issues: string[]): RecipientStatus {
+  if (issues.includes("invalid_address") || issues.includes("invalid_amount")) {
+    return "invalid";
+  }
+  if (issues.includes("missing_amount")) {
+    return "missing_amount";
+  }
+  if (issues.includes("duplicate")) {
+    return "duplicate";
+  }
+  return "valid";
+}
+
+function buildUniqueRecipients(
+  lines: ParsedLine[],
+  strategy: DedupeStrategy,
+  mode: AmountMode,
+  tokenDecimals: number,
+) {
   const byAddress = new Map<string, ParsedRecipient>();
   const uniqueRecipients: ParsedRecipient[] = [];
-  const validAddressLines = lines.filter((line) => line.addressNorm).length;
+  const validAddressLines = lines.filter((line) =>
+    isValidRecipientAddress(line.addressNorm),
+  ).length;
 
   lines.forEach((line) => {
     if (!line.addressNorm) {
@@ -110,15 +159,77 @@ function buildUniqueRecipients(lines: ParsedLine[], strategy: DedupeStrategy) {
       uniqueRecipients.push(line);
       return;
     }
-    if (strategy === "keep_last") {
-      const existing = byAddress.get(line.addressNorm);
-      if (existing) {
-        const index = uniqueRecipients.indexOf(existing);
-        if (index >= 0) {
-          uniqueRecipients[index] = line;
-        }
+
+    const existing = byAddress.get(line.addressNorm);
+    if (!existing) {
+      return;
+    }
+
+    const replaceExisting = () => {
+      const index = uniqueRecipients.indexOf(existing);
+      if (index >= 0) {
+        uniqueRecipients[index] = line;
       }
       byAddress.set(line.addressNorm, line);
+    };
+
+    if (strategy === "keep_last") {
+      replaceExisting();
+      return;
+    }
+
+    if (strategy === "merge_sum" || strategy === "merge_max") {
+      if (mode !== "custom") {
+        return;
+      }
+
+      const existingAmount = existing.amountNormalized ?? existing.amount ?? "";
+      const nextAmount = line.amountNormalized ?? line.amount ?? "";
+      const existingValidation = isValidAmount(existingAmount, tokenDecimals);
+      const nextValidation = isValidAmount(nextAmount, tokenDecimals);
+      if (!existingValidation.valid && nextValidation.valid) {
+        const merged = {
+          ...existing,
+          amount: nextAmount,
+          amountNormalized: nextValidation.normalized,
+        };
+        byAddress.set(line.addressNorm, merged);
+        const index = uniqueRecipients.indexOf(existing);
+        if (index >= 0) {
+          uniqueRecipients[index] = merged;
+        }
+        return;
+      }
+      if (!existingValidation.valid || !nextValidation.valid) {
+        return;
+      }
+
+      try {
+        const existingUnits = parseUnits(
+          existingValidation.normalized,
+          tokenDecimals,
+        );
+        const nextUnits = parseUnits(nextValidation.normalized, tokenDecimals);
+        const mergedUnits =
+          strategy === "merge_sum"
+            ? existingUnits + nextUnits
+            : existingUnits >= nextUnits
+              ? existingUnits
+              : nextUnits;
+        const mergedAmount = formatUnits(mergedUnits, tokenDecimals);
+        const merged = {
+          ...existing,
+          amount: mergedAmount,
+          amountNormalized: mergedAmount,
+        };
+        byAddress.set(line.addressNorm, merged);
+        const index = uniqueRecipients.indexOf(existing);
+        if (index >= 0) {
+          uniqueRecipients[index] = merged;
+        }
+      } catch {
+        return;
+      }
     }
   });
 
@@ -184,7 +295,7 @@ export function parseRecipients(
 
     const addressNorm = normalizeRecipientAddress(address);
     const issuesList: string[] = [];
-    if (!isAddress(addressNorm)) {
+    if (!isValidRecipientAddress(addressNorm)) {
       issuesList.push("invalid_address");
     }
     if (mode === "custom") {
@@ -207,6 +318,8 @@ export function parseRecipients(
       issuesList.push("ignored_amount");
     }
 
+    const status = resolveStatus(issuesList);
+
     lines.push({
       address,
       amount: mode === "custom" ? amount : undefined,
@@ -216,13 +329,74 @@ export function parseRecipients(
       raw: rawLine,
       addressNorm,
       issues: issuesList,
+      status,
+      reason: issuesList[0],
     });
   });
 
+  const duplicateAddresses = new Set<string>();
+  const addressCounts = new Map<string, number>();
+  lines.forEach((entry) => {
+    if (!isValidRecipientAddress(entry.addressNorm)) {
+      return;
+    }
+    const nextCount = (addressCounts.get(entry.addressNorm) ?? 0) + 1;
+    addressCounts.set(entry.addressNorm, nextCount);
+    if (nextCount > 1) {
+      duplicateAddresses.add(entry.addressNorm);
+    }
+  });
+
+  const rows = lines.map((entry) => {
+    if (!duplicateAddresses.has(entry.addressNorm)) {
+      return entry;
+    }
+    const issuesList = entry.issues.includes("duplicate")
+      ? entry.issues
+      : [...entry.issues, "duplicate"];
+    return {
+      ...entry,
+      issues: issuesList,
+      status: resolveStatus(issuesList),
+      reason: issuesList[0],
+    };
+  });
+
   const { uniqueRecipients, uniqueAddresses, duplicateLines } =
-    buildUniqueRecipients(lines, strategy);
-  const validUnique = uniqueRecipients.filter((entry) => {
-    if (!isAddress(entry.addressNorm)) {
+    buildUniqueRecipients(rows, strategy, mode, tokenDecimals);
+
+  const enrichedUnique = uniqueRecipients.map((entry) => {
+    const issuesList: string[] = [];
+    if (!isValidRecipientAddress(entry.addressNorm)) {
+      issuesList.push("invalid_address");
+    }
+    if (mode === "custom") {
+      const normalizedAmount = entry.amountNormalized ?? entry.amount ?? "";
+      if (!normalizedAmount) {
+        issuesList.push("missing_amount");
+      } else {
+        const amountValidation = isValidAmount(normalizedAmount, tokenDecimals);
+        if (!amountValidation.valid) {
+          issuesList.push("invalid_amount");
+        }
+      }
+    }
+    if (mode === "same" && entry.amount) {
+      issuesList.push("ignored_amount");
+    }
+
+    const status = resolveStatus(issuesList);
+
+    return {
+      ...entry,
+      issues: issuesList,
+      status,
+      reason: issuesList[0],
+    };
+  });
+
+  const validUnique = enrichedUnique.filter((entry) => {
+    if (!isValidRecipientAddress(entry.addressNorm)) {
       return false;
     }
     if (mode === "custom") {
@@ -232,22 +406,29 @@ export function parseRecipients(
     return true;
   }).length;
 
-  const invalidCount = lines.filter(
+  const invalidCount = rows.filter(
     (entry) =>
       entry.issues.includes("invalid_address") ||
       entry.issues.includes("invalid_amount"),
   ).length;
-  const missingCount = lines.filter((entry) =>
+  const missingCount = rows.filter((entry) =>
     entry.issues.includes("missing_amount"),
   ).length;
 
   return {
-    lines,
-    uniqueRecipients,
+    lines: rows,
+    rows,
+    uniqueRecipients: enrichedUnique,
     issues,
     ignoredAmountCount,
+    ignoredAmountRows: ignoredAmountCount,
     headerIgnored,
     decimalNormalizedCount,
+    linesTotal: rows.length,
+    uniqueAddresses,
+    duplicatesExtraRows: duplicateLines,
+    invalidRows: invalidCount,
+    missingAmountRows: missingCount,
     counts: {
       lines: lines.length,
       uniqueAddresses,
@@ -303,7 +484,8 @@ export function validateRow(
 ): RecipientValidation {
   const issues: string[] = [];
   const normalized = normalizeRecipientAddress(row.address);
-  const hasValidAddress = Boolean(normalized) && isAddress(normalized);
+  const hasValidAddress =
+    Boolean(normalized) && isValidRecipientAddress(normalized);
 
   if (!hasValidAddress) {
     issues.push("invalid_address");
@@ -378,17 +560,81 @@ export function computeTotals(
   return { total, validCount, totalCount: rows.length };
 }
 
-export function dedupe(rows: RecipientRowInput[]) {
-  const seen = new Set<string>();
-  return rows.filter((row) => {
+export function dedupe(
+  rows: RecipientRowInput[],
+  strategy: DedupeStrategy = "keep_first",
+  mode: AmountMode = "same",
+  tokenDecimals = 18,
+) {
+  const byAddress = new Map<string, RecipientRowInput>();
+  const result: RecipientRowInput[] = [];
+
+  rows.forEach((row) => {
     const normalized = normalizeRecipientAddress(row.address);
     if (!normalized) {
-      return true;
+      result.push(row);
+      return;
     }
-    if (seen.has(normalized)) {
-      return false;
+    const existing = byAddress.get(normalized);
+    if (!existing) {
+      byAddress.set(normalized, row);
+      result.push(row);
+      return;
     }
-    seen.add(normalized);
-    return true;
+
+    if (strategy === "keep_last") {
+      const index = result.indexOf(existing);
+      if (index >= 0) {
+        result[index] = row;
+      }
+      byAddress.set(normalized, row);
+      return;
+    }
+
+    if (strategy === "merge_sum" || strategy === "merge_max") {
+      if (mode !== "custom") {
+        return;
+      }
+      const existingAmount = existing.amount ?? "";
+      const nextAmount = row.amount ?? "";
+      const existingValidation = isValidAmount(existingAmount, tokenDecimals);
+      const nextValidation = isValidAmount(nextAmount, tokenDecimals);
+      if (!existingValidation.valid && nextValidation.valid) {
+        const merged = { ...existing, amount: nextValidation.normalized };
+        byAddress.set(normalized, merged);
+        const index = result.indexOf(existing);
+        if (index >= 0) {
+          result[index] = merged;
+        }
+        return;
+      }
+      if (!existingValidation.valid || !nextValidation.valid) {
+        return;
+      }
+      try {
+        const existingUnits = parseUnits(
+          existingValidation.normalized,
+          tokenDecimals,
+        );
+        const nextUnits = parseUnits(nextValidation.normalized, tokenDecimals);
+        const mergedUnits =
+          strategy === "merge_sum"
+            ? existingUnits + nextUnits
+            : existingUnits >= nextUnits
+              ? existingUnits
+              : nextUnits;
+        const mergedAmount = formatUnits(mergedUnits, tokenDecimals);
+        const merged = { ...existing, amount: mergedAmount };
+        byAddress.set(normalized, merged);
+        const index = result.indexOf(existing);
+        if (index >= 0) {
+          result[index] = merged;
+        }
+      } catch {
+        return;
+      }
+    }
   });
+
+  return result;
 }

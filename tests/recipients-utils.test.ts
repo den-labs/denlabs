@@ -17,8 +17,8 @@ test("parseRecipients supports separators and header detection", () => {
   ].join("\n");
   const result = parseRecipients(input, "custom", 18);
   assert.equal(result.headerIgnored, true);
-  assert.equal(result.counts.lines, 3);
-  assert.equal(result.counts.uniqueAddresses, 3);
+  assert.equal(result.linesTotal, 3);
+  assert.equal(result.uniqueAddresses, 3);
 });
 
 test("same amount mode counts valid unique and ignored amounts", () => {
@@ -28,10 +28,10 @@ test("same amount mode counts valid unique and ignored amounts", () => {
     "0x0000000000000000000000000000000000000002",
   ].join("\n");
   const result = parseRecipients(input, "same", 18);
-  assert.equal(result.ignoredAmountCount, 2);
-  assert.equal(result.counts.uniqueAddresses, 2);
+  assert.equal(result.ignoredAmountRows, 2);
+  assert.equal(result.uniqueAddresses, 2);
   assert.equal(result.counts.validUnique, 2);
-  assert.equal(result.counts.duplicateLines, 1);
+  assert.equal(result.duplicatesExtraRows, 1);
 });
 
 test("custom mode normalizes comma decimals", () => {
@@ -47,8 +47,41 @@ test("custom mode counts missing and invalid amounts", () => {
     "0x0000000000000000000000000000000000000002,0",
   ].join("\n");
   const result = parseRecipients(input, "custom", 18);
-  assert.equal(result.counts.missing, 1);
-  assert.equal(result.counts.invalid, 1);
+  assert.equal(result.missingAmountRows, 1);
+  assert.equal(result.invalidRows, 1);
+});
+
+test("parseRecipients counts invalid address rows", () => {
+  const input = [
+    "0x0000000000000000000000000000000000000001,1",
+    "badaddress,2",
+  ].join("\n");
+  const result = parseRecipients(input, "custom", 18);
+  assert.equal(result.invalidRows, 1);
+});
+
+test("parseRecipients dedupe strategies keep first and keep last", () => {
+  const input = [
+    "0x0000000000000000000000000000000000000001,1",
+    "0x0000000000000000000000000000000000000001,2",
+  ].join("\n");
+  const keepFirst = parseRecipients(input, "custom", 18, "keep_first");
+  assert.equal(keepFirst.uniqueRecipients[0].amountNormalized, "1");
+
+  const keepLast = parseRecipients(input, "custom", 18, "keep_last");
+  assert.equal(keepLast.uniqueRecipients[0].amountNormalized, "2");
+});
+
+test("parseRecipients dedupe strategies merge sum and merge max", () => {
+  const input = [
+    "0x0000000000000000000000000000000000000001,1.25",
+    "0x0000000000000000000000000000000000000001,2.75",
+  ].join("\n");
+  const mergeSum = parseRecipients(input, "custom", 18, "merge_sum");
+  assert.equal(Number(mergeSum.uniqueRecipients[0].amountNormalized), 4);
+
+  const mergeMax = parseRecipients(input, "custom", 18, "merge_max");
+  assert.equal(mergeMax.uniqueRecipients[0].amountNormalized, "2.75");
 });
 
 test("validateRow flags invalid address and missing amount", () => {
