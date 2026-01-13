@@ -7,8 +7,6 @@ import {
   type DedupeStrategy,
   type ParsedRecipient,
   parseRecipients,
-  type RecipientRowInput,
-  validateRow,
 } from "@/lib/recipients";
 
 type PastePreviewModalProps = {
@@ -21,6 +19,8 @@ type PastePreviewModalProps = {
   onApply: (rows: ParsedRecipient[], replace: boolean) => void;
   onModeChange?: (mode: AmountMode) => void;
 };
+
+type PreviewFilter = "all" | "issues" | "duplicates" | "invalid" | "missing";
 
 export function PastePreviewModal({
   isOpen,
@@ -37,14 +37,35 @@ export function PastePreviewModal({
   const [replaceMode, setReplaceMode] = useState(false);
   const [dedupeStrategy, setDedupeStrategy] =
     useState<DedupeStrategy>("keep_first");
+  const [previewFilter, setPreviewFilter] = useState<PreviewFilter>("all");
+  const [showInvalidConfirm, setShowInvalidConfirm] = useState(false);
+  const [pendingFixRows, setPendingFixRows] = useState<ParsedRecipient[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       setText(initialText);
       setReplaceMode(false);
       setDedupeStrategy("keep_first");
+      setPreviewFilter("all");
+      setShowInvalidConfirm(false);
+      setPendingFixRows([]);
     }
   }, [initialText, isOpen]);
+
+  useEffect(() => {
+    if (
+      mode === "same" &&
+      (dedupeStrategy === "merge_sum" || dedupeStrategy === "merge_max")
+    ) {
+      setDedupeStrategy("keep_first");
+    }
+  }, [dedupeStrategy, mode]);
+
+  useEffect(() => {
+    if (mode === "same" && previewFilter === "missing") {
+      setPreviewFilter("all");
+    }
+  }, [mode, previewFilter]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -73,22 +94,45 @@ export function PastePreviewModal({
     () => parseRecipients(text, mode, tokenDecimals, dedupeStrategy),
     [dedupeStrategy, mode, text, tokenDecimals],
   );
-  const rowInputs: RecipientRowInput[] = useMemo(
+  const previewRows = useMemo(
     () =>
-      parsed.uniqueRecipients.map((row, index) => ({
+      parsed.rows.map((row, index) => ({
+        ...row,
         id: `${row.line}-${index}`,
-        address: row.address,
-        amount: row.amountNormalized ?? row.amount ?? "",
       })),
-    [parsed.uniqueRecipients],
+    [parsed.rows],
   );
 
-  const validations = useMemo(() => {
-    return rowInputs.map((row) => ({
-      row,
-      validation: validateRow(row, tokenDecimals, mode),
-    }));
-  }, [mode, rowInputs, tokenDecimals]);
+  const hasIssues =
+    parsed.invalidRows + parsed.missingAmountRows + parsed.duplicatesExtraRows >
+    0;
+
+  const filteredRows = useMemo(() => {
+    let rows = previewRows;
+    if (previewFilter === "issues") {
+      rows = rows.filter((row) => row.status !== "valid");
+    } else if (previewFilter === "duplicates") {
+      rows = rows.filter((row) => row.issues.includes("duplicate"));
+    } else if (previewFilter === "invalid") {
+      rows = rows.filter((row) => row.status === "invalid");
+    } else if (previewFilter === "missing") {
+      rows = rows.filter((row) => row.status === "missing_amount");
+    }
+
+    if (previewFilter === "all" && hasIssues) {
+      const statusRank: Record<string, number> = {
+        invalid: 0,
+        missing_amount: 1,
+        duplicate: 2,
+        valid: 3,
+      };
+      rows = [...rows].sort(
+        (a, b) => (statusRank[a.status] ?? 3) - (statusRank[b.status] ?? 3),
+      );
+    }
+
+    return rows;
+  }, [hasIssues, previewFilter, previewRows]);
 
   const summary = useMemo(() => parsed.counts, [parsed.counts]);
 
@@ -96,11 +140,13 @@ export function PastePreviewModal({
     mode === "custom" ? "Mode: Custom amounts" : "Mode: Same amount";
 
   const applyRowsToText = (rows: ParsedRecipient[]) => {
-    const lines = rows.map((row) =>
-      mode === "custom" && row.amountNormalized
-        ? `${row.address},${row.amountNormalized}`
-        : row.address,
-    );
+    const lines = rows.map((row) => {
+      if (mode !== "custom") {
+        return row.address;
+      }
+      const amountValue = row.amountNormalized ?? row.amount;
+      return amountValue ? `${row.address},${amountValue}` : row.address;
+    });
     setText(lines.join("\n"));
   };
 
@@ -121,8 +167,7 @@ export function PastePreviewModal({
     const validRows = parsed.lines.filter(
       (entry) =>
         !entry.issues.includes("invalid_address") &&
-        !entry.issues.includes("invalid_amount") &&
-        !entry.issues.includes("missing_amount"),
+        !entry.issues.includes("invalid_amount"),
     );
     applyRowsToText(validRows);
   };
@@ -146,6 +191,24 @@ export function PastePreviewModal({
     setText(normalized);
   };
 
+  const handleFixAutomatically = () => {
+    if (parsed.invalidRows > 0) {
+      setPendingFixRows(parsed.uniqueRecipients);
+      setShowInvalidConfirm(true);
+      return;
+    }
+    applyRowsToText(parsed.uniqueRecipients);
+  };
+
+  const handleConfirmFix = (dropInvalid: boolean) => {
+    const nextRows = dropInvalid
+      ? pendingFixRows.filter((row) => row.status !== "invalid")
+      : pendingFixRows;
+    applyRowsToText(nextRows);
+    setPendingFixRows([]);
+    setShowInvalidConfirm(false);
+  };
+
   const hasWhitespaceChanges = useMemo(
     () =>
       text
@@ -154,8 +217,20 @@ export function PastePreviewModal({
     [text],
   );
   const canRemoveDuplicates = summary.duplicateLines > 0;
-  const canDropInvalid = summary.invalid > 0 || summary.missing > 0;
+  const canDropInvalid = parsed.invalidRows > 0;
   const canNormalizeDecimals = parsed.decimalNormalizedCount > 0;
+  const previewFilters = useMemo(() => {
+    const base: Array<{ id: PreviewFilter; label: string }> = [
+      { id: "all", label: "All" },
+      { id: "issues", label: "Issues" },
+      { id: "duplicates", label: "Duplicates" },
+      { id: "invalid", label: "Invalid" },
+    ];
+    if (mode === "custom") {
+      base.push({ id: "missing", label: "Missing amount" });
+    }
+    return base;
+  }, [mode]);
 
   if (!isOpen) return null;
 
@@ -163,7 +238,7 @@ export function PastePreviewModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
         ref={modalRef}
-        className="w-full max-w-4xl rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 shadow-2xl"
+        className="relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -209,26 +284,23 @@ export function PastePreviewModal({
               placeholder="0xabc...,0.25"
               className="min-h-[260px] w-full rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
             />
-            {parsed.ignoredAmountCount > 0 && mode === "same" ? (
+            {parsed.ignoredAmountRows > 0 && mode === "same" ? (
               <div className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-                <span>
-                  {parsed.ignoredAmountCount} line(s) include amounts that will
-                  be ignored.
-                </span>
+                <span>You pasted amounts, but Same amount ignores them.</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => onModeChange?.("same")}
                     className="rounded-md border border-amber-300/40 px-2 py-1 text-[11px] font-semibold uppercase text-amber-200 transition hover:border-amber-200"
                   >
-                    Keep same
+                    Keep Same amount
                   </button>
                   <button
                     type="button"
                     onClick={() => onModeChange?.("custom")}
-                    className="rounded-md border border-amber-300/40 px-2 py-1 text-[11px] font-semibold uppercase text-amber-100 transition hover:border-amber-200"
+                    className="rounded-md border border-amber-300/40 bg-amber-200/10 px-2 py-1 text-[11px] font-semibold uppercase text-amber-100 transition hover:border-amber-200"
                   >
-                    Switch to custom
+                    Switch to Custom amounts
                   </button>
                 </div>
               </div>
@@ -250,36 +322,139 @@ export function PastePreviewModal({
           <div className="rounded-xl border border-wolf-border bg-[#0f141d] p-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white">Preview</h3>
-              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1 text-[11px] uppercase text-white/60">
-                <button
-                  type="button"
-                  onClick={() => setReplaceMode(false)}
-                  className={`rounded-md px-3 py-1 transition ${
-                    !replaceMode ? "bg-wolf-neutral-soft text-white" : ""
-                  }`}
-                >
-                  Append
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReplaceMode(true)}
-                  className={`rounded-md px-3 py-1 transition ${
-                    replaceMode ? "bg-wolf-neutral-soft text-white" : ""
-                  }`}
-                >
-                  Replace
-                </button>
-              </div>
             </div>
 
+            <div className="mt-3 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-[11px] text-white/70">
+              <label className="flex cursor-pointer items-start gap-2">
+                <input
+                  type="radio"
+                  name="replace-mode"
+                  checked={!replaceMode}
+                  onChange={() => setReplaceMode(false)}
+                  className="mt-0.5 accent-wolf-emerald"
+                />
+                <div>
+                  <div className="text-xs font-semibold text-white">
+                    Append to current list
+                  </div>
+                  <div className="text-[11px] text-white/50">
+                    Adds these recipients to what you already have.
+                  </div>
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2">
+                <input
+                  type="radio"
+                  name="replace-mode"
+                  checked={replaceMode}
+                  onChange={() => setReplaceMode(true)}
+                  className="mt-0.5 accent-wolf-emerald"
+                />
+                <div>
+                  <div className="text-xs font-semibold text-white">
+                    Replace current list
+                  </div>
+                  <div className="text-[11px] text-white/50">
+                    Overwrites your existing recipients list.
+                  </div>
+                </div>
+              </label>
+            </div>
+            {replaceMode ? (
+              <p className="mt-2 text-xs text-amber-200">
+                Replace will overwrite your current recipients list.
+              </p>
+            ) : null}
+
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-white/60">
-              <span>{`Lines: ${summary.lines}`}</span>
-              <span>{`Unique: ${summary.uniqueAddresses}`}</span>
-              <span className="text-wolf-emerald">{`Valid unique: ${summary.validUnique}`}</span>
-              <span className="text-amber-300">{`D lines: ${summary.duplicateLines}`}</span>
-              <span className="text-amber-200">{`Missing: ${summary.missing}`}</span>
-              <span className="text-rose-300">{`Invalid: ${summary.invalid}`}</span>
-              <span className="text-white/50">{`Ignored amounts: ${parsed.ignoredAmountCount}`}</span>
+              <span>{`Lines: ${parsed.linesTotal}`}</span>
+              <span>{`Unique addresses: ${parsed.uniqueAddresses}`}</span>
+              <span className="text-wolf-emerald">{`Valid unique addresses: ${summary.validUnique}`}</span>
+              <span className="text-amber-300">{`Duplicate lines: ${parsed.duplicatesExtraRows}`}</span>
+              {mode === "custom" ? (
+                <span className="text-amber-200">{`Missing amounts: ${parsed.missingAmountRows}`}</span>
+              ) : null}
+              <span className="text-rose-300">{`Invalid: ${parsed.invalidRows}`}</span>
+              {mode === "same" ? (
+                <span className="text-white/50">{`Ignored amounts: ${parsed.ignoredAmountRows}`}</span>
+              ) : null}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-white">
+                    Recommended fixes
+                  </p>
+                  <p className="text-[11px] text-white/50">
+                    Trims whitespace, normalizes decimals, ignores headers, and
+                    resolves duplicates.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleFixAutomatically}
+                  disabled={parsed.linesTotal === 0}
+                  className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-3 py-2 text-[11px] font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.35)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
+                >
+                  Fix automatically (recommended)
+                </button>
+              </div>
+              {parsed.duplicatesExtraRows > 0 ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                  <span>Duplicate handling:</span>
+                  <div className="flex flex-wrap items-center gap-1 rounded-md border border-white/10 bg-black/20 p-1 text-[10px] uppercase text-white/60">
+                    <button
+                      type="button"
+                      onClick={() => setDedupeStrategy("keep_first")}
+                      className={`rounded px-2 py-1 transition ${
+                        dedupeStrategy === "keep_first"
+                          ? "bg-wolf-neutral-soft text-white"
+                          : ""
+                      }`}
+                    >
+                      Keep first
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDedupeStrategy("keep_last")}
+                      className={`rounded px-2 py-1 transition ${
+                        dedupeStrategy === "keep_last"
+                          ? "bg-wolf-neutral-soft text-white"
+                          : ""
+                      }`}
+                    >
+                      Keep last
+                    </button>
+                    {mode === "custom" ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setDedupeStrategy("merge_sum")}
+                          className={`rounded px-2 py-1 transition ${
+                            dedupeStrategy === "merge_sum"
+                              ? "bg-wolf-neutral-soft text-white"
+                              : ""
+                          }`}
+                        >
+                          Merge amounts (sum)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDedupeStrategy("merge_max")}
+                          className={`rounded px-2 py-1 transition ${
+                            dedupeStrategy === "merge_max"
+                              ? "bg-wolf-neutral-soft text-white"
+                              : ""
+                          }`}
+                        >
+                          Merge amounts (max)
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -289,32 +464,8 @@ export function PastePreviewModal({
                 disabled={!canRemoveDuplicates}
                 className="rounded-md border border-amber-400/30 px-2 py-1 text-[11px] font-semibold uppercase text-amber-200 transition hover:border-amber-300 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Remove duplicates
+                Resolve duplicates
               </button>
-              <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1 text-[10px] uppercase text-white/60">
-                <button
-                  type="button"
-                  onClick={() => setDedupeStrategy("keep_first")}
-                  className={`rounded px-2 py-1 transition ${
-                    dedupeStrategy === "keep_first"
-                      ? "bg-wolf-neutral-soft text-white"
-                      : ""
-                  }`}
-                >
-                  Keep first
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDedupeStrategy("keep_last")}
-                  className={`rounded px-2 py-1 transition ${
-                    dedupeStrategy === "keep_last"
-                      ? "bg-wolf-neutral-soft text-white"
-                      : ""
-                  }`}
-                >
-                  Keep last
-                </button>
-              </div>
               <button
                 type="button"
                 onClick={handleTrimWhitespace}
@@ -341,6 +492,23 @@ export function PastePreviewModal({
               </button>
             </div>
 
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase text-white/60">
+              {previewFilters.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => setPreviewFilter(filter.id)}
+                  className={`rounded-md border border-white/10 px-2 py-1 transition ${
+                    previewFilter === filter.id
+                      ? "border-wolf-emerald text-wolf-emerald"
+                      : "text-white/60 hover:border-white/30 hover:text-white/80"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+
             <div className="mt-4 max-h-[260px] overflow-y-auto rounded-lg border border-white/5">
               <div
                 className={`grid gap-3 border-b border-white/5 bg-black/20 px-3 py-2 text-[11px] uppercase text-white/40 ${
@@ -353,12 +521,16 @@ export function PastePreviewModal({
                 {mode === "custom" ? <span>Amount</span> : null}
                 <span>Status</span>
               </div>
-              {validations.length === 0 ? (
+              {previewRows.length === 0 ? (
                 <div className="px-3 py-6 text-xs text-white/60">
                   Paste recipients to see a preview.
                 </div>
+              ) : filteredRows.length === 0 ? (
+                <div className="px-3 py-6 text-xs text-white/60">
+                  No rows match this filter.
+                </div>
               ) : (
-                validations.map(({ row, validation }) => (
+                filteredRows.map((row) => (
                   <div
                     key={row.id}
                     className={`grid items-center gap-3 border-b border-white/5 px-3 py-2 text-xs text-white/80 ${
@@ -372,26 +544,26 @@ export function PastePreviewModal({
                     </span>
                     {mode === "custom" ? (
                       <span className="truncate text-white/60">
-                        {row.amount || "—"}
+                        {row.amountNormalized ?? row.amount ?? "—"}
                       </span>
                     ) : null}
                     <span
                       className={
-                        validation.status === "valid"
+                        row.status === "valid"
                           ? "text-wolf-emerald"
-                          : validation.status === "duplicate"
+                          : row.status === "duplicate"
                             ? "text-amber-300"
-                            : validation.status === "missing_amount"
+                            : row.status === "missing_amount"
                               ? "text-amber-200"
                               : "text-rose-300"
                       }
                     >
-                      {validation.status === "valid"
+                      {row.status === "valid"
                         ? "Valid"
-                        : validation.status === "duplicate"
+                        : row.status === "duplicate"
                           ? "Duplicate"
-                          : validation.status === "missing_amount"
-                            ? "Missing"
+                          : row.status === "missing_amount"
+                            ? "Missing amount"
                             : "Invalid"}
                     </span>
                   </div>
@@ -427,15 +599,39 @@ export function PastePreviewModal({
             </button>
           </div>
         </div>
-        {replaceMode ? (
-          <p className="mt-3 text-xs text-amber-200">
-            Replace will overwrite your current recipients list.
-          </p>
-        ) : null}
         {parsed.headerIgnored ? (
           <p className="mt-2 text-xs text-white/60">
             Header row detected and ignored.
           </p>
+        ) : null}
+        {showInvalidConfirm ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70">
+            <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#0b111a] p-4 text-white/80 shadow-2xl">
+              <h4 className="text-sm font-semibold text-white">
+                Drop invalid rows?
+              </h4>
+              <p className="mt-2 text-xs text-white/60">
+                We can finish the fixes now, but removing invalid rows is
+                optional.
+              </p>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleConfirmFix(false)}
+                  className="rounded-md border border-wolf-border px-3 py-1.5 text-[11px] font-semibold text-white/70 transition hover:border-wolf-border-strong hover:text-white"
+                >
+                  Keep invalid rows
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleConfirmFix(true)}
+                  className="rounded-md border border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold text-rose-100 transition hover:border-rose-300"
+                >
+                  Drop invalid rows
+                </button>
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
     </div>,
