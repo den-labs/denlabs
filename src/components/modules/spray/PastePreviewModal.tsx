@@ -13,6 +13,7 @@ type PastePreviewModalProps = {
   isOpen: boolean;
   mode: AmountMode;
   tokenDecimals: number;
+  currentRecipientsCount: number;
   title?: string;
   initialText?: string;
   onClose: () => void;
@@ -26,6 +27,7 @@ export function PastePreviewModal({
   isOpen,
   mode,
   tokenDecimals,
+  currentRecipientsCount,
   title = "Paste recipients",
   initialText = "",
   onClose,
@@ -45,14 +47,14 @@ export function PastePreviewModal({
   useEffect(() => {
     if (isOpen) {
       setText(initialText);
-      setReplaceMode(false);
+      setReplaceMode(currentRecipientsCount === 0);
       setDedupeStrategy("keep_first");
       setPreviewFilter("all");
       setShowInvalidConfirm(false);
       setPendingFixRows([]);
       setShowAdvanced(false);
     }
-  }, [initialText, isOpen]);
+  }, [currentRecipientsCount, initialText, isOpen]);
 
   useEffect(() => {
     if (
@@ -206,20 +208,20 @@ export function PastePreviewModal({
     setText(normalized);
   };
 
-  const handleFixAutomatically = () => {
+  const handleFixAndApply = () => {
     if (parsed.invalidRows > 0) {
       setPendingFixRows(parsed.uniqueRecipients);
       setShowInvalidConfirm(true);
       return;
     }
-    applyRowsToText(parsed.uniqueRecipients);
+    onApply(parsed.uniqueRecipients, replaceMode);
   };
 
   const handleConfirmFix = (dropInvalid: boolean) => {
     const nextRows = dropInvalid
       ? pendingFixRows.filter((row) => row.status !== "invalid")
       : pendingFixRows;
-    applyRowsToText(nextRows);
+    onApply(nextRows, replaceMode);
     setPendingFixRows([]);
     setShowInvalidConfirm(false);
   };
@@ -234,7 +236,14 @@ export function PastePreviewModal({
   const canRemoveDuplicates = summary.duplicateLines > 0;
   const canDropInvalid = parsed.invalidRows > 0;
   const canNormalizeDecimals = parsed.decimalNormalizedCount > 0;
-  const canApply = summary.validUnique > 0;
+  const canApplyAsIs = useMemo(
+    () =>
+      parsed.rows.some(
+        (row) => row.status === "valid" || row.status === "duplicate",
+      ),
+    [parsed.rows],
+  );
+  const canApplyFixes = summary.validUnique > 0;
   const previewFilters = useMemo(() => {
     const base: Array<{ id: PreviewFilter; label: string }> = [
       { id: "all", label: "All" },
@@ -341,7 +350,7 @@ export function PastePreviewModal({
                 <h3 className="text-sm font-semibold text-white">Preview</h3>
               </div>
 
-              <div className="mt-3 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-[11px] text-white/70">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-[11px] text-white/70">
                 <label className="flex cursor-pointer items-start gap-2">
                   <input
                     type="radio"
@@ -372,10 +381,13 @@ export function PastePreviewModal({
                       Replace current list
                     </div>
                     <div className="text-[11px] text-white/50">
-                      Overwrites your existing recipients list.
+                      Overwrites existing list.
                     </div>
                   </div>
                 </label>
+                <span className="text-[11px] text-white/40">
+                  Choose how to add these recipients.
+                </span>
               </div>
               {replaceMode ? (
                 <p className="mt-2 text-xs text-amber-200">
@@ -431,14 +443,6 @@ export function PastePreviewModal({
                         Keep last
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleFixAutomatically}
-                      disabled={parsed.linesTotal === 0}
-                      className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-3 py-2 text-[11px] font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.35)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
-                    >
-                      Fix automatically (recommended)
-                    </button>
                   </div>
                 </div>
               </div>
@@ -487,25 +491,24 @@ export function PastePreviewModal({
                     >
                       Drop invalid rows
                     </button>
+                    <div className="flex flex-wrap gap-2 text-[11px] uppercase text-white/60">
+                      {previewFilters.map((filter) => (
+                        <button
+                          key={filter.id}
+                          type="button"
+                          onClick={() => setPreviewFilter(filter.id)}
+                          className={`rounded-md border border-white/10 px-2 py-1 transition ${
+                            previewFilter === filter.id
+                              ? "border-wolf-emerald text-wolf-emerald"
+                              : "text-white/60 hover:border-white/30 hover:text-white/80"
+                          }`}
+                        >
+                          {filter.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase text-white/60">
-                {previewFilters.map((filter) => (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    onClick={() => setPreviewFilter(filter.id)}
-                    className={`rounded-md border border-white/10 px-2 py-1 transition ${
-                      previewFilter === filter.id
-                        ? "border-wolf-emerald text-wolf-emerald"
-                        : "text-white/60 hover:border-white/30 hover:text-white/80"
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
               </div>
 
               <div className="mt-4 max-h-[220px] overflow-y-auto rounded-lg border border-white/5">
@@ -597,11 +600,19 @@ export function PastePreviewModal({
               </button>
               <button
                 type="button"
-                onClick={() => onApply(parsed.uniqueRecipients, replaceMode)}
-                disabled={!canApply}
+                onClick={() => onApply(parsed.rows, replaceMode)}
+                disabled={!canApplyAsIs}
+                className="rounded-md border border-wolf-border px-4 py-2 text-xs font-semibold uppercase text-white/70 transition hover:border-wolf-border-strong hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Apply as-is
+              </button>
+              <button
+                type="button"
+                onClick={handleFixAndApply}
+                disabled={!canApplyFixes}
                 className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-5 py-2 text-xs font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
               >
-                Apply
+                Fix & apply (recommended)
               </button>
             </div>
           </div>
