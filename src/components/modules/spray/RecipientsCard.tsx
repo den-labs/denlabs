@@ -8,6 +8,7 @@ import type {
   RecipientRowInput,
   RecipientStatus,
 } from "@/lib/recipients";
+import { isValidAmount } from "@/lib/recipients";
 import { PastePreviewModal } from "./PastePreviewModal";
 import { RecipientsTable } from "./RecipientsTable";
 
@@ -71,6 +72,13 @@ export function RecipientsCard({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dedupeStrategy, setDedupeStrategy] =
     useState<DedupeStrategy>("keep_first");
+  const [showSameConfirm, setShowSameConfirm] = useState(false);
+  const [sameAmountInput, setSameAmountInput] = useState(globalAmount);
+  const [sameAmountError, setSameAmountError] = useState("");
+
+  useEffect(() => {
+    setSameAmountInput(globalAmount);
+  }, [globalAmount]);
 
   useEffect(() => {
     if (
@@ -279,7 +287,14 @@ export function RecipientsCard({
         <div className="flex items-center gap-1 rounded-lg border border-wolf-border bg-wolf-panel px-1.5 py-1 text-xs font-semibold uppercase text-wolf-text-subtle">
           <button
             type="button"
-            onClick={() => onModeChange("same")}
+            onClick={() => {
+              if (amountMode === "custom") {
+                setShowSameConfirm(true);
+                setSameAmountError("");
+                return;
+              }
+              onModeChange("same");
+            }}
             className={`rounded-md px-3 py-1 transition ${
               amountMode === "same"
                 ? "bg-wolf-neutral-soft text-white"
@@ -300,6 +315,62 @@ export function RecipientsCard({
             Custom amounts
           </button>
         </div>
+        {showSameConfirm ? (
+          <div className="flex w-full flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70">
+            <div className="flex flex-1 flex-col gap-1">
+              <span className="text-xs font-semibold text-white">
+                Switch to Same amount?
+              </span>
+              <span className="text-[11px] text-white/50">
+                This will replace individual amounts with a single amount
+                applied to all recipients.
+              </span>
+            </div>
+            <div className="flex flex-1 items-center gap-2">
+              <input
+                value={sameAmountInput}
+                onChange={(event) => setSameAmountInput(event.target.value)}
+                placeholder="Amount per recipient"
+                className="h-8 flex-1 rounded-md border border-wolf-border bg-wolf-panel px-2 text-xs text-white/80 placeholder:text-white/40 focus:border-wolf-emerald focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const validation = isValidAmount(
+                    sameAmountInput,
+                    tokenDecimals,
+                  );
+                  if (!validation.valid) {
+                    setSameAmountError("Enter a valid amount.");
+                    return;
+                  }
+                  onGlobalAmountChange(validation.normalized);
+                  onModeChange("same");
+                  setShowSameConfirm(false);
+                  setSameAmountError("");
+                }}
+                className="rounded-md border border-wolf-border px-2 py-1 text-[11px] font-semibold uppercase text-white/80 transition hover:border-wolf-border-strong hover:text-white"
+              >
+                Convert & switch
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSameConfirm(false);
+                  setSameAmountError("");
+                }}
+                className="rounded-md border border-wolf-border px-2 py-1 text-[11px] font-semibold uppercase text-white/60 transition hover:border-wolf-border-strong hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+            {sameAmountError ? (
+              <span className="w-full text-[11px] text-rose-200">
+                {sameAmountError}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         {amountMode === "same" ? (
           <div className="flex flex-1 items-center gap-2">
             <label
