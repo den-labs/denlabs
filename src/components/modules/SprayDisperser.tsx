@@ -24,13 +24,24 @@ import {
   parseEther,
   parseUnits,
 } from "ethers";
-import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
+import { RecipientsCard } from "@/components/modules/spray/RecipientsCard";
+import { StickyFooter } from "@/components/modules/spray/StickyFooter";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useDenUser } from "@/hooks/useDenUser";
 import { isENSName, validateAddress } from "@/lib/addressValidation";
+import {
+  type AmountMode,
+  computeTotals,
+  dedupe,
+  findDuplicateAddresses,
+  isValidAmount,
+  type RecipientRowInput,
+  validateRow,
+} from "@/lib/recipients";
 import {
   DEFAULT_SPRAY_NETWORK_KEY,
   SPRAY_NETWORKS,
@@ -50,12 +61,6 @@ const ERC20_ABI = [
   "function decimals() view returns (uint8)",
   "function symbol() view returns (string)",
 ];
-
-type RecipientRow = {
-  id: string;
-  address: string;
-  amount: string;
-};
 
 type TransactionRecord = {
   id: string;
@@ -90,7 +95,7 @@ function getEthereum(): EthereumProvider | undefined {
   return ethereum;
 }
 
-function createRow(): RecipientRow {
+function createRow(): RecipientRowInput {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     address: "",
@@ -167,6 +172,33 @@ function createReadOnlyProvider(config?: SprayNetworkConfig | null) {
   }
 }
 
+function buildTokenAmounts(
+  decimals: number,
+  sourceRows: RecipientRowInput[],
+  modeForAmounts: AmountMode,
+  globalValue: string,
+) {
+  try {
+    if (modeForAmounts === "same") {
+      const validation = isValidAmount(globalValue, decimals);
+      if (!validation.valid) {
+        return null;
+      }
+      const parsed = parseUnits(validation.normalized, decimals);
+      const amounts = sourceRows.map(() => parsed);
+      const total = parsed * BigInt(sourceRows.length);
+      return { amounts, total };
+    }
+    const amounts = sourceRows.map((row) =>
+      parseUnits((row.amount ?? "").trim(), decimals),
+    );
+    const total = amounts.reduce((acc, value) => acc + value, BigInt(0));
+    return { amounts, total };
+  } catch {
+    return null;
+  }
+}
+
 const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
   ethereum: ethereumNetwork,
   celo: celoNetwork,
@@ -236,6 +268,9 @@ export default function SprayDisperser() {
   const [chainId, setChainId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const [allowanceStatus, setAllowanceStatus] = useState<
+    "unknown" | "loading" | "approved" | "needs_approval"
+  >("unknown");
   const [mode, setMode] = useState<"native" | "token">("native");
   const [tokenAddress, setTokenAddress] = useState("");
   const [selectedTrustedToken, setSelectedTrustedToken] =
@@ -253,10 +288,10 @@ export default function SprayDisperser() {
     Record<string, string | null>
   >({});
   const [nativeBalance, setNativeBalance] = useState<string | null>(null);
-  // Use a deterministic initial row to avoid SSR/CSR mismatch from Math.random/Date.now()
-  const [rows, setRows] = useState<RecipientRow[]>([
-    { id: "initial", address: "", amount: "" },
-  ]);
+  const [rows, setRows] = useState<RecipientRowInput[]>([]);
+  const [amountMode, setAmountMode] = useState<AmountMode>("same");
+  const [globalAmount, setGlobalAmount] = useState("");
+  const [fillMissingValue, setFillMissingValue] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<TransactionRecord[]>([]);
@@ -604,13 +639,111 @@ export default function SprayDisperser() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isNetworkDropdownOpen]);
 
-  const totalEntered = useMemo(() => {
-    const rawTotal = rows.reduce(
-      (acc, row) => acc + (Number.parseFloat(row.amount) || 0),
-      0,
+  const activeTokenDecimals =
+    mode === "native"
+      ? (selectedNetwork.nativeCurrency.decimals ?? 18)
+      : (tokenInfo?.decimals ?? 18);
+  const debouncedRows = useDebouncedValue(rows, 300);
+  const debouncedGlobalAmount = useDebouncedValue(globalAmount, 300);
+  const duplicateAddresses = useMemo(
+    () => findDuplicateAddresses(debouncedRows),
+    [debouncedRows],
+  );
+  const rowValidations = useMemo(
+    () =>
+      debouncedRows.map((row) => ({
+        row,
+        validation: validateRow(
+          row,
+          activeTokenDecimals,
+          amountMode,
+          duplicateAddresses,
+        ),
+      })),
+    [activeTokenDecimals, amountMode, debouncedRows, duplicateAddresses],
+  );
+  const statusById = useMemo(() => {
+    return Object.fromEntries(
+      rowValidations.map(({ row, validation }) => [row.id, validation.status]),
     );
-    return Number.isFinite(rawTotal) ? rawTotal : 0;
-  }, [rows]);
+  }, [rowValidations]);
+  const issuesById = useMemo(() => {
+    return Object.fromEntries(
+      rowValidations.map(({ row, validation }) => [row.id, validation.issues]),
+    );
+  }, [rowValidations]);
+  const issuesCount = useMemo(
+    () =>
+      rowValidations.filter(({ validation }) => {
+        if (validation.status === "valid") {
+          return false;
+        }
+        if (amountMode === "same" && validation.status === "duplicate") {
+          return false;
+        }
+        return true;
+      }).length,
+    [amountMode, rowValidations],
+  );
+  const duplicateCount = useMemo(
+    () =>
+      rowValidations.filter(
+        ({ validation }) => validation.status === "duplicate",
+      ).length,
+    [rowValidations],
+  );
+  const missingAmountCount = useMemo(
+    () =>
+      rowValidations.filter(
+        ({ validation }) => validation.status === "missing_amount",
+      ).length,
+    [rowValidations],
+  );
+  const invalidCount = useMemo(
+    () =>
+      rowValidations.filter(({ validation }) => validation.status === "invalid")
+        .length,
+    [rowValidations],
+  );
+  const totals = useMemo(
+    () =>
+      computeTotals(
+        debouncedRows,
+        amountMode,
+        debouncedGlobalAmount,
+        activeTokenDecimals,
+        duplicateAddresses,
+      ),
+    [
+      activeTokenDecimals,
+      amountMode,
+      debouncedGlobalAmount,
+      debouncedRows,
+      duplicateAddresses,
+    ],
+  );
+  const recipientCount = useMemo(
+    () => rows.filter((row) => row.address.trim() !== "").length,
+    [rows],
+  );
+  const validRows = useMemo(
+    () =>
+      rowValidations
+        .filter(({ validation }) => validation.status === "valid")
+        .map(({ row }) => row),
+    [rowValidations],
+  );
+  const globalAmountValidation = useMemo(
+    () => isValidAmount(globalAmount, activeTokenDecimals),
+    [activeTokenDecimals, globalAmount],
+  );
+  const fillMissingValidation = useMemo(
+    () => isValidAmount(fillMissingValue, activeTokenDecimals),
+    [activeTokenDecimals, fillMissingValue],
+  );
+  const hasBlockingIssues =
+    issuesCount > 0 || (amountMode === "same" && !globalAmountValidation.valid);
+  const canFillMissing = amountMode === "custom" && fillMissingValidation.valid;
   const activityTimestampFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
@@ -835,10 +968,94 @@ export default function SprayDisperser() {
   }
 
   function removeRow(id: string) {
-    if (rows.length === 1) {
+    setRows((prev) => prev.filter((row) => row.id !== id));
+  }
+
+  function updateGlobalAmount(value: string) {
+    setGlobalAmount(sanitizeDecimalInput(value));
+  }
+
+  function updateFillMissingValue(value: string) {
+    setFillMissingValue(sanitizeDecimalInput(value));
+  }
+
+  function clearRows() {
+    setRows([]);
+  }
+
+  function applyParsedRows(
+    parsedRows: Array<{
+      address: string;
+      amount?: string;
+      amountNormalized?: string;
+    }>,
+    replace: boolean,
+  ) {
+    const mapped = parsedRows.map((row) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      address: row.address,
+      amount: row.amountNormalized ?? row.amount ?? "",
+    }));
+    setRows((prev) => (replace ? mapped : [...prev, ...mapped]));
+  }
+
+  function removeDuplicates() {
+    setRows((prev) => dedupe(prev));
+  }
+
+  function removeInvalidRows() {
+    setRows((prev) => {
+      const duplicates = findDuplicateAddresses(prev);
+      return prev.filter((row) => {
+        const validation = validateRow(
+          row,
+          activeTokenDecimals,
+          amountMode,
+          duplicates,
+        );
+        return validation.status !== "invalid";
+      });
+    });
+  }
+
+  function fillMissingAmounts() {
+    if (!fillMissingValidation.valid) {
+      setError(t("errors.invalidAmount"));
       return;
     }
-    setRows((prev) => prev.filter((row) => row.id !== id));
+    setRows((prev) =>
+      prev.map((row) =>
+        row.amount?.trim()
+          ? row
+          : { ...row, amount: fillMissingValidation.normalized },
+      ),
+    );
+  }
+
+  function buildRuntimeValidation() {
+    const duplicates = findDuplicateAddresses(rows);
+    const validations = rows.map((row) => ({
+      row,
+      validation: validateRow(row, activeTokenDecimals, amountMode, duplicates),
+    }));
+    const valid = validations
+      .filter(({ validation }) => validation.status === "valid")
+      .map(({ row }) => row);
+    const runtimeInvalid = validations.filter(
+      ({ validation }) => validation.status === "invalid",
+    ).length;
+    const runtimeDuplicate = validations.filter(
+      ({ validation }) => validation.status === "duplicate",
+    ).length;
+    const runtimeHasIssues =
+      validations.some(({ validation }) => validation.status !== "valid") ||
+      (amountMode === "same" && !globalAmountValidation.valid);
+    return {
+      validRows: valid,
+      hasIssues: runtimeHasIssues,
+      invalidCount: runtimeInvalid,
+      duplicateCount: runtimeDuplicate,
+    };
   }
 
   function addHistoryRecord(record: Omit<TransactionRecord, "sequence">) {
@@ -848,17 +1065,86 @@ export default function SprayDisperser() {
     );
   }
 
-  function buildTokenAmounts(decimals: number) {
-    try {
-      const amounts = rows.map((row) =>
-        parseUnits(row.amount.trim(), decimals),
-      );
-      const total = amounts.reduce((acc, value) => acc + value, BigInt(0));
-      return { amounts, total };
-    } catch {
-      return null;
+  useEffect(() => {
+    if (mode !== "token" || !tokenInfo || !provider || !signerAddress) {
+      setAllowanceStatus("unknown");
+      return;
     }
-  }
+
+    if (hasBlockingIssues || validRows.length === 0) {
+      setAllowanceStatus("unknown");
+      return;
+    }
+
+    const normalized = tokenAddress.trim();
+    const validation = validateAddress(normalized);
+    if (!validation.valid) {
+      setAllowanceStatus("unknown");
+      return;
+    }
+
+    const tokenDecimals = tokenInfo?.decimals ?? null;
+    if (tokenDecimals == null) {
+      setAllowanceStatus("unknown");
+      return;
+    }
+
+    const activeProvider = provider;
+    if (!activeProvider) {
+      setAllowanceStatus("unknown");
+      return;
+    }
+
+    let isCancelled = false;
+    async function checkAllowance() {
+      setAllowanceStatus("loading");
+      try {
+        const parsed = buildTokenAmounts(
+          tokenDecimals,
+          validRows,
+          amountMode,
+          debouncedGlobalAmount,
+        );
+        if (!parsed) {
+          setAllowanceStatus("unknown");
+          return;
+        }
+        const { total } = parsed;
+        const signer = await activeProvider.getSigner();
+        const erc20 = new Contract(normalized, ERC20_ABI, signer);
+        const allowance: bigint = await erc20.allowance(
+          await signer.getAddress(),
+          sprayAddress,
+        );
+        if (!isCancelled) {
+          setAllowanceStatus(
+            allowance >= total ? "approved" : "needs_approval",
+          );
+        }
+      } catch (_error) {
+        if (!isCancelled) {
+          setAllowanceStatus("unknown");
+        }
+      }
+    }
+
+    checkAllowance();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    amountMode,
+    debouncedGlobalAmount,
+    hasBlockingIssues,
+    mode,
+    provider,
+    signerAddress,
+    sprayAddress,
+    tokenAddress,
+    tokenInfo,
+    validRows,
+  ]);
 
   async function handleApprove() {
     if (!provider || !signerPromise || !tokenInfo) {
@@ -873,26 +1159,36 @@ export default function SprayDisperser() {
       return;
     }
 
-    if (
-      rows.some(
-        (row) =>
-          row.address.trim() === "" ||
-          row.amount.trim() === "" ||
-          Number(row.amount) <= 0,
-      )
-    ) {
-      setError(t("errors.invalidAmount"));
+    const runtimeValidation = buildRuntimeValidation();
+
+    if (runtimeValidation.validRows.length === 0) {
+      setError(t("errors.invalidRecipient"));
       return;
     }
 
-    const parsed = buildTokenAmounts(tokenInfo.decimals);
+    if (runtimeValidation.hasIssues) {
+      setError(
+        runtimeValidation.invalidCount > 0 ||
+          runtimeValidation.duplicateCount > 0
+          ? t("errors.invalidRecipient")
+          : t("errors.invalidAmount"),
+      );
+      return;
+    }
+
+    const parsed = buildTokenAmounts(
+      tokenInfo.decimals,
+      runtimeValidation.validRows,
+      amountMode,
+      globalAmount,
+    );
     if (!parsed) {
       setError(t("errors.invalidAmount"));
       return;
     }
 
     const { total: totalValue } = parsed;
-    const totalAmountLabel = totalEntered.toFixed(4);
+    const totalAmountLabel = totals.total.toFixed(4);
     const tokenSymbolLabel = tokenInfo?.symbol ?? t("summary.tokenPlaceholder");
 
     setIsApproving(true);
@@ -922,7 +1218,7 @@ export default function SprayDisperser() {
         hash: tx.hash,
         status: "pending",
         timestamp: new Date().toISOString(),
-        recipients: rows.length,
+        recipients: runtimeValidation.validRows.length,
         totalFormatted: totalAmountLabel,
         tokenSymbol: tokenSymbolLabel,
         networkKey: selectedNetworkKey,
@@ -968,8 +1264,30 @@ export default function SprayDisperser() {
       }
     }
 
-    const recipients = rows.map((row) => row.address.trim());
-    const amountsInput = rows.map((row) => row.amount.trim());
+    const runtimeValidation = buildRuntimeValidation();
+
+    if (runtimeValidation.validRows.length === 0) {
+      setError(t("errors.invalidRecipient"));
+      return;
+    }
+
+    if (runtimeValidation.hasIssues) {
+      setError(
+        runtimeValidation.invalidCount > 0 ||
+          runtimeValidation.duplicateCount > 0
+          ? t("errors.invalidRecipient")
+          : t("errors.invalidAmount"),
+      );
+      return;
+    }
+
+    const recipients = runtimeValidation.validRows.map((row) =>
+      row.address.trim(),
+    );
+    const amountsInput =
+      amountMode === "same"
+        ? runtimeValidation.validRows.map(() => globalAmount.trim())
+        : runtimeValidation.validRows.map((row) => (row.amount ?? "").trim());
 
     // Validate all addresses
     const hasENS = recipients.some((address) => isENSName(address));
@@ -985,7 +1303,7 @@ export default function SprayDisperser() {
       return;
     }
 
-    if (amountsInput.some((amount) => amount === "" || Number(amount) <= 0)) {
+    if (amountMode === "same" && !globalAmountValidation.valid) {
       setError(t("errors.invalidAmount"));
       return;
     }
@@ -1055,7 +1373,12 @@ export default function SprayDisperser() {
         }
 
         const decimals = tokenInfo.decimals;
-        const parsed = buildTokenAmounts(decimals);
+        const parsed = buildTokenAmounts(
+          decimals,
+          runtimeValidation.validRows,
+          amountMode,
+          globalAmount,
+        );
         if (!parsed) {
           setError(t("errors.invalidAmount"));
           return;
@@ -1071,7 +1394,6 @@ export default function SprayDisperser() {
 
         if (allowance < totalValue) {
           setError(t("errors.needsApproval"));
-          await handleApprove();
           return;
         }
 
@@ -1090,7 +1412,7 @@ export default function SprayDisperser() {
           status: "pending",
           timestamp: new Date().toISOString(),
           recipients: recipients.length,
-          totalFormatted: totalEntered.toFixed(4),
+          totalFormatted: totals.total.toFixed(4),
           tokenSymbol: tokenInfo.symbol,
           networkKey: selectedNetworkKey,
         });
@@ -1126,11 +1448,38 @@ export default function SprayDisperser() {
     }
   }
 
-  const ctaDisabled =
-    isSubmitting ||
-    rows.some((row) => row.address.trim() === "" || row.amount.trim() === "") ||
-    (mode === "token" &&
-      (!validateAddress(tokenAddress.trim()).valid || !tokenInfo));
+  const tokenAddressValidation = validateAddress(tokenAddress.trim());
+  const needsApproval =
+    mode === "token" && allowanceStatus === "needs_approval";
+  const ctaLabel = isApproving
+    ? t("actions.approving")
+    : isSubmitting
+      ? t("actions.submitting")
+      : needsApproval
+        ? t("actions.approve")
+        : t("actions.send");
+  const ctaDisabledReason = (() => {
+    if (isSubmitting || isApproving) {
+      return "Transaction in progress.";
+    }
+    if (recipientCount === 0) {
+      return "Add at least one recipient.";
+    }
+    if (hasBlockingIssues) {
+      return `Fix ${issuesCount} issue(s) before sending.`;
+    }
+    if (amountMode === "same" && !globalAmountValidation.valid) {
+      return "Enter an amount per recipient.";
+    }
+    if (mode === "token" && (!tokenAddressValidation.valid || !tokenInfo)) {
+      return "Enter a valid token address.";
+    }
+    if (mode === "token" && allowanceStatus === "loading") {
+      return "Checking allowance status...";
+    }
+    return null;
+  })();
+  const ctaDisabled = Boolean(ctaDisabledReason);
   const formatActivityTimestamp = (value: string) => {
     try {
       return activityTimestampFormatter.format(new Date(value));
@@ -1261,7 +1610,7 @@ export default function SprayDisperser() {
             </header>
 
             <div>
-              <section className="wolf-card--muted border border-wolf-border-mid p-6">
+              <section className="relative z-10 wolf-card--muted border border-wolf-border-mid p-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <button
                     type="button"
@@ -1298,7 +1647,10 @@ export default function SprayDisperser() {
                     </span>
                   </button>
                 </div>
-                <div ref={networkDropdownRef} className="relative mt-4 w-full">
+                <div
+                  ref={networkDropdownRef}
+                  className="relative z-30 mt-4 w-full"
+                >
                   <button
                     type="button"
                     aria-haspopup="listbox"
@@ -1338,7 +1690,7 @@ export default function SprayDisperser() {
                     </svg>
                   </button>
                   {isNetworkDropdownOpen ? (
-                    <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 rounded-2xl border border-wolf-border-soft bg-wolf-panel p-2 shadow-2xl">
+                    <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 rounded-2xl border border-wolf-border-soft bg-wolf-panel p-2 shadow-2xl">
                       <ul id="network-selector-options" className="space-y-1">
                         {SUPPORTED_SPRAY_NETWORKS.map((network) => {
                           const isActive = network.key === selectedNetworkKey;
@@ -1388,7 +1740,7 @@ export default function SprayDisperser() {
                   <div className="space-y-2">
                     <div
                       ref={trustedDropdownRef}
-                      className="relative"
+                      className="relative z-30"
                       id="trusted-token-select"
                     >
                       <button
@@ -1461,7 +1813,7 @@ export default function SprayDisperser() {
                         <div
                           id="trusted-token-options"
                           role="listbox"
-                          className="absolute z-20 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
+                          className="absolute z-40 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
                         >
                           <button
                             type="button"
@@ -1591,176 +1943,79 @@ export default function SprayDisperser() {
                       ) : null}
                     </div>
                   </div>
+                </div>
+              </section>
 
-                  <div className="text-xs uppercase text-wolf-emerald">
-                    <span>
-                      {t("summary.recipients", { count: rows.length })}
-                    </span>
-                    <span className="ml-3">
-                      {mode === "native"
-                        ? translate(
-                            "summary.totalNative",
-                            `Total: ${totalEntered.toFixed(4)} ${nativeSymbol}`,
-                            {
-                              amount: totalEntered.toFixed(4),
-                              symbol: nativeSymbol,
-                            },
-                          )
-                        : t("summary.totalToken", {
-                            amount: totalEntered.toFixed(4),
-                            symbol:
+              <div className="mt-6">
+                <RecipientsCard
+                  rows={rows}
+                  recipientCount={recipientCount}
+                  amountMode={amountMode}
+                  globalAmount={globalAmount}
+                  tokenDecimals={activeTokenDecimals}
+                  issuesCount={issuesCount}
+                  duplicateCount={duplicateCount}
+                  invalidCount={invalidCount}
+                  missingAmountCount={missingAmountCount}
+                  statusById={statusById}
+                  issuesById={issuesById}
+                  onModeChange={setAmountMode}
+                  onGlobalAmountChange={updateGlobalAmount}
+                  onRowChange={updateRow}
+                  onRemoveRow={removeRow}
+                  onAddRow={addRow}
+                  onClearRows={clearRows}
+                  onApplyParsedRows={applyParsedRows}
+                  onRemoveDuplicates={removeDuplicates}
+                  onRemoveInvalidRows={removeInvalidRows}
+                  onFillMissingAmounts={fillMissingAmounts}
+                  canFillMissing={canFillMissing}
+                  fillMissingValue={fillMissingValue}
+                  onFillMissingValueChange={updateFillMissingValue}
+                  footer={
+                    <StickyFooter
+                      recipientCount={recipientCount}
+                      totalLabel={
+                        mode === "native"
+                          ? `Total: ${totals.total.toFixed(4)} ${nativeSymbol}`
+                          : `Total: ${totals.total.toFixed(4)} ${
                               tokenInfo?.symbol ??
                               selectedTrustedTokenData?.symbol ??
-                              t("summary.tokenPlaceholder"),
-                          })}
-                    </span>
-                  </div>
-                </div>
+                              tokenSymbolPlaceholder
+                            }`
+                      }
+                      feeLabel="Estimated fee: —"
+                      allowanceLabel={
+                        mode === "token"
+                          ? allowanceStatus === "approved"
+                            ? "Allowance: Ready"
+                            : allowanceStatus === "needs_approval"
+                              ? "Allowance: Needs approval"
+                              : allowanceStatus === "loading"
+                                ? "Allowance: Checking..."
+                                : "Allowance: Not checked"
+                          : "Allowance: Not required"
+                      }
+                      ctaLabel={ctaLabel}
+                      ctaDisabled={ctaDisabled}
+                      ctaReason={ctaDisabledReason}
+                      onPrimaryAction={
+                        needsApproval ? handleApprove : handleSubmit
+                      }
+                      isLoading={isApproving || isSubmitting}
+                    />
+                  }
+                />
+              </div>
 
-                <div className="mt-6 space-y-4">
-                  {rows.map((row) => (
-                    <div key={row.id}>
-                      <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center">
-                        <div className="flex flex-1 items-center gap-2">
-                          <input
-                            value={row.address}
-                            onChange={(event) =>
-                              updateRow(row.id, "address", event.target.value)
-                            }
-                            placeholder={t("form.addressPlaceholder")}
-                            className="flex-1 rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
-                          />
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                if (typeof navigator === "undefined") {
-                                  setError(
-                                    translate(
-                                      "errors.clipboardFailed",
-                                      "Unable to read clipboard.",
-                                    ),
-                                  );
-                                  return;
-                                }
-                                const clipboardText =
-                                  await navigator.clipboard.readText();
-                                if (clipboardText) {
-                                  updateRow(
-                                    row.id,
-                                    "address",
-                                    clipboardText.trim(),
-                                  );
-                                }
-                              } catch {
-                                setError(
-                                  translate(
-                                    "errors.clipboardFailed",
-                                    "Unable to read clipboard.",
-                                  ),
-                                );
-                              }
-                            }}
-                            className="flex h-10 w-10 items-center justify-center rounded-full border border-wolf-border text-white/70 transition hover:border-wolf-emerald hover:text-white"
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              className="h-5 w-5"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M8 3h8v2h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3V3Zm2 0v2h4V3h-4Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                        <input
-                          value={row.amount}
-                          onChange={(event) =>
-                            updateRow(row.id, "amount", event.target.value)
-                          }
-                          placeholder={t("form.amountPlaceholder")}
-                          className="w-full rounded-lg border border-wolf-border bg-wolf-panel px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none md:w-40"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeRow(row.id)}
-                          disabled={rows.length === 1}
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-wolf-emerald transition hover:text-white disabled:cursor-not-allowed disabled:text-white/20"
-                          aria-label={t("actions.remove")}
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M6 7h12M10 7V5h4v2m-7 0v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              fill="none"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex flex-wrap items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={addRow}
-                    className="rounded-md border border-wolf-border px-5 py-2 text-xs font-semibold text-white/80 transition hover:border-wolf-border-strong hover:text-white"
-                  >
-                    {t("actions.addRecipient")}
-                  </button>
-                  {mode === "token" && tokenInfo ? (
-                    <button
-                      type="button"
-                      onClick={handleApprove}
-                      disabled={ctaDisabled || isApproving}
-                      className="rounded-md border border-wolf-border-soft px-5 py-2 text-xs font-semibold text-wolf-emerald transition hover:border-wolf-border-strong hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isApproving
-                        ? t("actions.approving")
-                        : t("actions.approve")}
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={ctaDisabled}
-                    className="ml-auto inline-flex items-center gap-3 rounded-xl border border-[#4ca22a] bg-[#89e24a] px-6 py-3 text-[0.75rem] font-semibold uppercase text-[#09140a] shadow-[0_0_20px_rgba(186,255,92,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(186,255,92,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#baff5c] disabled:translate-y-0 disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40 disabled:shadow-none"
-                  >
-                    {isSubmitting && (
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span>
-                      {isSubmitting
-                        ? t("actions.submitting")
-                        : t("actions.send")}
-                    </span>
-                  </button>
-                </div>
-
-                {feedback ? (
-                  <p className="mt-4 text-xs uppercase text-wolf-emerald">
-                    {feedback}
-                  </p>
-                ) : null}
-                {error ? (
-                  <p className="mt-2 text-xs uppercase text-rose-300">
-                    {error}
-                  </p>
-                ) : null}
-              </section>
+              {feedback ? (
+                <p className="mt-4 text-xs uppercase text-wolf-emerald">
+                  {feedback}
+                </p>
+              ) : null}
+              {error ? (
+                <p className="mt-2 text-xs uppercase text-rose-300">{error}</p>
+              ) : null}
             </div>
           </div>
         </div>
