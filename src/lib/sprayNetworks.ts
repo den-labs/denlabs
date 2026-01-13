@@ -4,6 +4,7 @@ const CELO_CCOP_ICON = "/tokens-ccop.png";
 const CELO_GOOD_ICON = "/tokens-gooddollar.png";
 const OPTIMISM_OP_ICON = "/tokens-op.png";
 const WCT_ICON = "/tokens-wct.png";
+const UVD_ICON = "/tokens-uvd.png";
 
 export type SprayNetworkConfig = {
   key: string;
@@ -210,6 +211,13 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
         address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         iconUrl: DEFAULT_TOKEN_ICON,
         decimals: 6,
+      },
+      {
+        label: "UVDAO (UVD)",
+        symbol: "UVD",
+        address: "0x4ffe7e01832243e03668e090706f17726c26d6b2",
+        iconUrl: UVD_ICON,
+        decimals: 18,
       },
     ],
   },
