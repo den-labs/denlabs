@@ -995,7 +995,7 @@ export default function SprayDisperser() {
     const mapped = parsedRows.map((row) => ({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       address: row.address,
-      amount: row.amountNormalized ?? row.amount ?? "",
+      amount: row.amount ?? "",
     }));
     setRows((prev) => (replace ? mapped : [...prev, ...mapped]));
   }
