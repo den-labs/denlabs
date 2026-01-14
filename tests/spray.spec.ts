@@ -16,9 +16,13 @@ const extractCookieValue = (setCookie: string, name: string) => {
 };
 
 const ensureAccess = async (page: Page, baseURL: string) => {
-  const response = await page.request.post(`${baseURL}/api/auth/wallet-login`, {
-    data: { walletAddress: TEST_WALLET },
-  });
+  const resolvedBaseUrl = baseURL || "http://localhost:3000";
+  const response = await page.request.post(
+    `${resolvedBaseUrl}/api/auth/wallet-login`,
+    {
+      data: { walletAddress: TEST_WALLET },
+    },
+  );
   if (!response.ok()) {
     return false;
   }
@@ -34,8 +38,7 @@ const ensureAccess = async (page: Page, baseURL: string) => {
     {
       name: "denlabs-user-id",
       value: cookieValue,
-      url: baseURL,
-      path: "/",
+      url: resolvedBaseUrl,
       httpOnly: true,
       sameSite: "Lax",
     },
