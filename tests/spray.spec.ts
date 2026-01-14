@@ -2,6 +2,46 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
 const LIST_PLACEHOLDER = "0xabc...,0.25";
+const TEST_WALLET = "0x00000000000000000000000000000000000000aa";
+
+const extractCookieValue = (setCookie: string, name: string) => {
+  const chunks = setCookie.split(/\n|,/);
+  for (const chunk of chunks) {
+    const match = new RegExp(`${name}=([^;]+)`).exec(chunk);
+    if (match?.[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
+
+const ensureAccess = async (page: Page, baseURL: string) => {
+  const response = await page.request.post(`${baseURL}/api/auth/wallet-login`, {
+    data: { walletAddress: TEST_WALLET },
+  });
+  if (!response.ok()) {
+    return false;
+  }
+  const setCookie = response.headers()["set-cookie"];
+  if (!setCookie) {
+    return false;
+  }
+  const cookieValue = extractCookieValue(setCookie, "denlabs-user-id");
+  if (!cookieValue) {
+    return false;
+  }
+  await page.context().addCookies([
+    {
+      name: "denlabs-user-id",
+      value: cookieValue,
+      url: baseURL,
+      path: "/",
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+  return true;
+};
 
 const buildRecipients = (count: number) =>
   Array.from({ length: count }, (_, index) => {
@@ -20,6 +60,9 @@ const applyRecipients = async (page: Page, list: string) => {
 
 test.describe("spray network selector", () => {
   test("shows ethereum in the network list", async ({ page, baseURL }) => {
+    const hasAccess = await ensureAccess(page, baseURL);
+    test.skip(!hasAccess, "requires wallet-login API and Supabase access");
+
     await page.goto(`${baseURL}/en/spray`, {
       waitUntil: "domcontentloaded",
     });
@@ -40,6 +83,9 @@ test.describe("spray recipients table virtualization", () => {
     page,
     baseURL,
   }) => {
+    const hasAccess = await ensureAccess(page, baseURL);
+    test.skip(!hasAccess, "requires wallet-login API and Supabase access");
+
     await page.goto(`${baseURL}/en/spray`, { waitUntil: "domcontentloaded" });
     await applyRecipients(page, buildRecipients(100));
 
@@ -51,6 +97,9 @@ test.describe("spray recipients table virtualization", () => {
     page,
     baseURL,
   }) => {
+    const hasAccess = await ensureAccess(page, baseURL);
+    test.skip(!hasAccess, "requires wallet-login API and Supabase access");
+
     await page.goto(`${baseURL}/en/spray`, { waitUntil: "domcontentloaded" });
     await applyRecipients(page, buildRecipients(1000));
 
