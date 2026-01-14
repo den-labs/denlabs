@@ -44,8 +44,10 @@ export function PastePreviewModal({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [dropInvalid, setDropInvalid] = useState(false);
   const [normalizeDecimals, setNormalizeDecimals] = useState(true);
+  const [mergeSameAddress, setMergeSameAddress] = useState(false);
   const [modalMode, setModalMode] = useState<AmountMode>(mode);
   const [preferSameAmount, setPreferSameAmount] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -56,8 +58,10 @@ export function PastePreviewModal({
       setShowAdvanced(false);
       setDropInvalid(false);
       setNormalizeDecimals(true);
+      setMergeSameAddress(false);
       setModalMode(mode);
       setPreferSameAmount(false);
+      setShowDetails(false);
     }
   }, [initialText, isOpen, mode]);
 
@@ -111,6 +115,7 @@ export function PastePreviewModal({
     () => parsed.rows.filter((row) => row.status !== "valid").length,
     [parsed.rows],
   );
+  const hasIssues = issuesCount > 0;
 
   const filteredRows = useMemo(() => {
     let rows = parsed.rows;
@@ -148,6 +153,7 @@ export function PastePreviewModal({
       mode: modalMode,
       tokenDecimals,
       dedupeStrategy,
+      mergeSameAddressSum: mergeSameAddress,
       trimWhitespace: true,
       normalizeDecimals,
       dropInvalid,
@@ -161,7 +167,7 @@ export function PastePreviewModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
         ref={modalRef}
-        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl"
+        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
@@ -236,6 +242,13 @@ export function PastePreviewModal({
             <div className="flex min-h-0 flex-col rounded-xl border border-wolf-border bg-[#0f141d] p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Preview</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowDetails((prev) => !prev)}
+                  className="text-[11px] font-semibold uppercase text-white/60 transition hover:text-white"
+                >
+                  {showDetails ? "Hide details" : "Show details"}
+                </button>
               </div>
 
               {currentRecipientsCount > 0 ? (
@@ -315,7 +328,7 @@ export function PastePreviewModal({
                     </label>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] uppercase text-white/50">
-                        Duplicate strategy
+                        Duplicate rows
                       </span>
                       <div className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 p-1 text-[10px] uppercase text-white/60">
                         <button
@@ -340,21 +353,21 @@ export function PastePreviewModal({
                         >
                           Keep last
                         </button>
-                        {modalMode === "custom" ? (
-                          <button
-                            type="button"
-                            onClick={() => setDedupeStrategy("merge_sum")}
-                            className={`rounded px-2 py-1 transition ${
-                              dedupeStrategy === "merge_sum"
-                                ? "bg-wolf-neutral-soft text-white"
-                                : ""
-                            }`}
-                          >
-                            Sum
-                          </button>
-                        ) : null}
                       </div>
                     </div>
+                    {modalMode === "custom" ? (
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={mergeSameAddress}
+                          onChange={(event) =>
+                            setMergeSameAddress(event.target.checked)
+                          }
+                          className="accent-wolf-emerald"
+                        />
+                        <span>Merge same address (sum amounts)</span>
+                      </label>
+                    ) : null}
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -372,69 +385,71 @@ export function PastePreviewModal({
                 ) : null}
               </div>
 
-              <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-white/5">
-                <div
-                  className={`grid gap-3 border-b border-white/5 bg-black/20 px-3 py-2 text-[11px] uppercase text-white/40 ${
-                    modalMode === "custom"
-                      ? "grid-cols-[minmax(0,1fr)_90px_90px]"
-                      : "grid-cols-[minmax(0,1fr)_90px]"
-                  }`}
-                >
-                  <span>Address</span>
-                  {modalMode === "custom" ? <span>Amount</span> : null}
-                  <span>Status</span>
-                </div>
-                <div className="min-h-0 flex-1 overflow-auto">
-                  {parsed.rows.length === 0 ? (
-                    <div className="px-3 py-6 text-xs text-white/60">
-                      Paste recipients to see a preview.
-                    </div>
-                  ) : filteredRows.length === 0 ? (
-                    <div className="px-3 py-6 text-xs text-white/60">
-                      No rows match this filter.
-                    </div>
-                  ) : (
-                    filteredRows.map((row) => (
-                      <div
-                        key={row.id}
-                        className={`grid items-center gap-3 border-b border-white/5 px-3 py-2 text-xs text-white/80 ${
-                          modalMode === "custom"
-                            ? "grid-cols-[minmax(0,1fr)_90px_90px]"
-                            : "grid-cols-[minmax(0,1fr)_90px]"
-                        }`}
-                      >
-                        <span className="truncate font-mono">
-                          {row.address || "—"}
-                        </span>
-                        {modalMode === "custom" ? (
-                          <span className="truncate text-white/60">
-                            {row.amountNormalized ?? row.amount ?? "—"}
-                          </span>
-                        ) : null}
-                        <span
-                          className={
-                            row.status === "valid"
-                              ? "text-wolf-emerald"
-                              : row.status === "duplicate"
-                                ? "text-amber-300"
-                                : row.status === "missing_amount"
-                                  ? "text-amber-200"
-                                  : "text-rose-300"
-                          }
-                        >
-                          {row.status === "valid"
-                            ? "Valid"
-                            : row.status === "duplicate"
-                              ? "Duplicate"
-                              : row.status === "missing_amount"
-                                ? "Missing amount"
-                                : "Invalid"}
-                        </span>
+              {showDetails ? (
+                <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-white/5">
+                  <div
+                    className={`grid gap-3 border-b border-white/5 bg-black/20 px-3 py-2 text-[11px] uppercase text-white/40 ${
+                      modalMode === "custom"
+                        ? "grid-cols-[minmax(0,1fr)_90px_90px]"
+                        : "grid-cols-[minmax(0,1fr)_90px]"
+                    }`}
+                  >
+                    <span>Address</span>
+                    {modalMode === "custom" ? <span>Amount</span> : null}
+                    <span>Status</span>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-auto">
+                    {parsed.rows.length === 0 ? (
+                      <div className="px-3 py-6 text-xs text-white/60">
+                        Paste recipients to see a preview.
                       </div>
-                    ))
-                  )}
+                    ) : filteredRows.length === 0 ? (
+                      <div className="px-3 py-6 text-xs text-white/60">
+                        No rows match this filter.
+                      </div>
+                    ) : (
+                      filteredRows.map((row) => (
+                        <div
+                          key={row.id}
+                          className={`grid items-center gap-3 border-b border-white/5 px-3 py-2 text-xs text-white/80 ${
+                            modalMode === "custom"
+                              ? "grid-cols-[minmax(0,1fr)_90px_90px]"
+                              : "grid-cols-[minmax(0,1fr)_90px]"
+                          }`}
+                        >
+                          <span className="truncate font-mono">
+                            {row.address || "—"}
+                          </span>
+                          {modalMode === "custom" ? (
+                            <span className="truncate text-white/60">
+                              {row.amountNormalized ?? row.amount ?? "—"}
+                            </span>
+                          ) : null}
+                          <span
+                            className={
+                              row.status === "valid"
+                                ? "text-wolf-emerald"
+                                : row.status === "duplicate"
+                                  ? "text-amber-300"
+                                  : row.status === "missing_amount"
+                                    ? "text-amber-200"
+                                    : "text-rose-300"
+                            }
+                          >
+                            {row.status === "valid"
+                              ? "Valid"
+                              : row.status === "duplicate"
+                                ? "Duplicate row"
+                                : row.status === "missing_amount"
+                                  ? "Missing amount"
+                                  : "Invalid"}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
           {parsed.headerIgnored ? (
@@ -461,21 +476,27 @@ export function PastePreviewModal({
               >
                 Cancel
               </button>
+              {hasIssues ? (
+                <button
+                  type="button"
+                  onClick={() => applyWithMode(parsed.rows)}
+                  disabled={!canApplyAsIs}
+                  className="rounded-md border border-wolf-border px-4 py-2 text-xs font-semibold uppercase text-white/70 transition hover:border-wolf-border-strong hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Apply as-is
+                </button>
+              ) : null}
               <button
                 type="button"
-                onClick={() => applyWithMode(parsed.rows)}
-                disabled={!canApplyAsIs}
-                className="rounded-md border border-wolf-border px-4 py-2 text-xs font-semibold uppercase text-white/70 transition hover:border-wolf-border-strong hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Apply as-is
-              </button>
-              <button
-                type="button"
-                onClick={handleFixAndApply}
-                disabled={!canApplyFixes}
+                onClick={
+                  hasIssues
+                    ? handleFixAndApply
+                    : () => applyWithMode(parsed.rows)
+                }
+                disabled={hasIssues ? !canApplyFixes : !canApplyAsIs}
                 className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-5 py-2 text-xs font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
               >
-                Fix & Apply (recommended)
+                {hasIssues ? "Fix & Apply (recommended)" : "Apply"}
               </button>
             </div>
           </div>

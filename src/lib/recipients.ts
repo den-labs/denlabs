@@ -76,6 +76,7 @@ export type RecipientFixesConfig = {
   mode: AmountMode;
   tokenDecimals: number;
   dedupeStrategy: DedupeStrategy;
+  mergeSameAddressSum: boolean;
   trimWhitespace: boolean;
   normalizeDecimals: boolean;
   dropInvalid: boolean;
@@ -146,7 +147,8 @@ function buildRecipientIssues(
   row: Pick<ParsedRecipient, "address" | "amount">,
   mode: AmountMode,
   tokenDecimals: number,
-  duplicates?: Set<string>,
+  duplicateRowIds?: Set<string>,
+  rowId?: string,
 ) {
   const issues: string[] = [];
   const normalized = normalizeRecipientAddress(row.address);
@@ -172,7 +174,7 @@ function buildRecipientIssues(
     issues.push("ignored_amount");
   }
 
-  if (hasValidAddress && duplicates?.has(normalized)) {
+  if (rowId && duplicateRowIds?.has(rowId)) {
     issues.push("duplicate");
   }
 
@@ -183,24 +185,62 @@ function buildRecipientIssues(
   };
 }
 
+function buildDuplicateRowKey(
+  row: Pick<ParsedRecipient, "address" | "amount" | "amountNormalized">,
+  mode: AmountMode,
+) {
+  const normalizedAddress = normalizeRecipientAddress(row.address);
+  if (!normalizedAddress || !isValidRecipientAddress(normalizedAddress)) {
+    return null;
+  }
+  if (mode === "custom") {
+    const amountValue = row.amountNormalized ?? row.amount ?? "";
+    const normalizedAmount = normalizeAmount(amountValue).normalized;
+    return `${normalizedAddress}::${normalizedAmount}`;
+  }
+  return normalizedAddress;
+}
+
+function findDuplicateRowIdsFromParsed(
+  rows: ParsedRecipient[],
+  mode: AmountMode,
+) {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+
+  rows.forEach((row) => {
+    const key = buildDuplicateRowKey(row, mode);
+    if (!key) {
+      return;
+    }
+    if (seen.has(key)) {
+      duplicates.add(row.id);
+      return;
+    }
+    seen.add(key);
+  });
+
+  return duplicates;
+}
+
 function dedupeParsedRecipients(
   rows: ParsedRecipient[],
   strategy: DedupeStrategy,
   mode: AmountMode,
   tokenDecimals: number,
 ) {
-  const byAddress = new Map<string, ParsedRecipient>();
+  const byKey = new Map<string, ParsedRecipient>();
   const result: ParsedRecipient[] = [];
 
   rows.forEach((row) => {
-    const normalized = normalizeRecipientAddress(row.address);
-    if (!normalized || !isValidRecipientAddress(normalized)) {
+    const key = buildDuplicateRowKey(row, mode);
+    if (!key) {
       result.push(row);
       return;
     }
-    const existing = byAddress.get(normalized);
+    const existing = byKey.get(key);
     if (!existing) {
-      byAddress.set(normalized, row);
+      byKey.set(key, row);
       result.push(row);
       return;
     }
@@ -214,7 +254,7 @@ function dedupeParsedRecipients(
       if (index >= 0) {
         result[index] = row;
       }
-      byAddress.set(normalized, row);
+      byKey.set(key, row);
       return;
     }
 
@@ -232,7 +272,7 @@ function dedupeParsedRecipients(
           amount: nextAmount,
           amountNormalized: nextValidation.normalized,
         };
-        byAddress.set(normalized, merged);
+        byKey.set(key, merged);
         const index = result.indexOf(existing);
         if (index >= 0) {
           result[index] = merged;
@@ -260,7 +300,7 @@ function dedupeParsedRecipients(
           amount: mergedAmount,
           amountNormalized: mergedAmount,
         };
-        byAddress.set(normalized, merged);
+        byKey.set(key, merged);
         const index = result.indexOf(existing);
         if (index >= 0) {
           result[index] = merged;
@@ -272,6 +312,64 @@ function dedupeParsedRecipients(
   });
 
   return result;
+}
+
+function mergeSameAddressSum(
+  rows: ParsedRecipient[],
+  tokenDecimals: number,
+  mode: AmountMode,
+) {
+  if (mode !== "custom") {
+    return rows;
+  }
+  const byAddress = new Map<string, ParsedRecipient>();
+  const totals = new Map<string, bigint>();
+  const ordered: string[] = [];
+
+  rows.forEach((row) => {
+    const normalized = normalizeRecipientAddress(row.address);
+    if (!normalized || !isValidRecipientAddress(normalized)) {
+      ordered.push(row.id);
+      byAddress.set(row.id, row);
+      return;
+    }
+
+    if (!byAddress.has(normalized)) {
+      byAddress.set(normalized, row);
+      ordered.push(normalized);
+    }
+
+    const amountValue = row.amountNormalized ?? row.amount ?? "";
+    const validation = isValidAmount(amountValue, tokenDecimals);
+    if (!validation.valid) {
+      return;
+    }
+    const existing = totals.get(normalized) ?? BigInt(0);
+    try {
+      const units = parseUnits(validation.normalized, tokenDecimals);
+      totals.set(normalized, existing + units);
+    } catch {
+      return;
+    }
+  });
+
+  return ordered
+    .map((key) => {
+      const row = byAddress.get(key);
+      if (!row) {
+        return null;
+      }
+      if (!totals.has(key)) {
+        return row;
+      }
+      const summed = formatUnits(totals.get(key) ?? BigInt(0), tokenDecimals);
+      return {
+        ...row,
+        amount: summed,
+        amountNormalized: summed,
+      };
+    })
+    .filter((row): row is ParsedRecipient => Boolean(row));
 }
 
 export function parseRecipients(
@@ -352,21 +450,20 @@ export function parseRecipients(
     });
   });
 
-  const duplicateAddresses = new Set<string>();
+  const duplicateRowIds = findDuplicateRowIdsFromParsed(lines, mode);
   const addressCounts = new Map<string, number>();
   lines.forEach((entry) => {
     if (!isValidRecipientAddress(entry.addressNorm)) {
       return;
     }
-    const nextCount = (addressCounts.get(entry.addressNorm) ?? 0) + 1;
-    addressCounts.set(entry.addressNorm, nextCount);
-    if (nextCount > 1) {
-      duplicateAddresses.add(entry.addressNorm);
-    }
+    addressCounts.set(
+      entry.addressNorm,
+      (addressCounts.get(entry.addressNorm) ?? 0) + 1,
+    );
   });
 
   const rows = lines.map((entry) => {
-    if (!duplicateAddresses.has(entry.addressNorm)) {
+    if (!duplicateRowIds.has(entry.id)) {
       return entry;
     }
     const issuesList = entry.issues.includes("duplicate")
@@ -448,20 +545,25 @@ export function applyFixes(
     config.tokenDecimals,
   );
 
-  const duplicates = findDuplicateAddresses(
-    dedupedRows.map((row) => ({
+  const mergedRows = config.mergeSameAddressSum
+    ? mergeSameAddressSum(dedupedRows, config.tokenDecimals, config.mode)
+    : dedupedRows;
+
+  const duplicateRowIds = findDuplicateRowIds(
+    mergedRows.map((row) => ({
       id: row.id,
       address: row.address,
       amount: row.amount,
     })),
   );
 
-  const validatedRows = dedupedRows.map((row) => {
+  const validatedRows = mergedRows.map((row) => {
     const { issues, status, normalizedAddress } = buildRecipientIssues(
       { address: row.address, amount: row.amount },
       config.mode,
       config.tokenDecimals,
-      duplicates,
+      duplicateRowIds,
+      row.id,
     );
     return {
       ...row,
@@ -498,19 +600,21 @@ export function isValidAmount(value: string, decimals: number) {
   return { valid: true, normalized };
 }
 
-export function findDuplicateAddresses(rows: RecipientRowInput[]) {
+export function findDuplicateRowIds(rows: RecipientRowInput[]) {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
   rows.forEach((row) => {
     const normalized = normalizeRecipientAddress(row.address);
-    if (!normalized) {
+    if (!normalized || !isValidRecipientAddress(normalized)) {
       return;
     }
-    if (seen.has(normalized)) {
-      duplicates.add(normalized);
+    const amountValue = row.amount ?? "";
+    const key = `${normalized}::${normalizeAmount(amountValue).normalized}`;
+    if (seen.has(key)) {
+      duplicates.add(row.id);
       return;
     }
-    seen.add(normalized);
+    seen.add(key);
   });
   return duplicates;
 }
@@ -519,7 +623,7 @@ export function validateRow(
   row: RecipientRowInput,
   tokenDecimals: number,
   mode: AmountMode,
-  duplicates?: Set<string>,
+  duplicateRowIds?: Set<string>,
 ): RecipientValidation {
   const issues: string[] = [];
   const normalized = normalizeRecipientAddress(row.address);
@@ -541,7 +645,7 @@ export function validateRow(
     }
   }
 
-  if (hasValidAddress && duplicates?.has(normalized)) {
+  if (duplicateRowIds?.has(row.id)) {
     issues.push("duplicate");
   }
 
@@ -605,18 +709,23 @@ export function dedupe(
   mode: AmountMode = "same",
   tokenDecimals = 18,
 ) {
-  const byAddress = new Map<string, RecipientRowInput>();
+  const byKey = new Map<string, RecipientRowInput>();
   const result: RecipientRowInput[] = [];
 
   rows.forEach((row) => {
     const normalized = normalizeRecipientAddress(row.address);
-    if (!normalized) {
+    if (!normalized || !isValidRecipientAddress(normalized)) {
       result.push(row);
       return;
     }
-    const existing = byAddress.get(normalized);
+    const amountValue = mode === "custom" ? (row.amount ?? "") : "";
+    const key =
+      strategy === "merge_sum" || strategy === "merge_max"
+        ? normalized
+        : `${normalized}::${normalizeAmount(amountValue).normalized}`;
+    const existing = byKey.get(key);
     if (!existing) {
-      byAddress.set(normalized, row);
+      byKey.set(key, row);
       result.push(row);
       return;
     }
@@ -626,7 +735,7 @@ export function dedupe(
       if (index >= 0) {
         result[index] = row;
       }
-      byAddress.set(normalized, row);
+      byKey.set(key, row);
       return;
     }
 
@@ -640,7 +749,7 @@ export function dedupe(
       const nextValidation = isValidAmount(nextAmount, tokenDecimals);
       if (!existingValidation.valid && nextValidation.valid) {
         const merged = { ...existing, amount: nextValidation.normalized };
-        byAddress.set(normalized, merged);
+        byKey.set(key, merged);
         const index = result.indexOf(existing);
         if (index >= 0) {
           result[index] = merged;
@@ -664,7 +773,7 @@ export function dedupe(
               : nextUnits;
         const mergedAmount = formatUnits(mergedUnits, tokenDecimals);
         const merged = { ...existing, amount: mergedAmount };
-        byAddress.set(normalized, merged);
+        byKey.set(key, merged);
         const index = result.indexOf(existing);
         if (index >= 0) {
           result[index] = merged;

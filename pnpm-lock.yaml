@@ -35,6 +35,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.90.16
         version: 5.90.16(react@19.1.2)
+      '@tanstack/react-virtual':
+        specifier: ^3.11.0
+        version: 3.13.18(react-dom@19.1.2(react@19.1.2))(react@19.1.2)
       '@wagmi/connectors':
         specifier: ^7.0.5
         version: 7.0.5(4zfe6l4lwbdpi45jn7p2axln2m)
@@ -2000,6 +2003,15 @@ packages:
     resolution: {integrity: sha512-bpMGOmV4OPmif7TNMteU/Ehf/hoC0Kf98PDc0F4BZkFrEapRMEqI/V6YS0lyzwSV6PQpY1y4xxArUIfBW5LVxQ==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@tanstack/react-virtual@3.13.18':
+    resolution: {integrity: sha512-dZkhyfahpvlaV0rIKnvQiVoWPyURppl6w4m9IwMDpuIjcJ1sD9YGWrt0wISvgU7ewACXx2Ct46WPgI6qAD4v6A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/virtual-core@3.13.18':
+    resolution: {integrity: sha512-Mx86Hqu1k39icq2Zusq+Ey2J6dDWTjDvEv43PJtRCoEYTLyfaPnxIQ6iy7YAOK0NV/qOEmZQ/uCufrppZxTgcg==}
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
@@ -7998,6 +8010,14 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.90.16
       react: 19.1.2
+
+  '@tanstack/react-virtual@3.13.18(react-dom@19.1.2(react@19.1.2))(react@19.1.2)':
+    dependencies:
+      '@tanstack/virtual-core': 3.13.18
+      react: 19.1.2
+      react-dom: 19.1.2(react@19.1.2)
+
+  '@tanstack/virtual-core@3.13.18': {}
 
   '@types/connect@3.4.38':
     dependencies:

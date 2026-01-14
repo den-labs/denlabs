@@ -33,7 +33,10 @@ export default function DenLayout({ children }: { children: ReactNode }) {
     <EventLabInstrumentationProvider labSlug={null}>
       <SidebarProvider>
         <DenRailSlotsProvider>
-          <div className="bg-sidebar text-sidebar-foreground">
+          <div
+            className="bg-sidebar text-sidebar-foreground"
+            style={{ "--app-header-height": "64px" } as React.CSSProperties}
+          >
             <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-6 px-6 py-6 md:flex-row">
               <SidebarNav />
               <div className="flex w-full flex-col gap-4">

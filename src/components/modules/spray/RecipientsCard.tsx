@@ -36,6 +36,9 @@ type RecipientsCardProps = {
   canFillMissing: boolean;
   fillMissingValue: string;
   onFillMissingValueChange: (value: string) => void;
+  primaryActionLabel?: string;
+  primaryActionDisabled?: boolean;
+  onPrimaryAction?: () => void;
   footer: React.ReactNode;
 };
 
@@ -64,6 +67,9 @@ export function RecipientsCard({
   canFillMissing,
   fillMissingValue,
   onFillMissingValueChange,
+  primaryActionLabel,
+  primaryActionDisabled,
+  onPrimaryAction,
   footer,
 }: RecipientsCardProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -71,6 +77,8 @@ export function RecipientsCard({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dedupeStrategy, setDedupeStrategy] =
     useState<DedupeStrategy>("keep_first");
+  const [showOverflow, setShowOverflow] = useState(false);
+  const overflowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (
@@ -119,9 +127,49 @@ export function RecipientsCard({
     URL.revokeObjectURL(url);
   };
 
+  useEffect(() => {
+    if (!showOverflow) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (
+        overflowRef.current &&
+        target &&
+        !overflowRef.current.contains(target)
+      ) {
+        setShowOverflow(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowOverflow(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showOverflow]);
+
+  const hasRecipients = recipientCount > 0;
+  const primaryLabel = hasRecipients
+    ? (primaryActionLabel ?? "Send")
+    : "Paste list";
+  const handlePrimaryAction = () => {
+    if (!hasRecipients) {
+      openPasteModal();
+      return;
+    }
+    onPrimaryAction?.();
+  };
+  const primaryDisabled = hasRecipients
+    ? Boolean(primaryActionDisabled)
+    : false;
+
   return (
-    <section className="wolf-card--muted border border-wolf-border-mid p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <section className="wolf-card--muted flex min-h-0 flex-1 flex-col border border-wolf-border-mid p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h3 className="text-base font-semibold text-white">
             {`Recipients (${recipientCount})`}
@@ -135,11 +183,21 @@ export function RecipientsCard({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={openPasteModal}
-            className="rounded-md border border-wolf-border px-3 py-2 text-xs font-semibold text-white/80 transition hover:border-wolf-border-strong hover:text-white"
+            onClick={handlePrimaryAction}
+            disabled={primaryDisabled}
+            className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-4 py-2 text-xs font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
           >
-            Paste list
+            {primaryLabel}
           </button>
+          {hasRecipients ? (
+            <button
+              type="button"
+              onClick={openPasteModal}
+              className="rounded-md border border-wolf-border px-3 py-2 text-xs font-semibold text-white/80 transition hover:border-wolf-border-strong hover:text-white"
+            >
+              Paste list
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -149,25 +207,46 @@ export function RecipientsCard({
           </button>
           <button
             type="button"
-            onClick={handleDownloadTemplate}
-            className="rounded-md border border-wolf-border px-3 py-2 text-xs font-semibold text-white/80 transition hover:border-wolf-border-strong hover:text-white"
-          >
-            Download template
-          </button>
-          <button
-            type="button"
             onClick={onAddRow}
             className="rounded-md border border-dashed border-wolf-border px-3 py-2 text-xs font-semibold text-white/70 transition hover:border-wolf-border-strong hover:text-white"
           >
             + Add manual
           </button>
-          <button
-            type="button"
-            onClick={onClearRows}
-            className="rounded-md border border-wolf-border px-3 py-2 text-xs font-semibold text-white/60 transition hover:border-wolf-border-strong hover:text-white"
-          >
-            Clear
-          </button>
+          <div ref={overflowRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowOverflow((prev) => !prev)}
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-wolf-border text-white/70 transition hover:border-wolf-border-strong hover:text-white"
+              aria-label="More actions"
+              aria-expanded={showOverflow}
+            >
+              ⋯
+            </button>
+            {showOverflow ? (
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 w-48 rounded-xl border border-wolf-border bg-[#0b111a] p-2 text-xs text-white/80 shadow-2xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDownloadTemplate();
+                    setShowOverflow(false);
+                  }}
+                  className="w-full rounded-lg px-3 py-2 text-left transition hover:bg-white/5"
+                >
+                  Download template
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClearRows();
+                    setShowOverflow(false);
+                  }}
+                  className="w-full rounded-lg px-3 py-2 text-left text-rose-200 transition hover:bg-white/5"
+                >
+                  Clear list
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -176,7 +255,7 @@ export function RecipientsCard({
           {duplicateCount > 0 ? (
             <>
               <span className="text-amber-200">
-                {`${duplicateCount} duplicate(s)`}
+                {`${duplicateCount} duplicate row(s)`}
               </span>
               <div className="flex flex-wrap items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1 text-[10px] uppercase text-white/60">
                 <button
@@ -202,30 +281,17 @@ export function RecipientsCard({
                   Keep last
                 </button>
                 {amountMode === "custom" ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setDedupeStrategy("merge_sum")}
-                      className={`rounded px-2 py-1 transition ${
-                        dedupeStrategy === "merge_sum"
-                          ? "bg-wolf-neutral-soft text-white"
-                          : ""
-                      }`}
-                    >
-                      Merge amounts (sum)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDedupeStrategy("merge_max")}
-                      className={`rounded px-2 py-1 transition ${
-                        dedupeStrategy === "merge_max"
-                          ? "bg-wolf-neutral-soft text-white"
-                          : ""
-                      }`}
-                    >
-                      Merge amounts (max)
-                    </button>
-                  </>
+                  <button
+                    type="button"
+                    onClick={() => setDedupeStrategy("merge_sum")}
+                    className={`rounded px-2 py-1 transition ${
+                      dedupeStrategy === "merge_sum"
+                        ? "bg-wolf-neutral-soft text-white"
+                        : ""
+                    }`}
+                  >
+                    Merge same address (sum)
+                  </button>
                 ) : null}
               </div>
               <button
@@ -233,7 +299,7 @@ export function RecipientsCard({
                 onClick={() => onRemoveDuplicates(dedupeStrategy)}
                 className="rounded-md border border-amber-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-amber-200 transition hover:border-amber-300 hover:text-amber-100"
               >
-                Resolve duplicates
+                Resolve duplicate rows
               </button>
             </>
           ) : null}
@@ -275,7 +341,7 @@ export function RecipientsCard({
         </div>
       )}
 
-      <div className="mt-6 flex flex-wrap items-center gap-4">
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1 rounded-lg border border-wolf-border bg-wolf-panel px-1.5 py-1 text-xs font-semibold uppercase text-wolf-text-subtle">
           <button
             type="button"
@@ -301,7 +367,7 @@ export function RecipientsCard({
           </button>
         </div>
         {amountMode === "same" ? (
-          <div className="flex flex-1 items-center gap-2">
+          <div className="flex min-w-[220px] flex-1 items-center gap-2">
             <label
               htmlFor="global-amount"
               className="text-xs uppercase text-white/50"
@@ -319,7 +385,7 @@ export function RecipientsCard({
         ) : null}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4 flex min-h-0 flex-1">
         <RecipientsTable
           rows={rows}
           amountMode={amountMode}

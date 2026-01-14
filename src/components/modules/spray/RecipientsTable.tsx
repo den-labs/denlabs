@@ -1,5 +1,6 @@
 "use client";
 
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   AmountMode,
@@ -19,9 +20,10 @@ type RecipientsTableProps = {
 };
 
 type RecipientFilter = "all" | "issues" | "duplicates" | "invalid" | "missing";
+type DensityMode = "comfort" | "compact";
 
-const ROW_HEIGHT = 44;
 const OVERSCAN = 6;
+export const RECIPIENTS_VIRTUALIZE_THRESHOLD = 150;
 
 function statusTone(status: RecipientStatus) {
   switch (status) {
@@ -41,7 +43,7 @@ function statusLabel(status: RecipientStatus) {
     case "valid":
       return "Valid";
     case "duplicate":
-      return "Duplicate";
+      return "Duplicate row";
     case "missing_amount":
       return "Missing amount";
     default:
@@ -61,10 +63,10 @@ export function RecipientsTable({
 }: RecipientsTableProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const filterInitRef = useRef(false);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(0);
   const [filter, setFilter] = useState<RecipientFilter>("all");
+  const [density, setDensity] = useState<DensityMode>("comfort");
   const footerOffset = footer ? 96 : 0;
+  const ROW_HEIGHT = density === "compact" ? 36 : 44;
 
   const hasIssues = useMemo(
     () =>
@@ -114,7 +116,7 @@ export function RecipientsTable({
     const base: Array<{ id: RecipientFilter; label: string }> = [
       { id: "all", label: "All" },
       { id: "issues", label: "Issues" },
-      { id: "duplicates", label: "Duplicates" },
+      { id: "duplicates", label: "Duplicate rows" },
       { id: "invalid", label: "Invalid" },
     ];
     if (amountMode === "custom") {
@@ -123,80 +125,82 @@ export function RecipientsTable({
     return base;
   }, [amountMode]);
 
-  const useVirtual = filteredRows.length > 100;
+  const useVirtual = filteredRows.length > RECIPIENTS_VIRTUALIZE_THRESHOLD;
+  const rowVirtualizer = useVirtualizer({
+    count: filteredRows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: OVERSCAN,
+  });
 
   useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) return;
-    const updateHeight = () => setContainerHeight(node.clientHeight);
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  const { startIndex, endIndex, offsetY, totalHeight } = useMemo(() => {
-    if (!useVirtual || containerHeight === 0) {
-      return {
-        startIndex: 0,
-        endIndex: filteredRows.length,
-        offsetY: 0,
-        totalHeight: filteredRows.length * ROW_HEIGHT,
-      };
+    if (!useVirtual) {
+      return;
     }
-    const start = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN);
-    const end = Math.min(
-      filteredRows.length,
-      Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN,
-    );
-    return {
-      startIndex: start,
-      endIndex: end,
-      offsetY: start * ROW_HEIGHT,
-      totalHeight: filteredRows.length * ROW_HEIGHT,
-    };
-  }, [containerHeight, filteredRows.length, scrollTop, useVirtual]);
-
-  const visibleRows = useVirtual
-    ? filteredRows.slice(startIndex, endIndex)
-    : filteredRows;
+    if (ROW_HEIGHT > 0) {
+      rowVirtualizer.measure();
+    }
+  }, [ROW_HEIGHT, rowVirtualizer, useVirtual]);
 
   const gridTemplate =
     amountMode === "custom"
-      ? "grid-cols-[minmax(0,1fr)_140px_110px_44px]"
-      : "grid-cols-[minmax(0,1fr)_110px_44px]";
+      ? "grid-cols-[minmax(220px,1fr)_120px_110px_44px]"
+      : "grid-cols-[minmax(220px,1fr)_110px_44px]";
+  const rowTextSize = density === "compact" ? "text-xs" : "text-sm";
+  const rowPadding = density === "compact" ? "py-1.5" : "py-2";
+  const inputHeight = density === "compact" ? "h-8 text-xs" : "h-9 text-sm";
 
   return (
-    <div className="rounded-2xl border border-wolf-border bg-[#0b111a]">
-      <div className="flex flex-wrap items-center gap-2 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/60">
-        {filterOptions.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            onClick={() => setFilter(option.id)}
-            className={`rounded-md border border-white/10 px-2 py-1 transition ${
-              filter === option.id
-                ? "border-wolf-emerald text-wolf-emerald"
-                : "text-white/60 hover:border-white/30 hover:text-white/80"
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
+    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-wolf-border bg-[#0b111a]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/60">
+        <div className="flex flex-wrap items-center gap-2">
+          {filterOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setFilter(option.id)}
+              className={`rounded-md border border-white/10 px-2 py-1 transition ${
+                filter === option.id
+                  ? "border-wolf-emerald text-wolf-emerald"
+                  : "text-white/60 hover:border-white/30 hover:text-white/80"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/20 p-1">
+          {(["comfort", "compact"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setDensity(option)}
+              className={`rounded px-2 py-1 text-[10px] uppercase transition ${
+                density === option
+                  ? "bg-wolf-neutral-soft text-white"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              {option === "comfort" ? "Comfort" : "Compact"}
+            </button>
+          ))}
+        </div>
       </div>
       <div
         className={`grid ${gridTemplate} items-center gap-3 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/40`}
       >
         <span>Address</span>
-        {amountMode === "custom" ? <span>Amount</span> : null}
+        {amountMode === "custom" ? (
+          <span className="text-right">Amount</span>
+        ) : null}
         <span>Status</span>
         <span className="text-right">Actions</span>
       </div>
 
       <div
         ref={scrollRef}
-        className="max-h-[420px] overflow-y-auto"
-        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+        className="min-h-0 flex-1 overflow-y-auto"
+        data-virtualized={useVirtual ? "true" : "false"}
       >
         {rows.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-6 py-12 text-center text-sm text-white/60">
@@ -222,92 +226,161 @@ export function RecipientsTable({
               Clear filter
             </button>
           </div>
-        ) : (
+        ) : useVirtual ? (
           <div
             className="relative"
-            style={
-              useVirtual
-                ? { height: `${totalHeight}px`, paddingBottom: footerOffset }
-                : { paddingBottom: footerOffset }
-            }
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              paddingBottom: footerOffset,
+            }}
           >
-            <div
-              style={
-                useVirtual
-                  ? { transform: `translateY(${offsetY}px)` }
-                  : undefined
-              }
-            >
-              {visibleRows.map((row) => {
-                const status = statusById[row.id] ?? "invalid";
-                const issues = issuesById[row.id] ?? [];
-                const addressClass =
-                  issues.includes("invalid_address") || status === "invalid"
-                    ? "border-rose-400/60 text-rose-100"
-                    : "border-wolf-border text-white/80";
-                const amountClass =
-                  issues.includes("missing_amount") ||
-                  issues.includes("invalid_amount")
-                    ? "border-rose-400/60 text-rose-100"
-                    : "border-wolf-border text-white/80";
-                return (
-                  <div
-                    key={row.id}
-                    className={`grid ${gridTemplate} items-center gap-3 border-b border-white/5 px-4 py-2 text-sm`}
-                    style={{ height: ROW_HEIGHT }}
-                  >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = filteredRows[virtualRow.index];
+              const status = statusById[row.id] ?? "invalid";
+              const issues = issuesById[row.id] ?? [];
+              const addressClass =
+                issues.includes("invalid_address") || status === "invalid"
+                  ? "border-rose-400/60 text-rose-100"
+                  : "border-wolf-border text-white/80";
+              const amountClass =
+                issues.includes("missing_amount") ||
+                issues.includes("invalid_amount")
+                  ? "border-rose-400/60 text-rose-100"
+                  : "border-wolf-border text-white/80";
+              return (
+                <div
+                  key={row.id}
+                  className={`absolute left-0 right-0 grid ${gridTemplate} items-center gap-3 border-b border-white/5 px-4 ${rowPadding} ${rowTextSize}`}
+                  style={{
+                    transform: `translateY(${virtualRow.start}px)`,
+                    height: ROW_HEIGHT,
+                  }}
+                >
+                  <input
+                    value={row.address}
+                    onChange={(event) =>
+                      onRowChange(row.id, "address", event.target.value)
+                    }
+                    placeholder="0x..."
+                    title={row.address}
+                    className={`w-full truncate rounded-md border bg-wolf-panel px-3 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${inputHeight} ${addressClass}`}
+                  />
+                  {amountMode === "custom" ? (
                     <input
-                      value={row.address}
+                      value={row.amount ?? ""}
                       onChange={(event) =>
-                        onRowChange(row.id, "address", event.target.value)
+                        onRowChange(row.id, "amount", event.target.value)
                       }
-                      placeholder="0x..."
-                      className={`h-9 w-full rounded-md border bg-wolf-panel px-3 text-sm placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${addressClass}`}
+                      placeholder="0.00"
+                      className={`w-full rounded-md border bg-wolf-panel px-3 text-right placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${inputHeight} ${amountClass}`}
                     />
-                    {amountMode === "custom" ? (
-                      <input
-                        value={row.amount ?? ""}
-                        onChange={(event) =>
-                          onRowChange(row.id, "amount", event.target.value)
-                        }
-                        placeholder="0.00"
-                        className={`h-9 w-full rounded-md border bg-wolf-panel px-3 text-sm placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${amountClass}`}
+                  ) : null}
+                  <span
+                    className={`text-xs font-semibold ${statusTone(status)}`}
+                  >
+                    {statusLabel(status)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveRow(row.id)}
+                    className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border border-transparent text-white/60 transition hover:border-wolf-border hover:text-white"
+                    aria-label="Remove recipient"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M6 7h12M10 7V5h4v2m-7 0v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
                       />
-                    ) : null}
-                    <span
-                      className={`text-xs font-semibold ${statusTone(status)}`}
+                    </svg>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="relative" style={{ paddingBottom: footerOffset }}>
+            {filteredRows.map((row) => {
+              const status = statusById[row.id] ?? "invalid";
+              const issues = issuesById[row.id] ?? [];
+              const addressClass =
+                issues.includes("invalid_address") || status === "invalid"
+                  ? "border-rose-400/60 text-rose-100"
+                  : "border-wolf-border text-white/80";
+              const amountClass =
+                issues.includes("missing_amount") ||
+                issues.includes("invalid_amount")
+                  ? "border-rose-400/60 text-rose-100"
+                  : "border-wolf-border text-white/80";
+              return (
+                <div
+                  key={row.id}
+                  className={`grid ${gridTemplate} items-center gap-3 border-b border-white/5 px-4 ${rowPadding} ${rowTextSize}`}
+                  style={{ height: ROW_HEIGHT }}
+                >
+                  <input
+                    value={row.address}
+                    onChange={(event) =>
+                      onRowChange(row.id, "address", event.target.value)
+                    }
+                    placeholder="0x..."
+                    title={row.address}
+                    className={`w-full truncate rounded-md border bg-wolf-panel px-3 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${inputHeight} ${addressClass}`}
+                  />
+                  {amountMode === "custom" ? (
+                    <input
+                      value={row.amount ?? ""}
+                      onChange={(event) =>
+                        onRowChange(row.id, "amount", event.target.value)
+                      }
+                      placeholder="0.00"
+                      className={`w-full rounded-md border bg-wolf-panel px-3 text-right placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none ${inputHeight} ${amountClass}`}
+                    />
+                  ) : null}
+                  <span
+                    className={`text-xs font-semibold ${statusTone(status)}`}
+                  >
+                    {statusLabel(status)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveRow(row.id)}
+                    className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border border-transparent text-white/60 transition hover:border-wolf-border hover:text-white"
+                    aria-label="Remove recipient"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      aria-hidden="true"
                     >
-                      {statusLabel(status)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveRow(row.id)}
-                      className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border border-transparent text-white/60 transition hover:border-wolf-border hover:text-white"
-                      aria-label="Remove recipient"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="h-4 w-4"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M6 7h12M10 7V5h4v2m-7 0v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          fill="none"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                      <path
+                        d="M6 7h12M10 7V5h4v2m-7 0v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {footer ? <div className="sticky bottom-0 z-10">{footer}</div> : null}
+        {footer ? (
+          <div className="sticky bottom-0 z-10 border-t border-wolf-border bg-[#0b111a] shadow-[0_-10px_24px_rgba(2,6,12,0.75)]">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>
   );

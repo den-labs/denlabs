@@ -38,7 +38,7 @@ import {
   computeTotals,
   type DedupeStrategy,
   dedupe,
-  findDuplicateAddresses,
+  findDuplicateRowIds,
   isValidAmount,
   type RecipientRowInput,
   validateRow,
@@ -75,6 +75,16 @@ type TransactionRecord = {
   networkKey: string;
   sequence: number;
   errorMessage?: string;
+};
+
+type BatchProgress = {
+  status: "idle" | "submitting" | "confirmed" | "error";
+  totalRecipients: number;
+  batchSize: number;
+  totalBatches: number;
+  currentBatch: number;
+  txHash?: string | null;
+  errorMessage?: string | null;
 };
 
 type EthereumProvider = {
@@ -210,6 +220,7 @@ const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
 const DEFAULT_TOKEN_ICON = "/tokens-usdc.png";
 const CUSTOM_TOKEN_ICON = "/tokens-custom.png";
 const NATIVE_TOKEN_KEY = "__native__";
+const BATCH_SIZE = 200;
 const NATIVE_TOKEN_ICONS: Record<string, string> = {
   ethereum: "/tokens-eth.png",
   celo: "/tokens-celo.png",
@@ -296,6 +307,15 @@ export default function SprayDisperser() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<TransactionRecord[]>([]);
+  const [batchProgress, setBatchProgress] = useState<BatchProgress>({
+    status: "idle",
+    totalRecipients: 0,
+    batchSize: BATCH_SIZE,
+    totalBatches: 0,
+    currentBatch: 0,
+    txHash: null,
+    errorMessage: null,
+  });
   const spraySequenceRef = useRef(0);
   const selectedNetwork =
     SPRAY_NETWORKS[selectedNetworkKey] ??
@@ -646,8 +666,8 @@ export default function SprayDisperser() {
       : (tokenInfo?.decimals ?? 18);
   const debouncedRows = useDebouncedValue(rows, 300);
   const debouncedGlobalAmount = useDebouncedValue(globalAmount, 300);
-  const duplicateAddresses = useMemo(
-    () => findDuplicateAddresses(debouncedRows),
+  const duplicateRowIds = useMemo(
+    () => findDuplicateRowIds(debouncedRows),
     [debouncedRows],
   );
   const rowValidations = useMemo(
@@ -658,10 +678,10 @@ export default function SprayDisperser() {
           row,
           activeTokenDecimals,
           amountMode,
-          duplicateAddresses,
+          duplicateRowIds,
         ),
       })),
-    [activeTokenDecimals, amountMode, debouncedRows, duplicateAddresses],
+    [activeTokenDecimals, amountMode, debouncedRows, duplicateRowIds],
   );
   const statusById = useMemo(() => {
     return Object.fromEntries(
@@ -713,14 +733,14 @@ export default function SprayDisperser() {
         amountMode,
         debouncedGlobalAmount,
         activeTokenDecimals,
-        duplicateAddresses,
+        duplicateRowIds,
       ),
     [
       activeTokenDecimals,
       amountMode,
       debouncedGlobalAmount,
       debouncedRows,
-      duplicateAddresses,
+      duplicateRowIds,
     ],
   );
   const recipientCount = useMemo(
@@ -1006,7 +1026,7 @@ export default function SprayDisperser() {
 
   function removeInvalidRows() {
     setRows((prev) => {
-      const duplicates = findDuplicateAddresses(prev);
+      const duplicates = findDuplicateRowIds(prev);
       return prev.filter((row) => {
         const validation = validateRow(
           row,
@@ -1034,7 +1054,7 @@ export default function SprayDisperser() {
   }
 
   function buildRuntimeValidation() {
-    const duplicates = findDuplicateAddresses(rows);
+    const duplicates = findDuplicateRowIds(rows);
     const validations = rows.map((row) => ({
       row,
       validation: validateRow(row, activeTokenDecimals, amountMode, duplicates),
@@ -1312,6 +1332,15 @@ export default function SprayDisperser() {
     setIsSubmitting(true);
     setError(null);
     setFeedback(null);
+    setBatchProgress({
+      status: "submitting",
+      totalRecipients: recipients.length,
+      batchSize: BATCH_SIZE,
+      totalBatches: Math.ceil(recipients.length / BATCH_SIZE),
+      currentBatch: Math.min(1, Math.ceil(recipients.length / BATCH_SIZE)),
+      txHash: null,
+      errorMessage: null,
+    });
 
     try {
       const signer = await signerPromise;
@@ -1330,6 +1359,14 @@ export default function SprayDisperser() {
         const recordId = `${Date.now()}-${Math.random()
           .toString(36)
           .slice(2, 7)}`;
+        setBatchProgress((prev) => ({
+          ...prev,
+          txHash: tx.hash,
+          currentBatch: Math.min(
+            prev.totalBatches || 1,
+            Math.max(prev.currentBatch, 1),
+          ),
+        }));
         addHistoryRecord({
           id: recordId,
           type: "native",
@@ -1346,6 +1383,10 @@ export default function SprayDisperser() {
 
         if (isSuccessfulReceiptStatus(receipt.status)) {
           setFeedback(t("messages.transactionConfirmed"));
+          setBatchProgress((prev) => ({
+            ...prev,
+            status: "confirmed",
+          }));
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId ? { ...entry, status: "success" } : entry,
@@ -1353,6 +1394,11 @@ export default function SprayDisperser() {
           );
         } else {
           setError(t("errors.transactionFailed"));
+          setBatchProgress((prev) => ({
+            ...prev,
+            status: "error",
+            errorMessage: t("errors.transactionFailed"),
+          }));
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId
@@ -1406,6 +1452,14 @@ export default function SprayDisperser() {
         const recordId = `${Date.now()}-${Math.random()
           .toString(36)
           .slice(2, 7)}`;
+        setBatchProgress((prev) => ({
+          ...prev,
+          txHash: tx.hash,
+          currentBatch: Math.min(
+            prev.totalBatches || 1,
+            Math.max(prev.currentBatch, 1),
+          ),
+        }));
         addHistoryRecord({
           id: recordId,
           type: "token",
@@ -1422,6 +1476,10 @@ export default function SprayDisperser() {
 
         if (isSuccessfulReceiptStatus(receipt.status)) {
           setFeedback(t("messages.transactionConfirmed"));
+          setBatchProgress((prev) => ({
+            ...prev,
+            status: "confirmed",
+          }));
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId ? { ...entry, status: "success" } : entry,
@@ -1429,6 +1487,11 @@ export default function SprayDisperser() {
           );
         } else {
           setError(t("errors.transactionFailed"));
+          setBatchProgress((prev) => ({
+            ...prev,
+            status: "error",
+            errorMessage: t("errors.transactionFailed"),
+          }));
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId
@@ -1444,6 +1507,11 @@ export default function SprayDisperser() {
       }
     } catch (_submitError) {
       setError(t("errors.transactionFailed"));
+      setBatchProgress((prev) => ({
+        ...prev,
+        status: "error",
+        errorMessage: t("errors.transactionFailed"),
+      }));
     } finally {
       setIsSubmitting(false);
     }
@@ -1627,12 +1695,35 @@ export default function SprayDisperser() {
       </div>
     </div>
   );
+  const batchProgressVisible = batchProgress.status !== "idle";
+  const batchProgressPercent =
+    batchProgress.totalBatches > 0
+      ? Math.min(
+          100,
+          (batchProgress.currentBatch / batchProgress.totalBatches) * 100,
+        )
+      : 0;
+  const batchProgressLabel =
+    batchProgress.status === "confirmed"
+      ? "All batches confirmed"
+      : batchProgress.status === "error"
+        ? "Batch failed"
+        : "Submitting batches";
+  const batchExplorerUrl =
+    batchProgress.txHash && selectedNetworkKey
+      ? getExplorerTxUrl(selectedNetworkKey, batchProgress.txHash)
+      : null;
 
   return (
     <>
       <DenMain>
         <div className="text-wolf-foreground">
-          <div className="mx-auto w-full max-w-[1120px] space-y-5">
+          <div
+            className="mx-auto flex w-full max-w-[1120px] min-h-0 flex-col gap-5 overflow-hidden"
+            style={{
+              maxHeight: "calc(100dvh - var(--app-header-height) - 24px)",
+            }}
+          >
             <div className="shadow-[0_45px_120px_-70px_rgba(160,83,255,0.35)]">
               <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col items-start gap-2 text-sm text-white/80">
@@ -1656,7 +1747,7 @@ export default function SprayDisperser() {
               </header>
 
               <div>
-                <section className="relative z-10 wolf-card--muted border border-wolf-border-mid p-6">
+                <section className="relative z-10 wolf-card--muted border border-wolf-border-mid p-5">
                   <div className="flex flex-wrap items-center gap-4">
                     <button
                       type="button"
@@ -1994,7 +2085,63 @@ export default function SprayDisperser() {
                   </div>
                 </section>
 
-                <div className="mt-5">
+                {batchProgressVisible ? (
+                  <div className="mt-4 rounded-2xl border border-wolf-border bg-[#0b111a] px-5 py-4 text-xs text-white/70">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase text-wolf-text-subtle">
+                          Batch execution
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-white">
+                          {batchProgressLabel}
+                        </p>
+                        <p className="mt-1 text-[11px] text-white/60">
+                          {`Recipients: ${batchProgress.totalRecipients} • Batch size: ${batchProgress.batchSize} • Total batches: ${batchProgress.totalBatches}`}
+                        </p>
+                      </div>
+                      <div className="text-right text-[11px] text-white/60">
+                        <div>{`Batch ${Math.max(
+                          batchProgress.currentBatch,
+                          1,
+                        )} of ${Math.max(batchProgress.totalBatches, 1)}`}</div>
+                        {batchProgress.txHash ? (
+                          <div className="mt-1 font-mono text-white/50">
+                            {formatHash(batchProgress.txHash)}
+                          </div>
+                        ) : null}
+                        {batchExplorerUrl ? (
+                          <a
+                            href={batchExplorerUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-1 inline-flex items-center gap-1 font-semibold text-wolf-emerald hover:text-wolf-emerald/80"
+                          >
+                            View
+                            <span aria-hidden="true">↗</span>
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="mt-4 h-2 rounded-full bg-white/10">
+                      <div
+                        className="h-2 rounded-full bg-wolf-emerald transition-all"
+                        style={{ width: `${batchProgressPercent}%` }}
+                      />
+                    </div>
+                    {batchProgress.errorMessage ? (
+                      <p className="mt-2 text-[11px] uppercase text-rose-300">
+                        {batchProgress.errorMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div
+                  className="mt-5 flex min-h-0 flex-1"
+                  style={{
+                    maxHeight: "calc(100dvh - var(--app-header-height) - 24px)",
+                  }}
+                >
                   <RecipientsCard
                     rows={rows}
                     recipientCount={recipientCount}
@@ -2020,6 +2167,13 @@ export default function SprayDisperser() {
                     canFillMissing={canFillMissing}
                     fillMissingValue={fillMissingValue}
                     onFillMissingValueChange={updateFillMissingValue}
+                    primaryActionLabel={
+                      recipientCount === 0 ? "Paste list" : ctaLabel
+                    }
+                    primaryActionDisabled={ctaDisabled}
+                    onPrimaryAction={
+                      needsApproval ? handleApprove : handleSubmit
+                    }
                     footer={
                       <StickyFooter
                         recipientCount={recipientCount}
