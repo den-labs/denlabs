@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export const SIDEBAR_WIDTH = 252;
+export const SIDEBAR_WIDTH = 264;
 export const SIDEBAR_COLLAPSED_WIDTH = 76;
 export const SIDEBAR_MOBILE_WIDTH = 268;
 

@@ -1584,444 +1584,499 @@ export default function SprayDisperser() {
     </div>
   );
 
+  const summaryPanel = (
+    <div className="wolf-card--muted border border-wolf-border px-5 py-4 text-xs text-white/70">
+      <p className="text-xs uppercase text-wolf-text-subtle">Summary</p>
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span>Recipients</span>
+          <span className="font-semibold text-white">{recipientCount}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Total</span>
+          <span className="font-semibold text-white">
+            {mode === "native"
+              ? `${totals.total.toFixed(4)} ${nativeSymbol}`
+              : `${totals.total.toFixed(4)} ${
+                  tokenInfo?.symbol ??
+                  selectedTrustedTokenData?.symbol ??
+                  tokenSymbolPlaceholder
+                }`}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Allowance</span>
+          <span className="text-white/80">
+            {mode === "token"
+              ? allowanceStatus === "approved"
+                ? "Ready"
+                : allowanceStatus === "needs_approval"
+                  ? "Needs approval"
+                  : allowanceStatus === "loading"
+                    ? "Checking"
+                    : "Not checked"
+              : "Not required"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Last spray</span>
+          <span className="text-white/60">
+            {history[0] ? formatActivityTimestamp(history[0].timestamp) : "—"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <DenMain>
-        <div className="space-y-8 text-wolf-foreground">
-          <div className="shadow-[0_45px_120px_-70px_rgba(160,83,255,0.35)]">
-            <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-col items-start gap-2 text-sm text-white/80">
-                {signerAddress ? null : (
-                  <>
-                    <span className="text-xs uppercase text-wolf-text-subtle">
-                      {translate(
-                        "network.prompt",
-                        "Connect a wallet to load Spray.",
-                      )}
-                    </span>
-                    <p className="max-w-[32ch] text-xs text-white/60">
-                      {translate(
-                        "wallet.helper",
-                        "Use the top bar to connect your wallet and load Spray rewards.",
-                      )}
-                    </p>
-                  </>
-                )}
-              </div>
-            </header>
-
-            <div>
-              <section className="relative z-10 wolf-card--muted border border-wolf-border-mid p-6">
-                <div className="flex flex-wrap items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (mode === "token") {
-                        handleSelectNativeToken();
-                      } else {
-                        handleSelectCustomToken();
-                      }
-                    }}
-                    className="relative flex items-center gap-1 rounded-lg border border-wolf-border-soft/80 bg-wolf-panel/80 px-1.5 py-1 text-xs font-semibold uppercase text-wolf-text-subtle shadow-[0_0_20px_rgba(160,83,255,0.12)] backdrop-blur-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:ring-[rgba(160,83,255,0.6)]"
-                    aria-label="Toggle native or custom token"
-                    aria-pressed={mode === "token"}
-                  >
-                    <span
-                      className={`flex items-center gap-1 rounded-lg px-3 py-1 transition ${
-                        mode === "native"
-                          ? "bg-wolf-neutral-soft text-white shadow-[0_0_16px_rgba(255,255,255,0.08)]"
-                          : "text-wolf-text-subtle"
-                      }`}
-                    >
-                      {translate("modes.native", `Native (${nativeSymbol})`, {
-                        symbol: nativeSymbol,
-                      })}
-                    </span>
-                    <span
-                      className={`flex items-center gap-1 rounded-lg px-3 py-1 transition ${
-                        mode === "token"
-                          ? "bg-[linear-gradient(135deg,rgba(160,83,255,0.85),rgba(91,45,255,0.65))] text-white shadow-[0_0_24px_rgba(160,83,255,0.45)]"
-                          : "text-wolf-text-subtle"
-                      }`}
-                    >
-                      {t("modes.token")}
-                    </span>
-                  </button>
-                </div>
-                <div
-                  ref={networkDropdownRef}
-                  className="relative z-30 mt-4 w-full"
-                >
-                  <button
-                    type="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={isNetworkDropdownOpen}
-                    aria-controls="network-selector-options"
-                    onClick={() => setIsNetworkDropdownOpen((prev) => !prev)}
-                    className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                      <Image
-                        src={selectedNetworkBadgeIcon}
-                        alt={`${selectedNetwork.name} badge`}
-                        width={32}
-                        height={32}
-                        className="h-8 w-8 object-contain"
-                      />
-                    </div>
-                    <div className="flex-1 text-left leading-tight">
-                      <p className="text-[10px] uppercase text-white/50">
-                        {networkSelectorLabel}
+        <div className="text-wolf-foreground">
+          <div className="mx-auto w-full max-w-[1120px] space-y-5">
+            <div className="shadow-[0_45px_120px_-70px_rgba(160,83,255,0.35)]">
+              <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col items-start gap-2 text-sm text-white/80">
+                  {signerAddress ? null : (
+                    <>
+                      <span className="text-xs uppercase text-wolf-text-subtle">
+                        {translate(
+                          "network.prompt",
+                          "Connect a wallet to load Spray.",
+                        )}
+                      </span>
+                      <p className="max-w-[32ch] text-xs text-white/60">
+                        {translate(
+                          "wallet.helper",
+                          "Use the top bar to connect your wallet and load Spray rewards.",
+                        )}
                       </p>
-                      <p className="text-base font-semibold text-white">
-                        {selectedNetwork.name}
-                      </p>
-                    </div>
-                    <svg
-                      className={`h-5 w-5 text-white/70 transition ${
-                        isNetworkDropdownOpen ? "rotate-180" : ""
-                      }`}
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 0 1 1.08 1.04l-4.25 4.38a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </button>
-                  {isNetworkDropdownOpen ? (
-                    <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 rounded-2xl border border-wolf-border-soft bg-wolf-panel p-2 shadow-2xl">
-                      <ul id="network-selector-options" className="space-y-1">
-                        {SUPPORTED_SPRAY_NETWORKS.map((network) => {
-                          const isActive = network.key === selectedNetworkKey;
-                          const iconSrc =
-                            NATIVE_TOKEN_ICONS[network.key] ??
-                            DEFAULT_TOKEN_ICON;
-                          return (
-                            <li key={network.key}>
-                              <button
-                                type="button"
-                                role="option"
-                                aria-selected={isActive}
-                                onClick={() => handleNetworkSelect(network.key)}
-                                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${
-                                  isActive
-                                    ? "bg-wolf-emerald-soft text-wolf-emerald"
-                                    : "text-white/80 hover:bg-white/5"
-                                }`}
-                              >
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
-                                  <Image
-                                    src={iconSrc}
-                                    alt={`${network.name} icon`}
-                                    width={24}
-                                    height={24}
-                                    className="h-6 w-6 object-contain"
-                                  />
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-semibold">
-                                    {network.name}
-                                  </span>
-                                  <span className="text-[10px] uppercase text-white/50">
-                                    {network.nativeCurrency.symbol}
-                                  </span>
-                                </div>
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ) : null}
+                    </>
+                  )}
                 </div>
+              </header>
 
-                <div className="mt-6 space-y-3">
-                  <div className="space-y-2">
-                    <div
-                      ref={trustedDropdownRef}
-                      className="relative z-30"
-                      id="trusted-token-select"
+              <div>
+                <section className="relative z-10 wolf-card--muted border border-wolf-border-mid p-6">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (mode === "token") {
+                          handleSelectNativeToken();
+                        } else {
+                          handleSelectCustomToken();
+                        }
+                      }}
+                      className="relative flex items-center gap-1 rounded-lg border border-wolf-border-soft/80 bg-wolf-panel/80 px-1.5 py-1 text-xs font-semibold uppercase text-wolf-text-subtle shadow-[0_0_20px_rgba(160,83,255,0.12)] backdrop-blur-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:ring-[rgba(160,83,255,0.6)]"
+                      aria-label="Toggle native or custom token"
+                      aria-pressed={mode === "token"}
                     >
-                      <button
-                        type="button"
-                        aria-haspopup="listbox"
-                        aria-expanded={isTrustedOpen}
-                        aria-controls="trusted-token-options"
-                        onClick={() => setIsTrustedOpen((v) => !v)}
-                        title={tokenCardPrimaryLabel}
-                        className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-3 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus:border-wolf-emerald focus:outline-none"
+                      <span
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 transition ${
+                          mode === "native"
+                            ? "bg-wolf-neutral-soft text-white shadow-[0_0_16px_rgba(255,255,255,0.08)]"
+                            : "text-wolf-text-subtle"
+                        }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                          <Image
-                            src={tokenCardIconSrc}
-                            alt={`${tokenCardSymbol} token icon`}
-                            width={32}
-                            height={32}
-                            className="h-8 w-8 object-contain"
-                          />
-                        </div>
-                        <div className="text-left leading-tight w-full">
-                          <p className="text-[11px] uppercase text-white/60">
-                            {tokenPayWithLabel}
-                          </p>
-                          {isCustomTokenSelected ? (
-                            <div className="mt-2 space-y-1">
-                              <input
-                                id="token-address-input-inline"
-                                value={tokenAddress}
-                                onChange={(event) =>
-                                  setTokenAddress(event.target.value)
-                                }
-                                placeholder={t("form.tokenPlaceholder")}
-                                className="w-full rounded-md border border-wolf-border bg-wolf-panel px-3 py-2 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
-                              />
-                              {isFetchingTokenInfo ? (
-                                <p className="text-xs text-white/50">
-                                  {t("form.tokenLoading")}
-                                </p>
-                              ) : tokenInfo ? (
-                                <p className="text-xs text-wolf-emerald">
-                                  {t("form.tokenResolved", {
-                                    symbol: tokenInfo.symbol,
-                                    decimals: tokenInfo.decimals,
-                                  })}
-                                </p>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <p className="text-lg font-semibold text-white">
-                              {tokenCardPrimaryLabel}
-                            </p>
-                          )}
-                        </div>
-                        <svg
-                          className="ml-auto h-4 w-4 text-white/70"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d="M5 8l5 5 5-5"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                      {isTrustedOpen ? (
-                        <div
-                          id="trusted-token-options"
-                          role="listbox"
-                          className="absolute z-40 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
-                        >
-                          <button
-                            type="button"
-                            role="option"
-                            aria-selected={isNativeTokenSelected}
-                            className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
-                              isNativeTokenSelected ? "bg-white/5" : ""
-                            }`}
-                            onClick={handleSelectNativeToken}
-                            aria-label={translate("actions.paste", "Paste")}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                                <Image
-                                  src={nativeTokenIconSrc}
-                                  alt={`${selectedNetwork.nativeCurrency.symbol} icon`}
-                                  width={32}
-                                  height={32}
-                                  className="h-8 w-8 object-contain"
-                                />
-                              </div>
-                              <div className="text-left leading-tight w-full">
-                                <p className="text-sm font-semibold text-white">
-                                  {nativeTokenLabel}
-                                </p>
-                                <div className="flex items-center justify-between text-xs text-white/60">
-                                  <span>
-                                    {selectedNetwork.nativeCurrency.symbol}
-                                  </span>
-                                  <span>{nativeBalanceDisplay}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                          {trustedTokens.map((tok) => {
-                            const balanceKey = tok.address.toLowerCase();
-                            const storedBalance =
-                              trustedTokenBalances[balanceKey];
-                            const hasBalanceEntry = Object.hasOwn(
-                              trustedTokenBalances,
-                              balanceKey,
-                            );
-
-                            let walletBalanceValue: string;
-                            if (storedBalance != null) {
-                              walletBalanceValue = storedBalance;
-                            } else if (!signerAddress) {
-                              walletBalanceValue = walletBalanceConnectHint;
-                            } else if (!hasBalanceEntry) {
-                              walletBalanceValue = walletBalanceLoadingLabel;
-                            } else {
-                              walletBalanceValue = "0";
-                            }
-
+                        {translate("modes.native", `Native (${nativeSymbol})`, {
+                          symbol: nativeSymbol,
+                        })}
+                      </span>
+                      <span
+                        className={`flex items-center gap-1 rounded-lg px-3 py-1 transition ${
+                          mode === "token"
+                            ? "bg-[linear-gradient(135deg,rgba(160,83,255,0.85),rgba(91,45,255,0.65))] text-white shadow-[0_0_24px_rgba(160,83,255,0.45)]"
+                            : "text-wolf-text-subtle"
+                        }`}
+                      >
+                        {t("modes.token")}
+                      </span>
+                    </button>
+                  </div>
+                  <div
+                    ref={networkDropdownRef}
+                    className="relative z-30 mt-4 w-full"
+                  >
+                    <button
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={isNetworkDropdownOpen}
+                      aria-controls="network-selector-options"
+                      onClick={() => setIsNetworkDropdownOpen((prev) => !prev)}
+                      className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                        <Image
+                          src={selectedNetworkBadgeIcon}
+                          alt={`${selectedNetwork.name} badge`}
+                          width={32}
+                          height={32}
+                          className="h-8 w-8 object-contain"
+                        />
+                      </div>
+                      <div className="flex-1 text-left leading-tight">
+                        <p className="text-[10px] uppercase text-white/50">
+                          {networkSelectorLabel}
+                        </p>
+                        <p className="text-base font-semibold text-white">
+                          {selectedNetwork.name}
+                        </p>
+                      </div>
+                      <svg
+                        className={`h-5 w-5 text-white/70 transition ${
+                          isNetworkDropdownOpen ? "rotate-180" : ""
+                        }`}
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 0 1 1.08 1.04l-4.25 4.38a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </button>
+                    {isNetworkDropdownOpen ? (
+                      <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 rounded-2xl border border-wolf-border-soft bg-wolf-panel p-2 shadow-2xl">
+                        <ul id="network-selector-options" className="space-y-1">
+                          {SUPPORTED_SPRAY_NETWORKS.map((network) => {
+                            const isActive = network.key === selectedNetworkKey;
+                            const iconSrc =
+                              NATIVE_TOKEN_ICONS[network.key] ??
+                              DEFAULT_TOKEN_ICON;
                             return (
-                              <button
-                                key={tok.address}
-                                type="button"
-                                role="option"
-                                aria-selected={
-                                  selectedTrustedToken === tok.address
-                                }
-                                className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
-                                  selectedTrustedToken === tok.address
-                                    ? "bg-white/5"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleSelectTrustedToken(tok.address)
-                                }
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                              <li key={network.key}>
+                                <button
+                                  type="button"
+                                  role="option"
+                                  aria-selected={isActive}
+                                  onClick={() =>
+                                    handleNetworkSelect(network.key)
+                                  }
+                                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${
+                                    isActive
+                                      ? "bg-wolf-emerald-soft text-wolf-emerald"
+                                      : "text-white/80 hover:bg-white/5"
+                                  }`}
+                                >
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
                                     <Image
-                                      src={tok.iconUrl ?? DEFAULT_TOKEN_ICON}
-                                      alt={`${tok.symbol ?? tok.label} icon`}
-                                      width={32}
-                                      height={32}
-                                      className="h-8 w-8 object-contain"
+                                      src={iconSrc}
+                                      alt={`${network.name} icon`}
+                                      width={24}
+                                      height={24}
+                                      className="h-6 w-6 object-contain"
                                     />
                                   </div>
-                                  <div className="text-left leading-tight w-full">
-                                    <p className="text-sm font-semibold text-white">
-                                      {tok.label}
-                                    </p>
-                                    <div className="flex items-center justify-between text-xs text-white/60">
-                                      <span>
-                                        {tok.symbol ?? tokenSymbolPlaceholder}
-                                      </span>
-                                      <span>{walletBalanceValue}</span>
-                                    </div>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold">
+                                      {network.name}
+                                    </span>
+                                    <span className="text-[10px] uppercase text-white/50">
+                                      {network.nativeCurrency.symbol}
+                                    </span>
                                   </div>
-                                </div>
-                              </button>
+                                </button>
+                              </li>
                             );
                           })}
-                          <button
-                            type="button"
-                            role="option"
-                            aria-selected={isCustomTokenSelected}
-                            className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
-                              isCustomTokenSelected ? "bg-white/5" : ""
-                            }`}
-                            onClick={handleSelectCustomToken}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                                <Image
-                                  src={CUSTOM_TOKEN_ICON}
-                                  alt="Custom token icon"
-                                  width={32}
-                                  height={32}
-                                  className="h-8 w-8 object-contain"
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="space-y-2">
+                      <div
+                        ref={trustedDropdownRef}
+                        className="relative z-30"
+                        id="trusted-token-select"
+                      >
+                        <button
+                          type="button"
+                          aria-haspopup="listbox"
+                          aria-expanded={isTrustedOpen}
+                          aria-controls="trusted-token-options"
+                          onClick={() => setIsTrustedOpen((v) => !v)}
+                          title={tokenCardPrimaryLabel}
+                          className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-3 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus:border-wolf-emerald focus:outline-none"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                            <Image
+                              src={tokenCardIconSrc}
+                              alt={`${tokenCardSymbol} token icon`}
+                              width={32}
+                              height={32}
+                              className="h-8 w-8 object-contain"
+                            />
+                          </div>
+                          <div className="text-left leading-tight w-full">
+                            <p className="text-[11px] uppercase text-white/60">
+                              {tokenPayWithLabel}
+                            </p>
+                            {isCustomTokenSelected ? (
+                              <div className="mt-2 space-y-1">
+                                <input
+                                  id="token-address-input-inline"
+                                  value={tokenAddress}
+                                  onChange={(event) =>
+                                    setTokenAddress(event.target.value)
+                                  }
+                                  placeholder={t("form.tokenPlaceholder")}
+                                  className="w-full rounded-md border border-wolf-border bg-wolf-panel px-3 py-2 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
                                 />
+                                {isFetchingTokenInfo ? (
+                                  <p className="text-xs text-white/50">
+                                    {t("form.tokenLoading")}
+                                  </p>
+                                ) : tokenInfo ? (
+                                  <p className="text-xs text-wolf-emerald">
+                                    {t("form.tokenResolved", {
+                                      symbol: tokenInfo.symbol,
+                                      decimals: tokenInfo.decimals,
+                                    })}
+                                  </p>
+                                ) : null}
                               </div>
-                              <div className="text-left leading-tight">
-                                <p className="text-sm font-semibold text-white">
-                                  {customTokenNameLabel}
-                                </p>
-                                <p className="text-xs text-white/60">
-                                  {t("form.tokenPlaceholder")}
-                                </p>
+                            ) : (
+                              <p className="text-lg font-semibold text-white">
+                                {tokenCardPrimaryLabel}
+                              </p>
+                            )}
+                          </div>
+                          <svg
+                            className="ml-auto h-4 w-4 text-white/70"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M5 8l5 5 5-5"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        {isTrustedOpen ? (
+                          <div
+                            id="trusted-token-options"
+                            role="listbox"
+                            className="absolute z-40 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
+                          >
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={isNativeTokenSelected}
+                              className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
+                                isNativeTokenSelected ? "bg-white/5" : ""
+                              }`}
+                              onClick={handleSelectNativeToken}
+                              aria-label={translate("actions.paste", "Paste")}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                                  <Image
+                                    src={nativeTokenIconSrc}
+                                    alt={`${selectedNetwork.nativeCurrency.symbol} icon`}
+                                    width={32}
+                                    height={32}
+                                    className="h-8 w-8 object-contain"
+                                  />
+                                </div>
+                                <div className="text-left leading-tight w-full">
+                                  <p className="text-sm font-semibold text-white">
+                                    {nativeTokenLabel}
+                                  </p>
+                                  <div className="flex items-center justify-between text-xs text-white/60">
+                                    <span>
+                                      {selectedNetwork.nativeCurrency.symbol}
+                                    </span>
+                                    <span>{nativeBalanceDisplay}</span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </button>
-                        </div>
-                      ) : null}
+                            </button>
+                            {trustedTokens.map((tok) => {
+                              const balanceKey = tok.address.toLowerCase();
+                              const storedBalance =
+                                trustedTokenBalances[balanceKey];
+                              const hasBalanceEntry = Object.hasOwn(
+                                trustedTokenBalances,
+                                balanceKey,
+                              );
+
+                              let walletBalanceValue: string;
+                              if (storedBalance != null) {
+                                walletBalanceValue = storedBalance;
+                              } else if (!signerAddress) {
+                                walletBalanceValue = walletBalanceConnectHint;
+                              } else if (!hasBalanceEntry) {
+                                walletBalanceValue = walletBalanceLoadingLabel;
+                              } else {
+                                walletBalanceValue = "0";
+                              }
+
+                              return (
+                                <button
+                                  key={tok.address}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={
+                                    selectedTrustedToken === tok.address
+                                  }
+                                  className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
+                                    selectedTrustedToken === tok.address
+                                      ? "bg-white/5"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleSelectTrustedToken(tok.address)
+                                  }
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                                      <Image
+                                        src={tok.iconUrl ?? DEFAULT_TOKEN_ICON}
+                                        alt={`${tok.symbol ?? tok.label} icon`}
+                                        width={32}
+                                        height={32}
+                                        className="h-8 w-8 object-contain"
+                                      />
+                                    </div>
+                                    <div className="text-left leading-tight w-full">
+                                      <p className="text-sm font-semibold text-white">
+                                        {tok.label}
+                                      </p>
+                                      <div className="flex items-center justify-between text-xs text-white/60">
+                                        <span>
+                                          {tok.symbol ?? tokenSymbolPlaceholder}
+                                        </span>
+                                        <span>{walletBalanceValue}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={isCustomTokenSelected}
+                              className={`block w-full cursor-pointer px-3 py-2 text-left transition hover:bg-white/5 ${
+                                isCustomTokenSelected ? "bg-white/5" : ""
+                              }`}
+                              onClick={handleSelectCustomToken}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                                  <Image
+                                    src={CUSTOM_TOKEN_ICON}
+                                    alt="Custom token icon"
+                                    width={32}
+                                    height={32}
+                                    className="h-8 w-8 object-contain"
+                                  />
+                                </div>
+                                <div className="text-left leading-tight">
+                                  <p className="text-sm font-semibold text-white">
+                                    {customTokenNameLabel}
+                                  </p>
+                                  <p className="text-xs text-white/60">
+                                    {t("form.tokenPlaceholder")}
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
+                </section>
+
+                <div className="mt-5">
+                  <RecipientsCard
+                    rows={rows}
+                    recipientCount={recipientCount}
+                    amountMode={amountMode}
+                    globalAmount={globalAmount}
+                    tokenDecimals={activeTokenDecimals}
+                    issuesCount={issuesCount}
+                    duplicateCount={duplicateCount}
+                    invalidCount={invalidCount}
+                    missingAmountCount={missingAmountCount}
+                    statusById={statusById}
+                    issuesById={issuesById}
+                    onModeChange={setAmountMode}
+                    onGlobalAmountChange={updateGlobalAmount}
+                    onRowChange={updateRow}
+                    onRemoveRow={removeRow}
+                    onAddRow={addRow}
+                    onClearRows={clearRows}
+                    onApplyParsedRows={applyParsedRows}
+                    onRemoveDuplicates={removeDuplicates}
+                    onRemoveInvalidRows={removeInvalidRows}
+                    onFillMissingAmounts={fillMissingAmounts}
+                    canFillMissing={canFillMissing}
+                    fillMissingValue={fillMissingValue}
+                    onFillMissingValueChange={updateFillMissingValue}
+                    footer={
+                      <StickyFooter
+                        recipientCount={recipientCount}
+                        totalLabel={
+                          mode === "native"
+                            ? `Total: ${totals.total.toFixed(4)} ${nativeSymbol}`
+                            : `Total: ${totals.total.toFixed(4)} ${
+                                tokenInfo?.symbol ??
+                                selectedTrustedTokenData?.symbol ??
+                                tokenSymbolPlaceholder
+                              }`
+                        }
+                        feeLabel="Estimated fee: —"
+                        allowanceLabel={
+                          mode === "token"
+                            ? allowanceStatus === "approved"
+                              ? "Allowance: Ready"
+                              : allowanceStatus === "needs_approval"
+                                ? "Allowance: Needs approval"
+                                : allowanceStatus === "loading"
+                                  ? "Allowance: Checking..."
+                                  : "Allowance: Not checked"
+                            : "Allowance: Not required"
+                        }
+                        ctaLabel={ctaLabel}
+                        ctaDisabled={ctaDisabled}
+                        ctaReason={ctaDisabledReason}
+                        onPrimaryAction={
+                          needsApproval ? handleApprove : handleSubmit
+                        }
+                        isLoading={isApproving || isSubmitting}
+                      />
+                    }
+                  />
                 </div>
-              </section>
 
-              <div className="mt-6">
-                <RecipientsCard
-                  rows={rows}
-                  recipientCount={recipientCount}
-                  amountMode={amountMode}
-                  globalAmount={globalAmount}
-                  tokenDecimals={activeTokenDecimals}
-                  issuesCount={issuesCount}
-                  duplicateCount={duplicateCount}
-                  invalidCount={invalidCount}
-                  missingAmountCount={missingAmountCount}
-                  statusById={statusById}
-                  issuesById={issuesById}
-                  onModeChange={setAmountMode}
-                  onGlobalAmountChange={updateGlobalAmount}
-                  onRowChange={updateRow}
-                  onRemoveRow={removeRow}
-                  onAddRow={addRow}
-                  onClearRows={clearRows}
-                  onApplyParsedRows={applyParsedRows}
-                  onRemoveDuplicates={removeDuplicates}
-                  onRemoveInvalidRows={removeInvalidRows}
-                  onFillMissingAmounts={fillMissingAmounts}
-                  canFillMissing={canFillMissing}
-                  fillMissingValue={fillMissingValue}
-                  onFillMissingValueChange={updateFillMissingValue}
-                  footer={
-                    <StickyFooter
-                      recipientCount={recipientCount}
-                      totalLabel={
-                        mode === "native"
-                          ? `Total: ${totals.total.toFixed(4)} ${nativeSymbol}`
-                          : `Total: ${totals.total.toFixed(4)} ${
-                              tokenInfo?.symbol ??
-                              selectedTrustedTokenData?.symbol ??
-                              tokenSymbolPlaceholder
-                            }`
-                      }
-                      feeLabel="Estimated fee: —"
-                      allowanceLabel={
-                        mode === "token"
-                          ? allowanceStatus === "approved"
-                            ? "Allowance: Ready"
-                            : allowanceStatus === "needs_approval"
-                              ? "Allowance: Needs approval"
-                              : allowanceStatus === "loading"
-                                ? "Allowance: Checking..."
-                                : "Allowance: Not checked"
-                          : "Allowance: Not required"
-                      }
-                      ctaLabel={ctaLabel}
-                      ctaDisabled={ctaDisabled}
-                      ctaReason={ctaDisabledReason}
-                      onPrimaryAction={
-                        needsApproval ? handleApprove : handleSubmit
-                      }
-                      isLoading={isApproving || isSubmitting}
-                    />
-                  }
-                />
+                {feedback ? (
+                  <p className="mt-4 text-xs uppercase text-wolf-emerald">
+                    {feedback}
+                  </p>
+                ) : null}
+                {error ? (
+                  <p className="mt-2 text-xs uppercase text-rose-300">
+                    {error}
+                  </p>
+                ) : null}
               </div>
-
-              {feedback ? (
-                <p className="mt-4 text-xs uppercase text-wolf-emerald">
-                  {feedback}
-                </p>
-              ) : null}
-              {error ? (
-                <p className="mt-2 text-xs uppercase text-rose-300">{error}</p>
-              ) : null}
             </div>
           </div>
         </div>
       </DenMain>
-      <DenRightRail>{activityPanel}</DenRightRail>
+      <DenRightRail>
+        <div className="space-y-4 lg:sticky lg:top-6">
+          {activityPanel}
+          {summaryPanel}
+        </div>
+      </DenRightRail>
     </>
   );
 }

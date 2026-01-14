@@ -34,7 +34,7 @@ export default function DenLayout({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <DenRailSlotsProvider>
           <div className="bg-sidebar text-sidebar-foreground">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-4 px-4 py-4 md:flex-row">
+            <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col gap-6 px-6 py-6 md:flex-row">
               <SidebarNav />
               <div className="flex w-full flex-col gap-4">
                 <DesktopLayout>{desktopChildren}</DesktopLayout>
@@ -58,8 +58,8 @@ function DesktopLayout({ children }: { children: ReactNode }) {
   return (
     <div className="hidden md:flex md:flex-1 md:flex-col">
       <div className="rounded-2xl border border-[#232a36] bg-[#05090f]/95 p-6 text-white shadow-[0_45px_120px_-80px_rgba(7,11,20,0.85)] backdrop-blur-xl">
-        <section className="space-y-6">
-          <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+        <section className="space-y-5">
+          <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-5">
             <div className="min-w-0 flex-1">
               <TopBar />
             </div>
@@ -75,7 +75,7 @@ function DesktopLayout({ children }: { children: ReactNode }) {
           <div
             className={`grid gap-6 ${
               rightActive
-                ? "lg:grid-cols-[minmax(0,1fr)_300px]"
+                ? "lg:grid-cols-[minmax(0,1fr)_340px]"
                 : "lg:grid-cols-1"
             }`}
           >
