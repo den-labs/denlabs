@@ -25,11 +25,11 @@ CREATE TABLE IF NOT EXISTS event_labs (
 );
 
 -- Indexes for event_labs
-CREATE INDEX idx_event_labs_slug ON event_labs(slug);
-CREATE INDEX idx_event_labs_creator_id ON event_labs(creator_id);
-CREATE INDEX idx_event_labs_status ON event_labs(status);
-CREATE INDEX idx_event_labs_dates ON event_labs(start_date, end_date);
-CREATE INDEX idx_event_labs_created_at ON event_labs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_event_labs_slug ON event_labs(slug);
+CREATE INDEX IF NOT EXISTS idx_event_labs_creator_id ON event_labs(creator_id);
+CREATE INDEX IF NOT EXISTS idx_event_labs_status ON event_labs(status);
+CREATE INDEX IF NOT EXISTS idx_event_labs_dates ON event_labs(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_event_labs_created_at ON event_labs(created_at DESC);
 
 -- Auto-update updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -41,6 +41,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for event_labs
+DROP TRIGGER IF EXISTS event_labs_updated_at_trigger ON event_labs;
 CREATE TRIGGER event_labs_updated_at_trigger
 BEFORE UPDATE ON event_labs
 FOR EACH ROW
@@ -85,16 +86,17 @@ CREATE TABLE IF NOT EXISTS feedback_items (
 );
 
 -- Indexes for feedback_items
-CREATE INDEX idx_feedback_items_lab_id ON feedback_items(lab_id);
-CREATE INDEX idx_feedback_items_status ON feedback_items(status);
-CREATE INDEX idx_feedback_items_trust_score ON feedback_items(trust_score);
-CREATE INDEX idx_feedback_items_session_id ON feedback_items(session_id);
-CREATE INDEX idx_feedback_items_created_at ON feedback_items(created_at DESC);
-CREATE INDEX idx_feedback_items_priority ON feedback_items(priority);
-CREATE INDEX idx_feedback_items_tags ON feedback_items USING GIN(tags);
-CREATE INDEX idx_feedback_items_lab_user_id ON feedback_items(lab_user_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_lab_id ON feedback_items(lab_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_status ON feedback_items(status);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_trust_score ON feedback_items(trust_score);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_session_id ON feedback_items(session_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_created_at ON feedback_items(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_priority ON feedback_items(priority);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_tags ON feedback_items USING GIN(tags);
+CREATE INDEX IF NOT EXISTS idx_feedback_items_lab_user_id ON feedback_items(lab_user_id);
 
 -- Trigger for feedback_items
+DROP TRIGGER IF EXISTS feedback_items_updated_at_trigger ON feedback_items;
 CREATE TRIGGER feedback_items_updated_at_trigger
 BEFORE UPDATE ON feedback_items
 FOR EACH ROW
@@ -116,12 +118,12 @@ CREATE TABLE IF NOT EXISTS event_tracking (
 );
 
 -- Indexes for event_tracking
-CREATE INDEX idx_event_tracking_lab_id ON event_tracking(lab_id);
-CREATE INDEX idx_event_tracking_session_id ON event_tracking(session_id);
-CREATE INDEX idx_event_tracking_event_type ON event_tracking(event_type);
-CREATE INDEX idx_event_tracking_created_at ON event_tracking(created_at DESC);
-CREATE INDEX idx_event_tracking_route ON event_tracking(route);
-CREATE INDEX idx_event_tracking_lab_session ON event_tracking(lab_id, session_id);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_lab_id ON event_tracking(lab_id);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_session_id ON event_tracking(session_id);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_event_type ON event_tracking(event_type);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_created_at ON event_tracking(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_route ON event_tracking(route);
+CREATE INDEX IF NOT EXISTS idx_event_tracking_lab_session ON event_tracking(lab_id, session_id);
 
 -- =====================================================
 -- 4. LAB_SESSIONS TABLE
@@ -141,10 +143,10 @@ CREATE TABLE IF NOT EXISTS lab_sessions (
 );
 
 -- Indexes for lab_sessions
-CREATE INDEX idx_lab_sessions_lab_id ON lab_sessions(lab_id);
-CREATE INDEX idx_lab_sessions_lab_user_id ON lab_sessions(lab_user_id);
-CREATE INDEX idx_lab_sessions_last_seen ON lab_sessions(last_seen DESC);
-CREATE INDEX idx_lab_sessions_wallet_address ON lab_sessions(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_lab_sessions_lab_id ON lab_sessions(lab_id);
+CREATE INDEX IF NOT EXISTS idx_lab_sessions_lab_user_id ON lab_sessions(lab_user_id);
+CREATE INDEX IF NOT EXISTS idx_lab_sessions_last_seen ON lab_sessions(last_seen DESC);
+CREATE INDEX IF NOT EXISTS idx_lab_sessions_wallet_address ON lab_sessions(wallet_address);
 
 -- =====================================================
 -- VERIFICATION QUERY

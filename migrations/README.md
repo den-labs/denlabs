@@ -77,6 +77,11 @@ XXX_descriptive_name.sql
 **user_run_stats** (VIEW) - Aggregated leaderboard stats
 - Per-run stats: missions_completed, total_missions, total_points, last_activity
 
+### Spray migrations (source of truth)
+
+Las migraciones activas para Supabase viven en `supabase/migrations/`.
+La migración de Spray está definida en `supabase/migrations/20260115090000_sprays_events.sql`.
+
 ## Cómo Aplicar Migraciones
 
 ### Opción 1: Supabase Dashboard (Recomendado para primeras migraciones)
@@ -268,6 +273,7 @@ Revisa la sintaxis SQL. Common issues:
 ### Migraciones Listas para Aplicar
 
 - ✅ **002_runs_and_missions.sql** - Schema de Runs y Missions (runs, missions, user_mission_progress, user_run_stats view)
+- ✅ **20260115090000_sprays_events.sql** - Schema de Spray (sprays, spray_events)
 
 ## Recursos
 

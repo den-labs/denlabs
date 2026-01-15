@@ -19,6 +19,12 @@ ALTER TABLE lab_sessions ENABLE ROW LEVEL SECURITY;
 -- 2. EVENT_LABS POLICIES
 -- =====================================================
 
+DROP POLICY IF EXISTS "Anyone can view active labs" ON event_labs;
+DROP POLICY IF EXISTS "Creators can view their own labs" ON event_labs;
+DROP POLICY IF EXISTS "Authenticated users can create labs" ON event_labs;
+DROP POLICY IF EXISTS "Creators can update their own labs" ON event_labs;
+DROP POLICY IF EXISTS "Creators can delete their own labs" ON event_labs;
+
 -- Public: Anyone can view active labs (for public participation pages)
 CREATE POLICY "Anyone can view active labs"
   ON event_labs
@@ -56,6 +62,13 @@ CREATE POLICY "Creators can delete their own labs"
 -- =====================================================
 -- 3. FEEDBACK_ITEMS POLICIES (Hybrid Visibility)
 -- =====================================================
+
+DROP POLICY IF EXISTS "Anyone can submit feedback to active labs" ON feedback_items;
+DROP POLICY IF EXISTS "Creators can view all feedback for their labs" ON feedback_items;
+DROP POLICY IF EXISTS "Participants can view their own feedback" ON feedback_items;
+DROP POLICY IF EXISTS "Public can view top priority feedback" ON feedback_items;
+DROP POLICY IF EXISTS "Creators can update feedback for their labs" ON feedback_items;
+DROP POLICY IF EXISTS "Users can update their own untriaged feedback" ON feedback_items;
 
 -- Public: Anyone can submit feedback to active labs
 CREATE POLICY "Anyone can submit feedback to active labs"
@@ -135,6 +148,9 @@ CREATE POLICY "Users can update their own untriaged feedback"
 -- 4. EVENT_TRACKING POLICIES
 -- =====================================================
 
+DROP POLICY IF EXISTS "Anyone can track events for active labs" ON event_tracking;
+DROP POLICY IF EXISTS "Creators can view events for their labs" ON event_tracking;
+
 -- Public: Anyone can track events for active labs (write-only)
 CREATE POLICY "Anyone can track events for active labs"
   ON event_tracking
@@ -162,6 +178,11 @@ CREATE POLICY "Creators can view events for their labs"
 -- =====================================================
 -- 5. LAB_SESSIONS POLICIES
 -- =====================================================
+
+DROP POLICY IF EXISTS "Anyone can manage sessions" ON lab_sessions;
+DROP POLICY IF EXISTS "Anyone can update sessions" ON lab_sessions;
+DROP POLICY IF EXISTS "Creators can view sessions for their labs" ON lab_sessions;
+DROP POLICY IF EXISTS "Users can view their own sessions" ON lab_sessions;
 
 -- Public: Anyone can create/update sessions (upsert pattern)
 CREATE POLICY "Anyone can manage sessions"
