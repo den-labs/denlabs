@@ -8,6 +8,7 @@ import type {
   RecipientRowInput,
   RecipientStatus,
 } from "@/lib/recipients";
+import type { SprayEventType } from "@/lib/sprayEventsClient";
 import { PastePreviewModal } from "./PastePreviewModal";
 import { RecipientsTable } from "./RecipientsTable";
 
@@ -36,9 +37,11 @@ type RecipientsCardProps = {
   canFillMissing: boolean;
   fillMissingValue: string;
   onFillMissingValueChange: (value: string) => void;
+  onPasteOpen?: (source: "paste" | "csv") => void;
   primaryActionLabel?: string;
   primaryActionDisabled?: boolean;
   onPrimaryAction?: () => void;
+  onEvent?: (type: SprayEventType, metadata?: Record<string, unknown>) => void;
   footer: React.ReactNode;
 };
 
@@ -67,9 +70,11 @@ export function RecipientsCard({
   canFillMissing,
   fillMissingValue,
   onFillMissingValueChange,
+  onPasteOpen,
   primaryActionLabel,
   primaryActionDisabled,
   onPrimaryAction,
+  onEvent,
   footer,
 }: RecipientsCardProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -90,11 +95,13 @@ export function RecipientsCard({
   }, [amountMode, dedupeStrategy]);
 
   const openPasteModal = () => {
+    onPasteOpen?.("paste");
     setPreviewText("");
     setIsPreviewOpen(true);
   };
 
   const openCsvModal = (text: string) => {
+    onPasteOpen?.("csv");
     setPreviewText(text);
     setIsPreviewOpen(true);
   };
@@ -410,6 +417,7 @@ export function RecipientsCard({
           onApplyParsedRows(parsedRows, replace);
           setIsPreviewOpen(false);
         }}
+        onEvent={onEvent}
       />
 
       <input

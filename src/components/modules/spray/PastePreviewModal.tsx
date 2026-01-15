@@ -9,6 +9,7 @@ import {
   type ParsedRecipient,
   parseRecipients,
 } from "@/lib/recipients";
+import type { SprayEventType } from "@/lib/sprayEventsClient";
 
 type PastePreviewModalProps = {
   isOpen: boolean;
@@ -20,6 +21,7 @@ type PastePreviewModalProps = {
   onClose: () => void;
   onApply: (rows: ParsedRecipient[], replace: boolean) => void;
   onModeChange?: (mode: AmountMode) => void;
+  onEvent?: (type: SprayEventType, metadata?: Record<string, unknown>) => void;
 };
 
 type PreviewFilter = "all" | "issues";
@@ -34,6 +36,7 @@ export function PastePreviewModal({
   onClose,
   onApply,
   onModeChange,
+  onEvent,
 }: PastePreviewModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [text, setText] = useState(initialText);
@@ -48,6 +51,7 @@ export function PastePreviewModal({
   const [modalMode, setModalMode] = useState<AmountMode>(mode);
   const [preferSameAmount, setPreferSameAmount] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const lastParseSignature = useRef<string>("");
 
   useEffect(() => {
     if (isOpen) {
@@ -62,6 +66,7 @@ export function PastePreviewModal({
       setModalMode(mode);
       setPreferSameAmount(false);
       setShowDetails(false);
+      lastParseSignature.current = "";
     }
   }, [initialText, isOpen, mode]);
 
@@ -141,11 +146,55 @@ export function PastePreviewModal({
     }
   }, [hasDetectedAmounts, isOpen, mode, preferSameAmount]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!text.trim()) return;
+    const signature = [
+      parsed.linesTotal,
+      parsed.issuesSummary.total,
+      parsed.detectedAmountRows,
+      parsed.headerIgnored ? "1" : "0",
+      modalMode,
+    ].join("|");
+
+    if (signature === lastParseSignature.current) {
+      return;
+    }
+    lastParseSignature.current = signature;
+
+    onEvent?.("paste_parsed", {
+      linesTotal: parsed.linesTotal,
+      uniqueAddresses: parsed.uniqueAddresses,
+      issuesTotal: parsed.issuesSummary.total,
+      invalidRows: parsed.invalidRows,
+      missingAmountRows: parsed.missingAmountRows,
+      duplicateRows: parsed.duplicateRows,
+      detectedAmountRows: parsed.detectedAmountRows,
+      headerIgnored: parsed.headerIgnored,
+      mode: modalMode,
+    });
+  }, [isOpen, modalMode, onEvent, parsed, text]);
+
   const applyWithMode = (rows: ParsedRecipient[]) => {
     if (modalMode !== mode) {
       onModeChange?.(modalMode);
     }
     onApply(rows, replaceMode);
+  };
+
+  const logPasteApplied = (rows: ParsedRecipient[], fixesApplied: boolean) => {
+    onEvent?.("paste_applied", {
+      rowsApplied: rows.length,
+      replaceMode,
+      mode: modalMode,
+      fixesApplied,
+      issuesTotal: parsed.issuesSummary.total,
+    });
+  };
+
+  const handleApplyAsIs = () => {
+    logPasteApplied(parsed.rows, false);
+    applyWithMode(parsed.rows);
   };
 
   const handleFixAndApply = () => {
@@ -158,6 +207,16 @@ export function PastePreviewModal({
       normalizeDecimals,
       dropInvalid,
     });
+    onEvent?.("fix_applied", {
+      rowsApplied: fixedRows.length,
+      replaceMode,
+      mode: modalMode,
+      dedupeStrategy,
+      dropInvalid,
+      normalizeDecimals,
+      mergeSameAddress,
+    });
+    logPasteApplied(fixedRows, true);
     applyWithMode(fixedRows);
   };
 
@@ -479,7 +538,7 @@ export function PastePreviewModal({
               {hasIssues ? (
                 <button
                   type="button"
-                  onClick={() => applyWithMode(parsed.rows)}
+                  onClick={handleApplyAsIs}
                   disabled={!canApplyAsIs}
                   className="rounded-md border border-wolf-border px-4 py-2 text-xs font-semibold uppercase text-white/70 transition hover:border-wolf-border-strong hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                 >
@@ -488,11 +547,7 @@ export function PastePreviewModal({
               ) : null}
               <button
                 type="button"
-                onClick={
-                  hasIssues
-                    ? handleFixAndApply
-                    : () => applyWithMode(parsed.rows)
-                }
+                onClick={hasIssues ? handleFixAndApply : handleApplyAsIs}
                 disabled={hasIssues ? !canApplyFixes : !canApplyAsIs}
                 className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-5 py-2 text-xs font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
               >

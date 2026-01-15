@@ -26,9 +26,10 @@ import {
 } from "ethers";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
 import { RecipientsCard } from "@/components/modules/spray/RecipientsCard";
+import { SprayLogModal } from "@/components/modules/spray/SprayLogModal";
 import { StickyFooter } from "@/components/modules/spray/StickyFooter";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useDenUser } from "@/hooks/useDenUser";
@@ -43,6 +44,13 @@ import {
   type RecipientRowInput,
   validateRow,
 } from "@/lib/recipients";
+import type { SprayEvent, SprayEventType } from "@/lib/sprayEventsClient";
+import {
+  ensureSprayId,
+  getCachedSprayId,
+  logEvent,
+  setCachedSprayId,
+} from "@/lib/sprayEventsClient";
 import {
   DEFAULT_SPRAY_NETWORK_KEY,
   SPRAY_NETWORKS,
@@ -316,6 +324,13 @@ export default function SprayDisperser() {
     txHash: null,
     errorMessage: null,
   });
+  const [sprayId, setSprayId] = useState<string | null>(() =>
+    getCachedSprayId(),
+  );
+  const [sprayLogOpen, setSprayLogOpen] = useState(false);
+  const [sprayEvents, setSprayEvents] = useState<SprayEvent[]>([]);
+  const [sprayEventsLoading, setSprayEventsLoading] = useState(false);
+  const [sprayEventsError, setSprayEventsError] = useState<string | null>(null);
   const spraySequenceRef = useRef(0);
   const selectedNetwork =
     SPRAY_NETWORKS[selectedNetworkKey] ??
@@ -378,6 +393,91 @@ export default function SprayDisperser() {
     () => createReadOnlyProvider(selectedNetwork),
     [selectedNetwork],
   );
+
+  useEffect(() => {
+    setCachedSprayId(sprayId);
+  }, [sprayId]);
+
+  const ensureSprayDraft = useCallback(async () => {
+    if (sprayId) {
+      return sprayId;
+    }
+    const createdId = await ensureSprayId();
+    if (createdId) {
+      setSprayId(createdId);
+      setCachedSprayId(createdId);
+    }
+    return createdId;
+  }, [sprayId]);
+
+  const logSprayEvent = useCallback(
+    (type: SprayEventType, metadata?: Record<string, unknown>) => {
+      void (async () => {
+        const activeId = await ensureSprayDraft();
+        if (!activeId) return;
+        void logEvent(type, metadata);
+      })();
+    },
+    [ensureSprayDraft],
+  );
+
+  const handlePasteOpen = useCallback(
+    (source: "paste" | "csv") => {
+      void (async () => {
+        const activeId = await ensureSprayDraft();
+        if (!activeId) return;
+        void logEvent("paste_opened", { source });
+      })();
+    },
+    [ensureSprayDraft],
+  );
+
+  const updateSprayStatus = useCallback(
+    (status: "started" | "completed" | "failed") => {
+      void (async () => {
+        const activeId = await ensureSprayDraft();
+        if (!activeId) return;
+        try {
+          await fetch(`/api/spray/${activeId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          });
+        } catch (statusError) {
+          console.warn("Failed to update spray status", statusError);
+        }
+      })();
+    },
+    [ensureSprayDraft],
+  );
+
+  const fetchSprayEvents = useCallback(async () => {
+    if (!sprayId) {
+      setSprayEvents([]);
+      return;
+    }
+    setSprayEventsLoading(true);
+    setSprayEventsError(null);
+    try {
+      const response = await fetch(`/api/spray/${sprayId}/events?limit=20`);
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.error || "Failed to fetch spray events");
+      }
+      const data = await response.json();
+      setSprayEvents((data?.events as SprayEvent[]) ?? []);
+    } catch (eventsError) {
+      console.error("Failed to fetch spray events", eventsError);
+      setSprayEventsError("Unable to load spray log.");
+    } finally {
+      setSprayEventsLoading(false);
+    }
+  }, [sprayId]);
+
+  useEffect(() => {
+    if (!sprayLogOpen) return;
+    void fetchSprayEvents();
+  }, [fetchSprayEvents, sprayLogOpen]);
 
   useEffect(() => {
     setSignerAddress(walletAddress ?? null);
@@ -1341,6 +1441,12 @@ export default function SprayDisperser() {
       txHash: null,
       errorMessage: null,
     });
+    const sendMetadataBase = {
+      recipients: recipients.length,
+      amountMode,
+      tokenMode: mode,
+      network: selectedNetworkKey,
+    };
 
     try {
       const signer = await signerPromise;
@@ -1352,6 +1458,14 @@ export default function SprayDisperser() {
           (acc, value) => acc + value,
           BigInt(0),
         );
+
+        const nativeMetadata = {
+          ...sendMetadataBase,
+          tokenSymbol: nativeSymbol,
+          totalAmount: formatEther(totalValue),
+        };
+        logSprayEvent("send_started", nativeMetadata);
+        updateSprayStatus("started");
 
         const tx = await contract.disperseNative(recipients, amounts, {
           value: totalValue,
@@ -1387,6 +1501,11 @@ export default function SprayDisperser() {
             ...prev,
             status: "confirmed",
           }));
+          logSprayEvent("send_completed", {
+            ...nativeMetadata,
+            txHash: tx.hash,
+          });
+          updateSprayStatus("completed");
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId ? { ...entry, status: "success" } : entry,
@@ -1399,6 +1518,12 @@ export default function SprayDisperser() {
             status: "error",
             errorMessage: t("errors.transactionFailed"),
           }));
+          logSprayEvent("send_failed", {
+            ...nativeMetadata,
+            txHash: tx.hash,
+            reason: "transaction_failed",
+          });
+          updateSprayStatus("failed");
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId
@@ -1444,6 +1569,14 @@ export default function SprayDisperser() {
           return;
         }
 
+        const tokenMetadata = {
+          ...sendMetadataBase,
+          tokenSymbol: tokenInfo.symbol,
+          totalAmount: totals.total.toFixed(4),
+        };
+        logSprayEvent("send_started", tokenMetadata);
+        updateSprayStatus("started");
+
         const tx = await contract.disperseToken(
           normalized,
           recipients,
@@ -1480,6 +1613,11 @@ export default function SprayDisperser() {
             ...prev,
             status: "confirmed",
           }));
+          logSprayEvent("send_completed", {
+            ...tokenMetadata,
+            txHash: tx.hash,
+          });
+          updateSprayStatus("completed");
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId ? { ...entry, status: "success" } : entry,
@@ -1492,6 +1630,12 @@ export default function SprayDisperser() {
             status: "error",
             errorMessage: t("errors.transactionFailed"),
           }));
+          logSprayEvent("send_failed", {
+            ...tokenMetadata,
+            txHash: tx.hash,
+            reason: "transaction_failed",
+          });
+          updateSprayStatus("failed");
           setHistory((prev) =>
             prev.map((entry) =>
               entry.id === recordId
@@ -1512,6 +1656,18 @@ export default function SprayDisperser() {
         status: "error",
         errorMessage: t("errors.transactionFailed"),
       }));
+      const fallbackTokenSymbol =
+        mode === "native"
+          ? nativeSymbol
+          : (tokenInfo?.symbol ??
+            selectedTrustedTokenData?.symbol ??
+            tokenSymbolPlaceholder);
+      logSprayEvent("send_failed", {
+        ...sendMetadataBase,
+        tokenSymbol: fallbackTokenSymbol,
+        reason: "transaction_failed",
+      });
+      updateSprayStatus("failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -1691,6 +1847,16 @@ export default function SprayDisperser() {
           <span className="text-white/60">
             {history[0] ? formatActivityTimestamp(history[0].timestamp) : "—"}
           </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Spray log</span>
+          <button
+            type="button"
+            onClick={() => setSprayLogOpen(true)}
+            className="text-xs font-semibold text-white/70 underline underline-offset-4 transition hover:text-white"
+          >
+            View log
+          </button>
         </div>
       </div>
     </div>
@@ -2167,6 +2333,8 @@ export default function SprayDisperser() {
                     canFillMissing={canFillMissing}
                     fillMissingValue={fillMissingValue}
                     onFillMissingValueChange={updateFillMissingValue}
+                    onPasteOpen={handlePasteOpen}
+                    onEvent={logSprayEvent}
                     primaryActionLabel={
                       recipientCount === 0 ? "Paste list" : ctaLabel
                     }
@@ -2231,6 +2399,14 @@ export default function SprayDisperser() {
           {summaryPanel}
         </div>
       </DenRightRail>
+      <SprayLogModal
+        isOpen={sprayLogOpen}
+        onClose={() => setSprayLogOpen(false)}
+        onRefresh={fetchSprayEvents}
+        events={sprayEvents}
+        isLoading={sprayEventsLoading}
+        error={sprayEventsError}
+      />
     </>
   );
 }
