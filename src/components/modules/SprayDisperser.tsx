@@ -2,6 +2,7 @@
 
 import {
   type AppKitNetwork,
+  avalancheFuji as avalancheFujiNetwork,
   avalanche as avalancheNetwork,
   base as baseNetwork,
   celo as celoNetwork,
@@ -224,6 +225,7 @@ const APPKIT_NETWORKS_BY_KEY: Partial<Record<string, AppKitNetwork>> = {
   optimism: optimismNetwork,
   base: baseNetwork,
   avalanche: avalancheNetwork,
+  avalancheFuji: avalancheFujiNetwork,
 };
 const DEFAULT_TOKEN_ICON = "/tokens-usdc.png";
 const CUSTOM_TOKEN_ICON = "/tokens-custom.png";
@@ -897,15 +899,16 @@ export default function SprayDisperser() {
       SPRAY_NETWORKS[networkKey] ?? SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY];
     const targetAppKitNetwork = APPKIT_NETWORKS_BY_KEY[networkKey];
 
+    // Try AppKit switch first (updates internal AppKit state)
     if (targetAppKitNetwork) {
       try {
         await switchNetwork(targetAppKitNetwork);
-        return;
       } catch (appKitSwitchError) {
         console.warn("AppKit network switch failed", appKitSwitchError);
       }
     }
 
+    // Always also request MetaMask to switch (ensures wallet is on correct network)
     const hasInjectedProvider = Boolean(getEthereum());
     if (hasInjectedProvider) {
       const switched = await ensureTargetNetwork(targetConfig);
@@ -1952,7 +1955,7 @@ export default function SprayDisperser() {
                   </div>
                   <div
                     ref={networkDropdownRef}
-                    className="relative z-30 mt-4 w-full"
+                    className={`relative mt-4 w-full ${isNetworkDropdownOpen ? "z-50" : "z-30"}`}
                   >
                     <button
                       type="button"
