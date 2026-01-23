@@ -334,10 +334,16 @@ export default function SprayDisperser() {
   const [sprayEventsLoading, setSprayEventsLoading] = useState(false);
   const [sprayEventsError, setSprayEventsError] = useState<string | null>(null);
   const spraySequenceRef = useRef(0);
-  const selectedNetwork =
-    SPRAY_NETWORKS[selectedNetworkKey] ??
-    SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY];
-  const trustedTokens = selectedNetwork.trustedTokens ?? [];
+  const selectedNetwork = useMemo(
+    () =>
+      SPRAY_NETWORKS[selectedNetworkKey] ??
+      SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY],
+    [selectedNetworkKey],
+  );
+  const trustedTokens = useMemo(
+    () => selectedNetwork.trustedTokens ?? [],
+    [selectedNetwork],
+  );
   const sprayAddress = selectedNetwork.sprayAddress;
   const selectedTrustedTokenData =
     selectedTrustedToken &&
@@ -395,6 +401,19 @@ export default function SprayDisperser() {
     () => createReadOnlyProvider(selectedNetwork),
     [selectedNetwork],
   );
+
+  // Balance fetch cache: prevent excessive RPC calls
+  const BALANCE_CACHE_TTL_MS = 30_000; // 30 seconds
+  const balanceCacheRef = useRef<{
+    key: string;
+    timestamp: number;
+    native: string | null;
+    tokens: Record<string, string | null>;
+  } | null>(null);
+  const fetchInProgressRef = useRef<string | null>(null);
+
+  // Debounce the signer address to prevent rapid re-fetches during wallet connection
+  const debouncedSignerAddress = useDebouncedValue(signerAddress, 500);
 
   useEffect(() => {
     setCachedSprayId(sprayId);
@@ -612,69 +631,79 @@ export default function SprayDisperser() {
     };
   }, [provider, readOnlyProvider, tokenAddress, mode, trustedTokens, t]);
 
+  // Combined balance fetching effect with caching and debouncing
   useEffect(() => {
-    // Clear balances first when network changes, then fetch new ones
-    // selectedNetworkKey is used to detect network changes
     const networkKey = selectedNetworkKey;
-    const networkConfig = SPRAY_NETWORKS[networkKey];
+    const networkConfig =
+      SPRAY_NETWORKS[networkKey] ?? SPRAY_NETWORKS[DEFAULT_SPRAY_NETWORK_KEY];
+    const tokens = networkConfig.trustedTokens ?? [];
+    const cacheKey = `${networkKey}:${debouncedSignerAddress}`;
 
-    console.log("[TokenBalances] Effect triggered", {
-      networkKey,
-      hasTrustedTokens: trustedTokens.length,
-      signerAddress,
-      hasReadOnlyProvider: !!readOnlyProvider,
-      hasProvider: !!provider,
-      rpcUrl: networkConfig?.rpcUrls?.[0],
-    });
-
-    if (!trustedTokens.length || !signerAddress) {
-      console.log("[TokenBalances] Early return - no tokens or no signer");
+    // Early return if no signer
+    if (!debouncedSignerAddress) {
+      setNativeBalance(null);
       setTrustedTokenBalances({});
       return;
     }
 
-    const balanceProvider = readOnlyProvider ?? provider;
+    const balanceProvider = readOnlyProvider;
     if (!balanceProvider) {
-      console.log("[TokenBalances] Early return - no provider available");
+      setNativeBalance(null);
       setTrustedTokenBalances({});
       return;
     }
 
-    // Clear existing balances before fetching new ones for the new network
-    setTrustedTokenBalances({});
-
-    let isCancelled = false;
-
-    async function fetchTrustedTokenBalances() {
-      if (!balanceProvider) {
-        console.warn("[TokenBalances] No provider in fetch function");
+    // Check cache - skip fetch if data is fresh
+    const cached = balanceCacheRef.current;
+    const now = Date.now();
+    if (cached && cached.key === cacheKey) {
+      const age = now - cached.timestamp;
+      if (age < BALANCE_CACHE_TTL_MS) {
+        // Restore from cache silently (no log spam)
+        setNativeBalance(cached.native);
+        setTrustedTokenBalances(cached.tokens);
         return;
       }
+    }
 
-      // Verify provider network matches selected network
-      let providerChainId: number | null = null;
+    // Prevent duplicate fetches for the same key
+    if (fetchInProgressRef.current === cacheKey) {
+      return;
+    }
+
+    // Network changed - clear balances immediately
+    if (!cached || cached.key !== cacheKey) {
+      setNativeBalance(null);
+      setTrustedTokenBalances({});
+    }
+
+    fetchInProgressRef.current = cacheKey;
+    let isCancelled = false;
+
+    async function fetchAllBalances() {
+      if (!balanceProvider || !debouncedSignerAddress) return;
+
+      console.log("[Balances] Fetching", { network: networkKey });
+
       try {
-        const network = await balanceProvider.getNetwork();
-        providerChainId = Number(network.chainId);
-        console.log("[TokenBalances] Provider network:", {
-          chainId: providerChainId,
-          name: network.name,
-        });
-      } catch (e) {
-        console.warn("[TokenBalances] Could not get provider network", e);
-      }
+        // Fetch native balance
+        let nativeFormatted: string | null = null;
+        try {
+          const nativeBal = await balanceProvider.getBalance(
+            debouncedSignerAddress,
+          );
+          const decimals = networkConfig.nativeCurrency.decimals ?? 18;
+          nativeFormatted = formatTokenBalanceDisplay(
+            formatUnits(nativeBal, decimals),
+          );
+        } catch (e) {
+          console.warn("[Balances] Native balance error", e);
+          nativeFormatted = "0";
+        }
 
-      console.log("[TokenBalances] Starting fetch for", networkKey, {
-        tokenCount: trustedTokens.length,
-        tokens: trustedTokens.map((t) => t.symbol),
-        expectedChainId: networkConfig?.chainId,
-        actualChainId: providerChainId,
-        networkMatch: providerChainId === networkConfig?.chainId,
-      });
-
-      try {
-        const entries = await Promise.all(
-          trustedTokens.map(async (token) => {
+        // Fetch token balances in parallel
+        const tokenEntries = await Promise.all(
+          tokens.map(async (token) => {
             try {
               const erc20 = new Contract(
                 token.address,
@@ -685,109 +714,56 @@ export default function SprayDisperser() {
                 typeof token.decimals === "number"
                   ? token.decimals
                   : await erc20.decimals();
-              const balance = await erc20.balanceOf(signerAddress);
-              const formattedValue = formatTokenBalanceDisplay(
-                formatUnits(balance, decimalsValue),
-              );
-              console.log("[TokenBalances] Fetched", token.symbol, {
-                rawBalance: balance.toString(),
-                formatted: formattedValue,
-                decimals: decimalsValue,
-                network: networkKey,
-              });
-              return [token.address.toLowerCase(), formattedValue];
-            } catch (balanceError) {
-              console.warn("[TokenBalances] Failed to fetch", {
-                token: token.label,
-                address: token.address,
-                error:
-                  balanceError instanceof Error
-                    ? balanceError.message
-                    : balanceError,
-                network: networkKey,
-              });
+              const balance = await erc20.balanceOf(debouncedSignerAddress);
+              return [
+                token.address.toLowerCase(),
+                formatTokenBalanceDisplay(formatUnits(balance, decimalsValue)),
+              ];
+            } catch {
               return [token.address.toLowerCase(), null];
             }
           }),
         );
-        if (!isCancelled) {
-          console.log("[TokenBalances] Setting balances", {
-            network: networkKey,
-            entries: Object.fromEntries(entries),
-          });
-          setTrustedTokenBalances(Object.fromEntries(entries));
-        } else {
-          console.log("[TokenBalances] Cancelled, not setting balances");
-        }
-      } catch (outerError) {
-        console.warn("[TokenBalances] Outer error", outerError);
-        if (!isCancelled) {
-          setTrustedTokenBalances({});
-        }
-      }
-    }
 
-    fetchTrustedTokenBalances();
+        if (isCancelled) return;
 
-    return () => {
-      console.log("[TokenBalances] Cleanup - marking as cancelled");
-      isCancelled = true;
-    };
-  }, [
-    provider,
-    readOnlyProvider,
-    signerAddress,
-    trustedTokens,
-    selectedNetworkKey,
-  ]);
+        const tokenBalances = Object.fromEntries(tokenEntries);
 
-  useEffect(() => {
-    if (!signerAddress) {
-      setNativeBalance(null);
-      return;
-    }
+        // Update cache
+        balanceCacheRef.current = {
+          key: cacheKey,
+          timestamp: Date.now(),
+          native: nativeFormatted,
+          tokens: tokenBalances,
+        };
 
-    const providerForNative = readOnlyProvider ?? provider;
-    if (!providerForNative) {
-      setNativeBalance(null);
-      return;
-    }
-    const address = signerAddress;
+        // Update state
+        setNativeBalance(nativeFormatted);
+        setTrustedTokenBalances(tokenBalances);
 
-    let isCancelled = false;
-
-    async function fetchNativeBalance(
-      currentProvider: BrowserProvider | JsonRpcProvider,
-      addressToQuery: string,
-    ) {
-      try {
-        const balance = await currentProvider.getBalance(addressToQuery);
-        const decimals = selectedNetwork.nativeCurrency.decimals ?? 18;
-        const formatted = formatTokenBalanceDisplay(
-          formatUnits(balance, decimals),
-        );
-        if (!isCancelled) {
-          setNativeBalance(formatted);
-        }
-      } catch (nativeBalanceError) {
-        console.warn("Failed to fetch native balance", nativeBalanceError);
+        console.log("[Balances] Complete", {
+          network: networkKey,
+          tokens: Object.keys(tokenBalances).length,
+        });
+      } catch (error) {
+        console.warn("[Balances] Fetch error", error);
         if (!isCancelled) {
           setNativeBalance("0");
+          setTrustedTokenBalances({});
+        }
+      } finally {
+        if (fetchInProgressRef.current === cacheKey) {
+          fetchInProgressRef.current = null;
         }
       }
     }
 
-    fetchNativeBalance(providerForNative, address);
+    fetchAllBalances();
 
     return () => {
       isCancelled = true;
     };
-  }, [
-    provider,
-    readOnlyProvider,
-    signerAddress,
-    selectedNetwork.nativeCurrency.decimals,
-  ]);
+  }, [readOnlyProvider, debouncedSignerAddress, selectedNetworkKey]);
 
   // When the user selects a trusted token, keep the address input in sync
   useEffect(() => {
@@ -995,7 +971,11 @@ export default function SprayDisperser() {
     });
   };
 
-  const signerPromise = provider?.getSigner();
+  // Get signer lazily to avoid triggering eth_requestAccounts on every render
+  const getSignerLazy = useCallback(
+    () => provider?.getSigner() ?? null,
+    [provider],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1344,7 +1324,7 @@ export default function SprayDisperser() {
   ]);
 
   async function handleApprove() {
-    if (!provider || !signerPromise || !tokenInfo) {
+    if (!provider || !tokenInfo) {
       setError(t("errors.noWallet"));
       return;
     }
@@ -1395,7 +1375,12 @@ export default function SprayDisperser() {
     let approvalHash: string | null = null;
 
     try {
-      const signer = await signerPromise;
+      const signerOrNull = await getSignerLazy();
+      if (!signerOrNull) {
+        setError(t("errors.noWallet"));
+        return;
+      }
+      const signer = signerOrNull;
       const erc20 = new Contract(normalized, ERC20_ABI, signer);
       const allowance: bigint = await erc20.allowance(
         await signer.getAddress(),
@@ -1449,7 +1434,7 @@ export default function SprayDisperser() {
   }
 
   async function handleSubmit() {
-    if (!provider || !signerPromise) {
+    if (!provider) {
       setError(t("errors.noWallet"));
       return;
     }
@@ -1525,7 +1510,12 @@ export default function SprayDisperser() {
     };
 
     try {
-      const signer = await signerPromise;
+      const signerOrNull = await getSignerLazy();
+      if (!signerOrNull) {
+        setError(t("errors.noWallet"));
+        return;
+      }
+      const signer = signerOrNull;
       const contract = new Contract(sprayAddress, SPRAY_ABI, signer);
 
       if (mode === "native") {
