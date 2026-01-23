@@ -254,7 +254,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Avalanche Fuji Testnet",
     chainId: 43113,
     chainHex: "0xa869",
-    sprayAddress: "0xe62c875ba6609E27c088F697dA16D47519b6B118",
+    sprayAddress: "0x8C6c4Eaf07B5888629f8C5562a61fC79638c40e7",
     nativeCurrency: {
       name: "Avalanche",
       symbol: "AVAX",
