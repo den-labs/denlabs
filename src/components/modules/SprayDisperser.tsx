@@ -495,8 +495,12 @@ export default function SprayDisperser() {
       setProvider(null);
       return;
     }
+    // Recreate provider when walletProvider or chainId changes to ensure correct network
+    // Reference chainId to trigger effect on network change (value used for cache key logic)
+    const _networkKey = chainId;
+    void _networkKey;
     setProvider(new BrowserProvider(walletProvider));
-  }, [walletProvider]);
+  }, [walletProvider, chainId]);
 
   useEffect(() => {
     const ethereum = getEthereum();
@@ -609,20 +613,65 @@ export default function SprayDisperser() {
   }, [provider, readOnlyProvider, tokenAddress, mode, trustedTokens, t]);
 
   useEffect(() => {
+    // Clear balances first when network changes, then fetch new ones
+    // selectedNetworkKey is used to detect network changes
+    const networkKey = selectedNetworkKey;
+    const networkConfig = SPRAY_NETWORKS[networkKey];
+
+    console.log("[TokenBalances] Effect triggered", {
+      networkKey,
+      hasTrustedTokens: trustedTokens.length,
+      signerAddress,
+      hasReadOnlyProvider: !!readOnlyProvider,
+      hasProvider: !!provider,
+      rpcUrl: networkConfig?.rpcUrls?.[0],
+    });
+
     if (!trustedTokens.length || !signerAddress) {
+      console.log("[TokenBalances] Early return - no tokens or no signer");
       setTrustedTokenBalances({});
       return;
     }
 
     const balanceProvider = readOnlyProvider ?? provider;
     if (!balanceProvider) {
+      console.log("[TokenBalances] Early return - no provider available");
       setTrustedTokenBalances({});
       return;
     }
 
+    // Clear existing balances before fetching new ones for the new network
+    setTrustedTokenBalances({});
+
     let isCancelled = false;
 
     async function fetchTrustedTokenBalances() {
+      if (!balanceProvider) {
+        console.warn("[TokenBalances] No provider in fetch function");
+        return;
+      }
+
+      // Verify provider network matches selected network
+      let providerChainId: number | null = null;
+      try {
+        const network = await balanceProvider.getNetwork();
+        providerChainId = Number(network.chainId);
+        console.log("[TokenBalances] Provider network:", {
+          chainId: providerChainId,
+          name: network.name,
+        });
+      } catch (e) {
+        console.warn("[TokenBalances] Could not get provider network", e);
+      }
+
+      console.log("[TokenBalances] Starting fetch for", networkKey, {
+        tokenCount: trustedTokens.length,
+        tokens: trustedTokens.map((t) => t.symbol),
+        expectedChainId: networkConfig?.chainId,
+        actualChainId: providerChainId,
+        networkMatch: providerChainId === networkConfig?.chainId,
+      });
+
       try {
         const entries = await Promise.all(
           trustedTokens.map(async (token) => {
@@ -640,21 +689,38 @@ export default function SprayDisperser() {
               const formattedValue = formatTokenBalanceDisplay(
                 formatUnits(balance, decimalsValue),
               );
+              console.log("[TokenBalances] Fetched", token.symbol, {
+                rawBalance: balance.toString(),
+                formatted: formattedValue,
+                decimals: decimalsValue,
+                network: networkKey,
+              });
               return [token.address.toLowerCase(), formattedValue];
             } catch (balanceError) {
-              console.warn("Failed to fetch trusted token balance", {
+              console.warn("[TokenBalances] Failed to fetch", {
                 token: token.label,
-                error: balanceError,
+                address: token.address,
+                error:
+                  balanceError instanceof Error
+                    ? balanceError.message
+                    : balanceError,
+                network: networkKey,
               });
               return [token.address.toLowerCase(), null];
             }
           }),
         );
         if (!isCancelled) {
+          console.log("[TokenBalances] Setting balances", {
+            network: networkKey,
+            entries: Object.fromEntries(entries),
+          });
           setTrustedTokenBalances(Object.fromEntries(entries));
+        } else {
+          console.log("[TokenBalances] Cancelled, not setting balances");
         }
       } catch (outerError) {
-        console.warn("Failed to prepare trusted token balances", outerError);
+        console.warn("[TokenBalances] Outer error", outerError);
         if (!isCancelled) {
           setTrustedTokenBalances({});
         }
@@ -664,9 +730,16 @@ export default function SprayDisperser() {
     fetchTrustedTokenBalances();
 
     return () => {
+      console.log("[TokenBalances] Cleanup - marking as cancelled");
       isCancelled = true;
     };
-  }, [provider, readOnlyProvider, signerAddress, trustedTokens]);
+  }, [
+    provider,
+    readOnlyProvider,
+    signerAddress,
+    trustedTokens,
+    selectedNetworkKey,
+  ]);
 
   useEffect(() => {
     if (!signerAddress) {

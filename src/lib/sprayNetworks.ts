@@ -6,6 +6,29 @@ const OPTIMISM_OP_ICON = "/tokens-op.png";
 const WCT_ICON = "/tokens-wct.png";
 const UVD_ICON = "/tokens-uvd.png";
 
+// Alchemy RPC configuration
+const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
+
+function getAlchemyRpc(network: string): string | null {
+  if (!ALCHEMY_API_KEY) return null;
+  const alchemyNetworks: Record<string, string> = {
+    ethereum: "eth-mainnet",
+    optimism: "opt-mainnet",
+    base: "base-mainnet",
+    avalanche: "avax-mainnet",
+    avalancheFuji: "avax-fuji",
+    celo: "celo-mainnet",
+  };
+  const alchemyNetwork = alchemyNetworks[network];
+  if (!alchemyNetwork) return null;
+  return `https://${alchemyNetwork}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+}
+
+function buildRpcUrls(network: string, fallbacks: string[]): string[] {
+  const alchemyRpc = getAlchemyRpc(network);
+  return alchemyRpc ? [alchemyRpc, ...fallbacks] : fallbacks;
+}
+
 export type SprayNetworkConfig = {
   key: string;
   name: string;
@@ -40,7 +63,10 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "ETH",
       decimals: 18,
     },
-    rpcUrls: ["https://eth.llamarpc.com", "https://rpc.ankr.com/eth"],
+    rpcUrls: buildRpcUrls("ethereum", [
+      "https://eth.llamarpc.com",
+      "https://rpc.ankr.com/eth",
+    ]),
     explorerUrls: ["https://etherscan.io"],
     trustedTokens: [
       {
@@ -77,7 +103,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "CELO",
       decimals: 18,
     },
-    rpcUrls: ["https://forno.celo.org"],
+    rpcUrls: buildRpcUrls("celo", ["https://forno.celo.org"]),
     explorerUrls: ["https://celoscan.io"],
     trustedTokens: [
       {
@@ -135,7 +161,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "ETH",
       decimals: 18,
     },
-    rpcUrls: ["https://mainnet.optimism.io"],
+    rpcUrls: buildRpcUrls("optimism", ["https://mainnet.optimism.io"]),
     explorerUrls: ["https://optimistic.etherscan.io"],
     trustedTokens: [
       {
@@ -172,7 +198,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "ETH",
       decimals: 18,
     },
-    rpcUrls: ["https://mainnet.base.org"],
+    rpcUrls: buildRpcUrls("base", ["https://mainnet.base.org"]),
     explorerUrls: ["https://basescan.org"],
     trustedTokens: [
       {
@@ -202,7 +228,9 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "AVAX",
       decimals: 18,
     },
-    rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+    rpcUrls: buildRpcUrls("avalanche", [
+      "https://api.avax.network/ext/bc/C/rpc",
+    ]),
     explorerUrls: ["https://snowtrace.io"],
     trustedTokens: [
       {
@@ -232,7 +260,9 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
       symbol: "AVAX",
       decimals: 18,
     },
-    rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+    rpcUrls: buildRpcUrls("avalancheFuji", [
+      "https://api.avax-test.network/ext/bc/C/rpc",
+    ]),
     explorerUrls: ["https://testnet.snowtrace.io"],
     trustedTokens: [
       {
