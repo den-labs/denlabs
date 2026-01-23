@@ -931,8 +931,6 @@ export default function SprayDisperser() {
   const isTargetNetworkReady =
     signerAddress != null && chainId === selectedNetwork.chainId;
   const nativeSymbol = selectedNetwork.nativeCurrency.symbol;
-  const displayedHistory = history.slice(0, 5);
-  const hasMoreHistory = history.length > displayedHistory.length;
 
   const handleNetworkSelect = (networkKey: string) => {
     setSelectedNetworkKey(networkKey);
@@ -1778,101 +1776,6 @@ export default function SprayDisperser() {
       return new Date(value).toLocaleString();
     }
   };
-  const getActivitySummary = (entry: TransactionRecord) => {
-    const key =
-      entry.recipients === 1
-        ? "activity.summarySingle"
-        : "activity.summaryMany";
-    return t(key, {
-      amount: entry.totalFormatted,
-      symbol: entry.tokenSymbol,
-      count: entry.recipients,
-    });
-  };
-  const activityPanel = (
-    <div className="wolf-card--muted border border-wolf-border px-5 py-5">
-      <p className="text-xs uppercase text-wolf-text-subtle">
-        {t("activity.title")}
-      </p>
-      {history.length === 0 ? (
-        <p className="mt-3 text-sm text-white/60">{t("activity.empty")}</p>
-      ) : (
-        <>
-          <ul className="mt-4 space-y-3">
-            {displayedHistory.map((entry) => {
-              const statusLabel =
-                entry.status === "success"
-                  ? t("activity.confirmed")
-                  : t(`activity.status.${entry.status}`);
-              const statusPillClass =
-                entry.status === "success"
-                  ? "bg-wolf-emerald-soft text-wolf-emerald"
-                  : entry.status === "pending"
-                    ? "bg-wolf-charcoal-70 text-wolf-amber"
-                    : "bg-rose-500/10 text-rose-300";
-              const explorerUrl = getExplorerTxUrl(
-                entry.networkKey,
-                entry.hash,
-              );
-              return (
-                <li
-                  key={entry.id}
-                  className="rounded-lg border border-wolf-border-soft bg-wolf-charcoal-70 px-4 py-3"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-white">
-                      {`Spray #${entry.sequence} · ${getActivitySummary(
-                        entry,
-                      )}`}
-                    </p>
-                    <span
-                      className={`wolf-pill text-[10px] uppercase ${statusPillClass}`}
-                    >
-                      {t(`activity.status.${entry.status}`)}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-white/70">
-                    {`${statusLabel} • ${formatActivityTimestamp(
-                      entry.timestamp,
-                    )}`}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-white/60">
-                    <span className="font-mono text-white/50">
-                      {formatHash(entry.hash)}
-                    </span>
-                    {explorerUrl ? (
-                      <a
-                        href={explorerUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-wolf-emerald hover:text-wolf-emerald/80"
-                      >
-                        {t("activity.viewOnExplorer")}
-                        <span aria-hidden="true">↗</span>
-                      </a>
-                    ) : null}
-                  </div>
-                  {entry.errorMessage ? (
-                    <p className="mt-2 text-[11px] uppercase text-rose-300">
-                      {entry.errorMessage}
-                    </p>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-          {hasMoreHistory ? (
-            <button
-              type="button"
-              className="mt-4 text-xs font-semibold text-white/70 underline underline-offset-4 transition hover:text-white"
-            >
-              {t("activity.viewAll")}
-            </button>
-          ) : null}
-        </>
-      )}
-    </div>
-  );
 
   const summaryPanel = (
     <div className="wolf-card--muted border border-wolf-border px-5 py-4 text-xs text-white/70">
@@ -2460,10 +2363,7 @@ export default function SprayDisperser() {
         </div>
       </DenMain>
       <DenRightRail>
-        <div className="space-y-4 lg:sticky lg:top-6">
-          {activityPanel}
-          {summaryPanel}
-        </div>
+        <div className="space-y-4 lg:sticky lg:top-6">{summaryPanel}</div>
       </DenRightRail>
       <SprayLogModal
         isOpen={sprayLogOpen}
