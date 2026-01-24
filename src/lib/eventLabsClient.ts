@@ -1,3 +1,4 @@
+import { api } from "./apiClient";
 import type {
   CreateEventLabPayload,
   CreateFeedbackPayload,
@@ -18,43 +19,19 @@ import type { RetroPack } from "./retroPack";
 export async function createEventLab(
   payload: CreateEventLabPayload,
 ): Promise<EventLab> {
-  const response = await fetch("/api/labs", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to create lab");
-  }
-
-  const data = await response.json();
+  const data = await api.post<{ lab: EventLab }>("/api/labs", payload);
   return data.lab;
 }
 
 export async function getEventLab(slug: string): Promise<EventLab> {
-  const response = await fetch(`/api/labs/${slug}`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch lab");
-  }
-
-  const data = await response.json();
+  const data = await api.get<{ lab: EventLab }>(`/api/labs/${slug}`);
   return data.lab;
 }
 
 export async function listEventLabs(creatorId?: string): Promise<EventLab[]> {
-  const url = creatorId ? `/api/labs?creator_id=${creatorId}` : "/api/labs";
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to list labs");
-  }
-
-  const data = await response.json();
+  const data = await api.get<{ labs: EventLab[] }>("/api/labs", {
+    creator_id: creatorId,
+  });
   return data.labs;
 }
 
@@ -62,30 +39,12 @@ export async function updateEventLab(
   slug: string,
   payload: UpdateEventLabPayload,
 ): Promise<EventLab> {
-  const response = await fetch(`/api/labs/${slug}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to update lab");
-  }
-
-  const data = await response.json();
+  const data = await api.patch<{ lab: EventLab }>(`/api/labs/${slug}`, payload);
   return data.lab;
 }
 
 export async function deleteEventLab(slug: string): Promise<void> {
-  const response = await fetch(`/api/labs/${slug}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to delete lab");
-  }
+  await api.delete(`/api/labs/${slug}`);
 }
 
 // =====================================================
@@ -96,42 +55,20 @@ export async function createFeedback(
   slug: string,
   payload: CreateFeedbackPayload,
 ): Promise<{ feedback: FeedbackItem; trust_score: TrustScore }> {
-  const response = await fetch(`/api/labs/${slug}/feedback`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to submit feedback");
-  }
-
-  return response.json();
+  return api.post<{ feedback: FeedbackItem; trust_score: TrustScore }>(
+    `/api/labs/${slug}/feedback`,
+    payload,
+  );
 }
 
 export async function listFeedback(
   slug: string,
   filters?: { status?: string; priority?: string },
 ): Promise<{ feedback: FeedbackItem[]; is_creator: boolean }> {
-  let url = `/api/labs/${slug}/feedback`;
-
-  if (filters) {
-    const params = new URLSearchParams();
-    if (filters.status) params.set("status", filters.status);
-    if (filters.priority) params.set("priority", filters.priority);
-    const queryString = params.toString();
-    if (queryString) url += `?${queryString}`;
-  }
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to list feedback");
-  }
-
-  return response.json();
+  return api.get<{ feedback: FeedbackItem[]; is_creator: boolean }>(
+    `/api/labs/${slug}/feedback`,
+    filters,
+  );
 }
 
 export async function updateFeedback(
@@ -139,18 +76,10 @@ export async function updateFeedback(
   id: string,
   payload: UpdateFeedbackPayload,
 ): Promise<FeedbackItem> {
-  const response = await fetch(`/api/labs/${slug}/feedback/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to update feedback");
-  }
-
-  const data = await response.json();
+  const data = await api.patch<{ feedback: FeedbackItem }>(
+    `/api/labs/${slug}/feedback/${id}`,
+    payload,
+  );
   return data.feedback;
 }
 
@@ -162,16 +91,7 @@ export async function trackEvent(
   slug: string,
   payload: EventTrackingPayload,
 ): Promise<void> {
-  const response = await fetch(`/api/labs/${slug}/events`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to track event");
-  }
+  await api.post(`/api/labs/${slug}/events`, payload);
 }
 
 // =====================================================
@@ -179,26 +99,12 @@ export async function trackEvent(
 // =====================================================
 
 export async function generateRetro(slug: string): Promise<RetroPack> {
-  const response = await fetch(`/api/labs/${slug}/retro`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to generate retro pack");
-  }
-
-  const data = await response.json();
+  const data = await api.get<{ retro: RetroPack }>(`/api/labs/${slug}/retro`);
   return data.retro;
 }
 
 export async function exportRetroMarkdown(slug: string): Promise<string> {
-  const response = await fetch(`/api/labs/${slug}/retro?format=markdown`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to export retro markdown");
-  }
-
-  return response.text();
+  return api.text(`/api/labs/${slug}/retro`, { format: "markdown" });
 }
 
 // =====================================================
@@ -206,13 +112,8 @@ export async function exportRetroMarkdown(slug: string): Promise<string> {
 // =====================================================
 
 export async function getTelemetry(slug: string): Promise<TelemetryData> {
-  const response = await fetch(`/api/labs/${slug}/telemetry`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch telemetry");
-  }
-
-  const data = await response.json();
+  const data = await api.get<{ telemetry: TelemetryData }>(
+    `/api/labs/${slug}/telemetry`,
+  );
   return data.telemetry;
 }
