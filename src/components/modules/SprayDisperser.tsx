@@ -289,10 +289,23 @@ export default function SprayDisperser() {
   const [signerAddress, setSignerAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
   const [allowanceStatus, setAllowanceStatus] = useState<
     "unknown" | "loading" | "approved" | "needs_approval"
   >("unknown");
+  // ERC20 transaction steps state
+  const [erc20Steps, setErc20Steps] = useState<{
+    active: boolean;
+    currentStep: "idle" | "approving" | "approved" | "sending" | "complete";
+    approvalTxHash: string | null;
+    sendTxHash: string | null;
+    error: string | null;
+  }>({
+    active: false,
+    currentStep: "idle",
+    approvalTxHash: null,
+    sendTxHash: null,
+    error: null,
+  });
   const [mode, setMode] = useState<"native" | "token">("native");
   const [tokenAddress, setTokenAddress] = useState("");
   const [selectedTrustedToken, setSelectedTrustedToken] =
@@ -1321,116 +1334,6 @@ export default function SprayDisperser() {
     validRows,
   ]);
 
-  async function handleApprove() {
-    if (!provider || !tokenInfo) {
-      setError(t("errors.noWallet"));
-      return;
-    }
-
-    const normalized = tokenAddress.trim();
-    const validation = validateAddress(normalized);
-    if (!validation.valid) {
-      setError(validation.error || t("errors.invalidToken"));
-      return;
-    }
-
-    const runtimeValidation = buildRuntimeValidation();
-
-    if (runtimeValidation.validRows.length === 0) {
-      setError(t("errors.invalidRecipient"));
-      return;
-    }
-
-    if (runtimeValidation.hasIssues) {
-      setError(
-        runtimeValidation.invalidCount > 0 ||
-          runtimeValidation.duplicateCount > 0
-          ? t("errors.invalidRecipient")
-          : t("errors.invalidAmount"),
-      );
-      return;
-    }
-
-    const parsed = buildTokenAmounts(
-      tokenInfo.decimals,
-      runtimeValidation.validRows,
-      amountMode,
-      globalAmount,
-    );
-    if (!parsed) {
-      setError(t("errors.invalidAmount"));
-      return;
-    }
-
-    const { total: totalValue } = parsed;
-    const totalAmountLabel = totals.total.toFixed(4);
-    const tokenSymbolLabel = tokenInfo?.symbol ?? t("summary.tokenPlaceholder");
-
-    setIsApproving(true);
-    setError(null);
-    setFeedback(null);
-
-    let approvalHash: string | null = null;
-
-    try {
-      const signerOrNull = await getSignerLazy();
-      if (!signerOrNull) {
-        setError(t("errors.noWallet"));
-        return;
-      }
-      const signer = signerOrNull;
-      const erc20 = new Contract(normalized, ERC20_ABI, signer);
-      const allowance: bigint = await erc20.allowance(
-        await signer.getAddress(),
-        sprayAddress,
-      );
-
-      if (allowance >= totalValue) {
-        setFeedback(t("messages.alreadyApproved"));
-        return;
-      }
-
-      const tx = await erc20.approve(sprayAddress, totalValue);
-      approvalHash = tx.hash;
-      addHistoryRecord({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        type: "token",
-        hash: tx.hash,
-        status: "pending",
-        timestamp: new Date().toISOString(),
-        recipients: runtimeValidation.validRows.length,
-        totalFormatted: totalAmountLabel,
-        tokenSymbol: tokenSymbolLabel,
-        networkKey: selectedNetworkKey,
-      });
-      setFeedback(t("messages.approvalSent"));
-      await tx.wait();
-      setFeedback(t("messages.approvalComplete"));
-      setHistory((prev) =>
-        prev.map((entry) =>
-          entry.hash === tx.hash ? { ...entry, status: "success" } : entry,
-        ),
-      );
-    } catch (_approveError) {
-      setError(t("errors.approvalFailed"));
-      if (approvalHash) {
-        setHistory((prev) =>
-          prev.map((entry) =>
-            entry.hash === approvalHash
-              ? {
-                  ...entry,
-                  status: "error",
-                  errorMessage: t("errors.approvalFailed"),
-                }
-              : entry,
-          ),
-        );
-      }
-    } finally {
-      setIsApproving(false);
-    }
-  }
-
   async function handleSubmit() {
     if (!provider) {
       setError(t("errors.noWallet"));
@@ -1601,6 +1504,7 @@ export default function SprayDisperser() {
           );
         }
       } else {
+        // ERC20 Token mode - handles approval + send in one flow
         const normalized = tokenAddress.trim();
         const validation = validateAddress(normalized);
         if (!validation.valid || !tokenInfo) {
@@ -1621,23 +1525,75 @@ export default function SprayDisperser() {
         }
 
         const { amounts, total: totalValue } = parsed;
-
+        const signerAddress = await signer.getAddress();
         const erc20 = new Contract(normalized, ERC20_ABI, signer);
         const allowance: bigint = await erc20.allowance(
-          await signer.getAddress(),
+          signerAddress,
           sprayAddress,
         );
-
-        if (allowance < totalValue) {
-          setError(t("errors.needsApproval"));
-          return;
-        }
 
         const tokenMetadata = {
           ...sendMetadataBase,
           tokenSymbol: tokenInfo.symbol,
           totalAmount: totals.total.toFixed(4),
         };
+
+        // Check if approval is needed
+        const needsApprovalNow = allowance < totalValue;
+
+        if (needsApprovalNow) {
+          // Step 1: Approval
+          setErc20Steps({
+            active: true,
+            currentStep: "approving",
+            approvalTxHash: null,
+            sendTxHash: null,
+            error: null,
+          });
+
+          try {
+            const approveTx = await erc20.approve(sprayAddress, totalValue);
+            setErc20Steps((prev) => ({
+              ...prev,
+              approvalTxHash: approveTx.hash,
+            }));
+            setFeedback(t("messages.approvalSent"));
+
+            await approveTx.wait();
+
+            setErc20Steps((prev) => ({
+              ...prev,
+              currentStep: "approved",
+            }));
+            setAllowanceStatus("approved");
+            setFeedback(t("messages.approvalComplete"));
+          } catch (_approvalError) {
+            setErc20Steps((prev) => ({
+              ...prev,
+              currentStep: "idle",
+              error: t("errors.approvalFailed"),
+              active: false,
+            }));
+            setError(t("errors.approvalFailed"));
+            return;
+          }
+        } else {
+          // Already approved, show steps UI
+          setErc20Steps({
+            active: true,
+            currentStep: "approved",
+            approvalTxHash: null,
+            sendTxHash: null,
+            error: null,
+          });
+        }
+
+        // Step 2: Send dispersion
+        setErc20Steps((prev) => ({
+          ...prev,
+          currentStep: "sending",
+        }));
+
         logSprayEvent("send_started", tokenMetadata);
         updateSprayStatus("started");
 
@@ -1649,6 +1605,12 @@ export default function SprayDisperser() {
         const recordId = `${Date.now()}-${Math.random()
           .toString(36)
           .slice(2, 7)}`;
+
+        setErc20Steps((prev) => ({
+          ...prev,
+          sendTxHash: tx.hash,
+        }));
+
         setBatchProgress((prev) => ({
           ...prev,
           txHash: tx.hash,
@@ -1673,6 +1635,10 @@ export default function SprayDisperser() {
 
         if (isSuccessfulReceiptStatus(receipt.status)) {
           setFeedback(t("messages.transactionConfirmed"));
+          setErc20Steps((prev) => ({
+            ...prev,
+            currentStep: "complete",
+          }));
           setBatchProgress((prev) => ({
             ...prev,
             status: "confirmed",
@@ -1687,8 +1653,24 @@ export default function SprayDisperser() {
               entry.id === recordId ? { ...entry, status: "success" } : entry,
             ),
           );
+          // Reset steps after a delay
+          setTimeout(() => {
+            setErc20Steps({
+              active: false,
+              currentStep: "idle",
+              approvalTxHash: null,
+              sendTxHash: null,
+              error: null,
+            });
+          }, 3000);
         } else {
           setError(t("errors.transactionFailed"));
+          setErc20Steps((prev) => ({
+            ...prev,
+            currentStep: "idle",
+            error: t("errors.transactionFailed"),
+            active: false,
+          }));
           setBatchProgress((prev) => ({
             ...prev,
             status: "error",
@@ -1738,17 +1720,26 @@ export default function SprayDisperser() {
   }
 
   const tokenAddressValidation = validateAddress(tokenAddress.trim());
-  const needsApproval =
-    mode === "token" && allowanceStatus === "needs_approval";
-  const ctaLabel = isApproving
-    ? t("actions.approving")
-    : isSubmitting
-      ? t("actions.submitting")
-      : needsApproval
-        ? t("actions.approve")
-        : t("actions.send");
+  // CTA label based on current state
+  const ctaLabel = (() => {
+    if (erc20Steps.active) {
+      switch (erc20Steps.currentStep) {
+        case "approving":
+          return t("actions.approving");
+        case "approved":
+        case "sending":
+          return t("actions.submitting");
+        case "complete":
+          return t("messages.transactionConfirmed");
+        default:
+          return t("actions.send");
+      }
+    }
+    if (isSubmitting) return t("actions.submitting");
+    return t("actions.send");
+  })();
   const ctaDisabledReason = (() => {
-    if (isSubmitting || isApproving) {
+    if (isSubmitting || erc20Steps.active) {
       return "Transaction in progress.";
     }
     if (recipientCount === 0) {
@@ -2220,6 +2211,129 @@ export default function SprayDisperser() {
                   </div>
                 </section>
 
+                {/* ERC20 Transaction Steps Indicator */}
+                {erc20Steps.active && mode === "token" && (
+                  <div className="mt-4 rounded-2xl border border-wolf-border bg-[#0b111a] px-5 py-4">
+                    <p className="text-xs uppercase text-wolf-text-subtle mb-3">
+                      Transaction Steps
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {/* Step 1: Approve Token */}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                            erc20Steps.currentStep === "approving"
+                              ? "bg-wolf-emerald/20 text-wolf-emerald animate-pulse"
+                              : erc20Steps.currentStep === "approved" ||
+                                  erc20Steps.currentStep === "sending" ||
+                                  erc20Steps.currentStep === "complete"
+                                ? "bg-wolf-emerald text-white"
+                                : "bg-white/10 text-white/50"
+                          }`}
+                        >
+                          {erc20Steps.currentStep === "approved" ||
+                          erc20Steps.currentStep === "sending" ||
+                          erc20Steps.currentStep === "complete" ? (
+                            <span>✓</span>
+                          ) : erc20Steps.currentStep === "approving" ? (
+                            <span className="animate-spin">◌</span>
+                          ) : (
+                            <span>1</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p
+                            className={`text-sm font-medium ${
+                              erc20Steps.currentStep === "approving"
+                                ? "text-wolf-emerald"
+                                : erc20Steps.currentStep === "approved" ||
+                                    erc20Steps.currentStep === "sending" ||
+                                    erc20Steps.currentStep === "complete"
+                                  ? "text-white"
+                                  : "text-white/50"
+                            }`}
+                          >
+                            {`Approve ${tokenInfo?.symbol || "Token"}`}
+                          </p>
+                          {erc20Steps.approvalTxHash ? (
+                            <a
+                              href={
+                                getExplorerTxUrl(
+                                  selectedNetworkKey,
+                                  erc20Steps.approvalTxHash,
+                                ) ?? undefined
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] font-mono text-wolf-emerald hover:text-wolf-emerald/80 flex items-center gap-1"
+                            >
+                              {formatHash(erc20Steps.approvalTxHash)}
+                              <span aria-hidden="true">↗</span>
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {/* Step 2: Send Dispersion */}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                            erc20Steps.currentStep === "sending"
+                              ? "bg-wolf-emerald/20 text-wolf-emerald animate-pulse"
+                              : erc20Steps.currentStep === "complete"
+                                ? "bg-wolf-emerald text-white"
+                                : "bg-white/10 text-white/50"
+                          }`}
+                        >
+                          {erc20Steps.currentStep === "complete" ? (
+                            <span>✓</span>
+                          ) : erc20Steps.currentStep === "sending" ? (
+                            <span className="animate-spin">◌</span>
+                          ) : (
+                            <span>2</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p
+                            className={`text-sm font-medium ${
+                              erc20Steps.currentStep === "sending"
+                                ? "text-wolf-emerald"
+                                : erc20Steps.currentStep === "complete"
+                                  ? "text-white"
+                                  : "text-white/50"
+                            }`}
+                          >
+                            Send Dispersion
+                          </p>
+                          {erc20Steps.sendTxHash ? (
+                            <a
+                              href={
+                                getExplorerTxUrl(
+                                  selectedNetworkKey,
+                                  erc20Steps.sendTxHash,
+                                ) ?? undefined
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] font-mono text-wolf-emerald hover:text-wolf-emerald/80 flex items-center gap-1"
+                            >
+                              {formatHash(erc20Steps.sendTxHash)}
+                              <span aria-hidden="true">↗</span>
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Error message */}
+                    {erc20Steps.error && (
+                      <p className="mt-3 text-[11px] uppercase text-rose-300">
+                        {erc20Steps.error}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {batchProgressVisible ? (
                   <div className="mt-4 rounded-2xl border border-wolf-border bg-[#0b111a] px-5 py-4 text-xs text-white/70">
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2308,9 +2422,7 @@ export default function SprayDisperser() {
                       recipientCount === 0 ? "Paste list" : ctaLabel
                     }
                     primaryActionDisabled={ctaDisabled}
-                    onPrimaryAction={
-                      needsApproval ? handleApprove : handleSubmit
-                    }
+                    onPrimaryAction={handleSubmit}
                     footer={
                       <StickyFooter
                         recipientCount={recipientCount}
@@ -2338,10 +2450,8 @@ export default function SprayDisperser() {
                         ctaLabel={ctaLabel}
                         ctaDisabled={ctaDisabled}
                         ctaReason={ctaDisabledReason}
-                        onPrimaryAction={
-                          needsApproval ? handleApprove : handleSubmit
-                        }
-                        isLoading={isApproving || isSubmitting}
+                        onPrimaryAction={handleSubmit}
+                        isLoading={isSubmitting || erc20Steps.active}
                       />
                     }
                   />
