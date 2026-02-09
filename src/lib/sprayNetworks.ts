@@ -90,7 +90,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Celo",
     chainId: 42220,
     chainHex: "0xa4ec",
-    sprayAddress: "0x062ad0B066bCfA6ce26C7EaD528363f7ff6483fe",
+    sprayAddress: "0xeC7062FbC96FCb685F48Cd6621258d9F7088e03a",
     nativeCurrency: {
       name: "Celo",
       symbol: "CELO",
