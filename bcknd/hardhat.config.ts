@@ -3,9 +3,8 @@ import '@nomicfoundation/hardhat-toolbox'
 require('hardhat-deploy')
 import '@openzeppelin/hardhat-upgrades'
 
-import * as path from 'path'
 import * as dotenv from 'dotenv'
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') })
+dotenv.config()
 
 const {
   CELO_PRIVATE_KEY,
