@@ -67,7 +67,7 @@ export type RecipientRowInput = {
 };
 
 export type RecipientTotals = {
-  total: number;
+  total: string;
   validCount: number;
   totalCount: number;
 };
@@ -668,7 +668,7 @@ export function computeTotals(
   tokenDecimals: number,
   duplicates?: Set<string>,
 ): RecipientTotals {
-  let total = 0;
+  let totalBigInt = BigInt(0);
   let validCount = 0;
 
   const globalAmountValidation =
@@ -680,27 +680,38 @@ export function computeTotals(
       return;
     }
 
-    let amountValue = 0;
     if (mode === "same") {
       if (!globalAmountValidation?.valid) {
         return;
       }
-      amountValue = Number(globalAmountValidation.normalized);
+      try {
+        totalBigInt += parseUnits(
+          globalAmountValidation.normalized,
+          tokenDecimals,
+        );
+        validCount += 1;
+      } catch {
+        return;
+      }
     } else {
       const parsed = isValidAmount(row.amount ?? "", tokenDecimals);
       if (!parsed.valid) {
         return;
       }
-      amountValue = Number(parsed.normalized);
-    }
-
-    if (Number.isFinite(amountValue)) {
-      total += amountValue;
-      validCount += 1;
+      try {
+        totalBigInt += parseUnits(parsed.normalized, tokenDecimals);
+        validCount += 1;
+      } catch {
+        return;
+      }
     }
   });
 
-  return { total, validCount, totalCount: rows.length };
+  return {
+    total: formatUnits(totalBigInt, tokenDecimals),
+    validCount,
+    totalCount: rows.length,
+  };
 }
 
 export function dedupe(

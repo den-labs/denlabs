@@ -83,13 +83,6 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
         iconUrl: DEFAULT_TOKEN_ICON,
         decimals: 6,
       },
-      {
-        label: "Dai Stablecoin (DAI)",
-        symbol: "DAI",
-        address: "0x6B175474E89094C44Da98b954EedeC8E5BE3830",
-        iconUrl: DEFAULT_TOKEN_ICON,
-        decimals: 18,
-      },
     ],
   },
   celo: {
