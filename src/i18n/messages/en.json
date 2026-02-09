@@ -1273,7 +1273,17 @@
       "needsApproval": "Approve token spend for the Spray contract first.",
       "approvalFailed": "Token approval failed.",
       "transactionFailed": "Dispersion transaction failed.",
-      "clipboardFailed": "Unable to read clipboard."
+      "clipboardFailed": "Unable to read clipboard.",
+      "tooManyRecipients": "Too many recipients. Maximum is 200 per batch.",
+      "zeroAddress": "One or more recipient addresses are invalid (zero address).",
+      "zeroAmount": "All amounts must be greater than zero.",
+      "lengthMismatch": "Recipients and amounts count do not match.",
+      "emptyRecipients": "Add at least one recipient.",
+      "incorrectNativeValue": "The amount sent does not match the total required.",
+      "insufficientAllowance": "Token allowance is insufficient. Please approve first.",
+      "invalidTokenAddress": "The token address is invalid.",
+      "contractPaused": "The Spray contract is temporarily paused. Try again later.",
+      "userRejected": "Transaction was rejected in your wallet."
     }
   },
   "gooddollar": {

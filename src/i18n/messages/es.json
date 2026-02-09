@@ -1273,7 +1273,17 @@
       "needsApproval": "Primero aprueba el gasto del token para el contrato Spray.",
       "approvalFailed": "Falló la aprobación del token.",
       "transactionFailed": "Falló la transacción de dispersión.",
-      "clipboardFailed": "No se pudo leer el portapapeles."
+      "clipboardFailed": "No se pudo leer el portapapeles.",
+      "tooManyRecipients": "Demasiados destinatarios. El máximo es 200 por lote.",
+      "zeroAddress": "Una o más direcciones de destinatario son inválidas (dirección cero).",
+      "zeroAmount": "Todos los montos deben ser mayores a cero.",
+      "lengthMismatch": "La cantidad de destinatarios y montos no coincide.",
+      "emptyRecipients": "Agrega al menos un destinatario.",
+      "incorrectNativeValue": "El monto enviado no coincide con el total requerido.",
+      "insufficientAllowance": "La autorización del token es insuficiente. Aprueba primero.",
+      "invalidTokenAddress": "La dirección del token es inválida.",
+      "contractPaused": "El contrato Spray está temporalmente pausado. Intenta más tarde.",
+      "userRejected": "La transacción fue rechazada en tu wallet."
     }
   },
   "gooddollar": {

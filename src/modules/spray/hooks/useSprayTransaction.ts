@@ -8,6 +8,7 @@ import { findDuplicateRowIds, validateRow } from "@/lib/recipients";
 import {
   BATCH_SIZE,
   buildTokenAmounts,
+  decodeSprayError,
   ERC20_ABI,
   isSuccessfulReceiptStatus,
   SPRAY_ABI,
@@ -90,6 +91,21 @@ export function useSprayTransaction(
   const [error, setError] = useState<string | null>(null);
 
   const spraySequenceRef = useRef(0);
+
+  const resolveErrorMessage = useCallback(
+    (err: unknown): string => {
+      const key = decodeSprayError(err);
+      if (key) {
+        try {
+          return t(`errors.${key}` as Parameters<typeof t>[0]);
+        } catch {
+          // key not in i18n, fall through
+        }
+      }
+      return t("errors.transactionFailed");
+    },
+    [t],
+  );
 
   const addHistoryRecord = useCallback(
     (record: Omit<TransactionRecord, "sequence">) => {
@@ -432,14 +448,15 @@ export function useSprayTransaction(
             }));
             setAllowanceStatus("approved");
             setFeedback(t("messages.approvalComplete"));
-          } catch {
+          } catch (approveErr) {
+            const approveMsg = resolveErrorMessage(approveErr);
             setErc20Steps((prev) => ({
               ...prev,
               currentStep: "idle",
-              error: t("errors.approvalFailed"),
+              error: approveMsg,
               active: false,
             }));
-            setError(t("errors.approvalFailed"));
+            setError(approveMsg);
             return;
           }
         } else {
@@ -543,12 +560,14 @@ export function useSprayTransaction(
           );
         }
       }
-    } catch {
-      setError(t("errors.transactionFailed"));
+    } catch (txErr) {
+      const decoded = decodeSprayError(txErr);
+      const msg = resolveErrorMessage(txErr);
+      setError(msg);
       setBatchProgress((prev) => ({
         ...prev,
         status: "error",
-        errorMessage: t("errors.transactionFailed"),
+        errorMessage: msg,
       }));
       const tokenSymbolPlaceholder = t("summary.tokenPlaceholder");
       const fallbackTokenSymbol =
@@ -560,7 +579,7 @@ export function useSprayTransaction(
       telemetry.logSprayEvent("send_failed", {
         ...sendMetadataBase,
         tokenSymbol: fallbackTokenSymbol,
-        reason: "transaction_failed",
+        reason: decoded ?? "transaction_failed",
       });
       telemetry.updateSprayStatus("failed");
     } finally {
@@ -582,6 +601,7 @@ export function useSprayTransaction(
     nativeSymbol,
     telemetry,
     addHistoryRecord,
+    resolveErrorMessage,
     t,
     tokenAddress,
     tokenInfo,

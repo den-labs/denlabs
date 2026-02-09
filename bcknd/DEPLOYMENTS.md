@@ -44,11 +44,11 @@ The Spray contract is **stateless** (no storage, no proxy). Upgrading means:
 2. Update `sprayAddress` in `src/lib/sprayNetworks.ts`
 3. Frontend picks up new address on next build
 
-Function signatures are unchanged between v1 and v2, so `SPRAY_ABI` in `src/modules/spray/constants.ts` does not need updating.
+Function signatures are unchanged between v1 and v2. `SPRAY_ABI` in `src/modules/spray/constants.ts` now includes custom error signatures for client-side decoding.
 
 ## Custom Errors (v2)
 
-Frontend currently expects revert strings. v2 uses custom errors:
+Frontend decodes custom errors via `decodeSprayError()` in `constants.ts` and shows i18n messages (EN/ES) in `useSprayTransaction.ts`:
 
 | Error | Parameters |
 |-------|------------|

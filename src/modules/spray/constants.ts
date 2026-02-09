@@ -7,7 +7,7 @@ import {
   mainnet as ethereumNetwork,
   optimism as optimismNetwork,
 } from "@reown/appkit/networks";
-import { JsonRpcProvider, parseUnits } from "ethers";
+import { Interface, JsonRpcProvider, parseUnits } from "ethers";
 import {
   type AmountMode,
   isValidAmount,
@@ -23,6 +23,14 @@ import type { EthereumProvider } from "./types";
 export const SPRAY_ABI = [
   "function disperseNative(address[] _recipients, uint256[] _amounts) payable",
   "function disperseToken(address tokenAddress, address[] _recipients, uint256[] _amounts)",
+  "error TooManyRecipients(uint256 count, uint256 max)",
+  "error ZeroAddress(uint256 index)",
+  "error ZeroAmount(uint256 index)",
+  "error LengthMismatch(uint256 recipientsLength, uint256 amountsLength)",
+  "error EmptyRecipients()",
+  "error IncorrectNativeValue(uint256 sent, uint256 required)",
+  "error InsufficientAllowance(uint256 available, uint256 required)",
+  "error InvalidTokenAddress()",
 ];
 
 export const ERC20_ABI = [
@@ -183,4 +191,79 @@ export function getEthereum(): EthereumProvider | undefined {
     ethereum?: EthereumProvider;
   };
   return ethereum;
+}
+
+export type SprayErrorKey =
+  | "tooManyRecipients"
+  | "zeroAddress"
+  | "zeroAmount"
+  | "lengthMismatch"
+  | "emptyRecipients"
+  | "incorrectNativeValue"
+  | "insufficientAllowance"
+  | "invalidTokenAddress"
+  | "contractPaused"
+  | "userRejected";
+
+const sprayIface = new Interface(SPRAY_ABI);
+
+const SPRAY_ERROR_MAP: Record<string, SprayErrorKey> = {
+  TooManyRecipients: "tooManyRecipients",
+  ZeroAddress: "zeroAddress",
+  ZeroAmount: "zeroAmount",
+  LengthMismatch: "lengthMismatch",
+  EmptyRecipients: "emptyRecipients",
+  IncorrectNativeValue: "incorrectNativeValue",
+  InsufficientAllowance: "insufficientAllowance",
+  InvalidTokenAddress: "invalidTokenAddress",
+};
+
+export function decodeSprayError(error: unknown): SprayErrorKey | null {
+  if (!error || typeof error !== "object") return null;
+  const err = error as Record<string, unknown>;
+
+  // User rejected in wallet
+  if (err.code === 4001 || err.code === "ACTION_REJECTED")
+    return "userRejected";
+  if (
+    typeof err.code === "string" &&
+    (err.code as string).includes("ACTION_REJECTED")
+  )
+    return "userRejected";
+
+  // Pausable: OpenZeppelin EnforcedPause selector 0xd93c0665
+  const dataStr =
+    typeof err.data === "string"
+      ? err.data
+      : typeof (err as Record<string, Record<string, unknown>>).error?.data ===
+          "string"
+        ? ((err as Record<string, Record<string, unknown>>).error
+            .data as string)
+        : null;
+  if (dataStr?.startsWith("0xd93c0665")) return "contractPaused";
+
+  // Try to decode custom error from revert data
+  if (dataStr?.startsWith("0x") && dataStr.length >= 10) {
+    try {
+      const decoded = sprayIface.parseError(dataStr);
+      if (decoded) {
+        const key = SPRAY_ERROR_MAP[decoded.name];
+        if (key) return key;
+      }
+    } catch {
+      // not a known Spray error
+    }
+  }
+
+  // ethers v6 wraps revert info
+  const reason = err.reason ?? err.message;
+  if (typeof reason === "string") {
+    const lower = reason.toLowerCase();
+    if (lower.includes("user rejected") || lower.includes("user denied"))
+      return "userRejected";
+    if (lower.includes("enforcedpause") || lower.includes("paused"))
+      return "contractPaused";
+  }
+
+  return null;
 }
