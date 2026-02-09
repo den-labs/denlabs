@@ -10,6 +10,7 @@ import {
   parseRecipients,
 } from "@/lib/recipients";
 import type { SprayEventType } from "@/lib/sprayEventsClient";
+import { ReplaceConfirmDialog } from "./ReplaceConfirmDialog";
 
 type PastePreviewModalProps = {
   isOpen: boolean;
@@ -51,6 +52,8 @@ export function PastePreviewModal({
   const [modalMode, setModalMode] = useState<AmountMode>(mode);
   const [preferSameAmount, setPreferSameAmount] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const pendingApplyRef = useRef<(() => void) | null>(null);
   const lastParseSignature = useRef<string>("");
 
   useEffect(() => {
@@ -66,6 +69,8 @@ export function PastePreviewModal({
       setModalMode(mode);
       setPreferSameAmount(false);
       setShowDetails(false);
+      setShowReplaceConfirm(false);
+      pendingApplyRef.current = null;
       lastParseSignature.current = "";
     }
   }, [initialText, isOpen, mode]);
@@ -192,12 +197,14 @@ export function PastePreviewModal({
     });
   };
 
-  const handleApplyAsIs = () => {
+  const requireReplaceConfirm = replaceMode && currentRecipientsCount > 0;
+
+  const executeApplyAsIs = () => {
     logPasteApplied(parsed.rows, false);
     applyWithMode(parsed.rows);
   };
 
-  const handleFixAndApply = () => {
+  const executeFixAndApply = () => {
     const fixedRows = applyFixes(parsed.rows, {
       mode: modalMode,
       tokenDecimals,
@@ -218,6 +225,29 @@ export function PastePreviewModal({
     });
     logPasteApplied(fixedRows, true);
     applyWithMode(fixedRows);
+  };
+
+  const maybeConfirmThenApply = (applyFn: () => void) => {
+    if (requireReplaceConfirm) {
+      pendingApplyRef.current = applyFn;
+      setShowReplaceConfirm(true);
+      return;
+    }
+    applyFn();
+  };
+
+  const handleApplyAsIs = () => maybeConfirmThenApply(executeApplyAsIs);
+  const handleFixAndApply = () => maybeConfirmThenApply(executeFixAndApply);
+
+  const handleReplaceConfirm = () => {
+    setShowReplaceConfirm(false);
+    pendingApplyRef.current?.();
+    pendingApplyRef.current = null;
+  };
+
+  const handleReplaceCancel = () => {
+    setShowReplaceConfirm(false);
+    pendingApplyRef.current = null;
   };
 
   if (!isOpen) return null;
@@ -557,6 +587,13 @@ export function PastePreviewModal({
           </div>
         </div>
       </div>
+      <ReplaceConfirmDialog
+        isOpen={showReplaceConfirm}
+        existingCount={currentRecipientsCount}
+        incomingCount={parsed.rows.length}
+        onConfirm={handleReplaceConfirm}
+        onCancel={handleReplaceCancel}
+      />
     </div>,
     document.body,
   );
