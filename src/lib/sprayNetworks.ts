@@ -57,7 +57,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Ethereum",
     chainId: 1,
     chainHex: "0x1",
-    sprayAddress: "0xB9Acfe176fae237915C865AF3444fAfF3aD24064",
+    sprayAddress: "0xdf5d9bfa9129a992736150663fc54e42739caf10",
     nativeCurrency: {
       name: "Ether",
       symbol: "ETH",
@@ -148,7 +148,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Optimism",
     chainId: 10,
     chainHex: "0xa",
-    sprayAddress: "0xe62c875ba6609E27c088F697dA16D47519b6B118",
+    sprayAddress: "0x7FE386fa64e9f2208E7aC05d1b75d2E5e14e8be7",
     nativeCurrency: {
       name: "Ether",
       symbol: "ETH",
@@ -185,7 +185,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Base",
     chainId: 8453,
     chainHex: "0x2105",
-    sprayAddress: "0x8C6c4Eaf07B5888629f8C5562a61fC79638c40e7",
+    sprayAddress: "0xB9Acfe176fae237915C865AF3444fAfF3aD24064",
     nativeCurrency: {
       name: "Ether",
       symbol: "ETH",
@@ -215,7 +215,7 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     name: "Avalanche",
     chainId: 43114,
     chainHex: "0xa86a",
-    sprayAddress: "0xe62c875ba6609E27c088F697dA16D47519b6B118",
+    sprayAddress: "0x7FE386fa64e9f2208E7aC05d1b75d2E5e14e8be7",
     nativeCurrency: {
       name: "Avalanche",
       symbol: "AVAX",

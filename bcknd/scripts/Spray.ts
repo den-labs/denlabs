@@ -21,6 +21,7 @@ async function main() {
   const spray = await Spray.deploy(deployer.address, {
     gasPrice,
     type: 0,
+    gasLimit: 3_000_000,
   })
 
   await spray.waitForDeployment()
