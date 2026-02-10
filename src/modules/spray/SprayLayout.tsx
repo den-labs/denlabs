@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { DenMain, DenRightRail } from "@/components/den/RailSlots";
@@ -179,10 +180,73 @@ export default function SprayLayout() {
         )
       : null;
 
+  const sendReady =
+    recipients.recipientCount > 0 &&
+    !recipients.hasBlockingIssues &&
+    !ctaDisabled;
+
+  const progressSteps = [
+    { label: "Network", done: true },
+    { label: "Token", done: true },
+    { label: "Recipients", done: recipients.recipientCount > 0 },
+    { label: "Ready", done: sendReady },
+  ];
+
+  const allowanceDisplay =
+    token.mode === "token"
+      ? transaction.allowanceStatus === "approved"
+        ? "Ready"
+        : transaction.allowanceStatus === "needs_approval"
+          ? "Needs approval"
+          : transaction.allowanceStatus === "loading"
+            ? "Checking"
+            : "Not checked"
+      : "Not required";
+
   const summaryPanel = (
-    <div className="wolf-card--muted border border-wolf-border px-5 py-4 text-xs text-white/70">
-      <p className="text-xs uppercase text-wolf-text-subtle">Summary</p>
-      <div className="mt-3 space-y-2">
+    <div
+      className={`wolf-card border border-wolf-border px-5 py-5 text-xs text-white/70 ${sendReady ? "shadow-[var(--den-shadow-glow-accent)]" : ""}`}
+    >
+      <div className="flex items-center gap-3">
+        <Image
+          src={selectedNetworkBadgeIcon}
+          alt={`${network.selectedNetwork.name} icon`}
+          width={28}
+          height={28}
+          className="h-7 w-7 object-contain"
+        />
+        <div>
+          <p className="text-[10px] uppercase text-wolf-text-subtle">Network</p>
+          <p className="text-sm font-semibold text-white">
+            {network.selectedNetwork.name}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        {progressSteps.map((step) => (
+          <div
+            key={step.label}
+            className="flex flex-1 flex-col items-center gap-1"
+          >
+            <div
+              className={`h-1.5 w-full rounded-full transition ${step.done ? "bg-wolf-emerald" : "bg-white/10"}`}
+            />
+            <span
+              className={`text-[9px] uppercase ${step.done ? "text-wolf-emerald" : "text-white/30"}`}
+            >
+              {step.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 rounded-xl border border-wolf-border bg-wolf-panel/60 px-4 py-3 text-center">
+        <p className="text-[10px] uppercase text-wolf-text-subtle">Total</p>
+        <p className="mt-1 text-lg font-bold text-white">{totalDisplay}</p>
+      </div>
+
+      <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between gap-3">
           <span>Recipients</span>
           <span className="font-semibold text-white">
@@ -190,22 +254,12 @@ export default function SprayLayout() {
           </span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span>Total</span>
-          <span className="font-semibold text-white">{totalDisplay}</span>
+          <span>Balance</span>
+          <span className="text-white/80">{nativeBalanceDisplay}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
           <span>Allowance</span>
-          <span className="text-white/80">
-            {token.mode === "token"
-              ? transaction.allowanceStatus === "approved"
-                ? "Ready"
-                : transaction.allowanceStatus === "needs_approval"
-                  ? "Needs approval"
-                  : transaction.allowanceStatus === "loading"
-                    ? "Checking"
-                    : "Not checked"
-              : "Not required"}
-          </span>
+          <span className="text-white/80">{allowanceDisplay}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
           <span>Last spray</span>
@@ -233,12 +287,7 @@ export default function SprayLayout() {
     <>
       <DenMain>
         <div className="text-wolf-foreground">
-          <div
-            className="mx-auto flex w-full max-w-[1120px] min-h-0 flex-col gap-5 overflow-hidden"
-            style={{
-              maxHeight: "calc(100dvh - var(--app-header-height) - 24px)",
-            }}
-          >
+          <div className="mx-auto flex w-full max-w-[1120px] min-h-0 flex-col gap-5 overflow-y-auto">
             <div className="shadow-[0_45px_120px_-70px_rgba(160,83,255,0.35)]">
               <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col items-start gap-2 text-sm text-white/80">
@@ -300,50 +349,58 @@ export default function SprayLayout() {
                     </button>
                   </div>
 
-                  <NetworkSelector
-                    selectedNetworkKey={network.selectedNetworkKey}
-                    selectedNetworkName={network.selectedNetwork.name}
-                    isOpen={network.isNetworkDropdownOpen}
-                    setIsOpen={network.setIsNetworkDropdownOpen}
-                    onSelect={network.selectNetwork}
-                    label={networkSelectorLabel}
-                    badgeIcon={selectedNetworkBadgeIcon}
-                  />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                    <NetworkSelector
+                      selectedNetworkKey={network.selectedNetworkKey}
+                      selectedNetworkName={network.selectedNetwork.name}
+                      isOpen={network.isNetworkDropdownOpen}
+                      setIsOpen={network.setIsNetworkDropdownOpen}
+                      onSelect={network.selectNetwork}
+                      label={networkSelectorLabel}
+                      badgeIcon={selectedNetworkBadgeIcon}
+                      onOpenChange={(open) => {
+                        if (open) token.setIsTrustedOpen(false);
+                      }}
+                    />
 
-                  <TokenSelector
-                    isOpen={token.isTrustedOpen}
-                    setIsOpen={token.setIsTrustedOpen}
-                    tokenCardIconSrc={token.tokenCardIconSrc}
-                    tokenCardSymbol={token.tokenCardSymbol}
-                    tokenCardPrimaryLabel={tokenCardPrimaryLabel}
-                    tokenPayWithLabel={tokenPayWithLabel}
-                    isCustomTokenSelected={token.isCustomTokenSelected}
-                    isNativeTokenSelected={token.isNativeTokenSelected}
-                    tokenAddress={token.tokenAddress}
-                    onTokenAddressChange={token.setTokenAddress}
-                    isFetchingTokenInfo={token.isFetchingTokenInfo}
-                    tokenInfo={token.tokenInfo}
-                    nativeTokenIconSrc={token.nativeTokenIconSrc}
-                    nativeTokenLabel={nativeTokenLabel}
-                    nativeSymbol={nativeSymbol}
-                    nativeBalanceDisplay={nativeBalanceDisplay}
-                    trustedTokens={token.trustedTokens}
-                    selectedTrustedToken={token.selectedTrustedToken}
-                    trustedTokenBalances={balances.trustedTokenBalances}
-                    signerAddress={wallet.signerAddress}
-                    walletBalanceConnectHint={walletBalanceConnectHint}
-                    walletBalanceLoadingLabel={walletBalanceLoadingLabel}
-                    tokenSymbolPlaceholder={tokenSymbolPlaceholder}
-                    customTokenNameLabel={customTokenNameLabel}
-                    onSelectNative={token.handleSelectNativeToken}
-                    onSelectCustom={token.handleSelectCustomToken}
-                    onSelectTrusted={token.handleSelectTrustedToken}
-                  />
+                    <TokenSelector
+                      isOpen={token.isTrustedOpen}
+                      setIsOpen={token.setIsTrustedOpen}
+                      onOpenChange={(open) => {
+                        if (open) network.setIsNetworkDropdownOpen(false);
+                      }}
+                      tokenCardIconSrc={token.tokenCardIconSrc}
+                      tokenCardSymbol={token.tokenCardSymbol}
+                      tokenCardPrimaryLabel={tokenCardPrimaryLabel}
+                      tokenPayWithLabel={tokenPayWithLabel}
+                      isCustomTokenSelected={token.isCustomTokenSelected}
+                      isNativeTokenSelected={token.isNativeTokenSelected}
+                      tokenAddress={token.tokenAddress}
+                      onTokenAddressChange={token.setTokenAddress}
+                      isFetchingTokenInfo={token.isFetchingTokenInfo}
+                      tokenInfo={token.tokenInfo}
+                      nativeTokenIconSrc={token.nativeTokenIconSrc}
+                      nativeTokenLabel={nativeTokenLabel}
+                      nativeSymbol={nativeSymbol}
+                      nativeBalanceDisplay={nativeBalanceDisplay}
+                      trustedTokens={token.trustedTokens}
+                      selectedTrustedToken={token.selectedTrustedToken}
+                      trustedTokenBalances={balances.trustedTokenBalances}
+                      signerAddress={wallet.signerAddress}
+                      walletBalanceConnectHint={walletBalanceConnectHint}
+                      walletBalanceLoadingLabel={walletBalanceLoadingLabel}
+                      tokenSymbolPlaceholder={tokenSymbolPlaceholder}
+                      customTokenNameLabel={customTokenNameLabel}
+                      onSelectNative={token.handleSelectNativeToken}
+                      onSelectCustom={token.handleSelectCustomToken}
+                      onSelectTrusted={token.handleSelectTrustedToken}
+                    />
+                  </div>
                 </section>
 
                 {/* ERC20 Transaction Steps Indicator */}
                 {transaction.erc20Steps.active && token.mode === "token" && (
-                  <div className="mt-4 rounded-2xl border border-wolf-border bg-[#0b111a] px-5 py-4">
+                  <div className="mt-4 rounded-2xl border border-wolf-border bg-den-bg px-5 py-4">
                     <p className="text-xs uppercase text-wolf-text-subtle mb-3">
                       Transaction Steps
                     </p>
@@ -437,7 +494,7 @@ export default function SprayLayout() {
 
                 {/* Batch Progress */}
                 {batchProgressVisible ? (
-                  <div className="mt-4 rounded-2xl border border-wolf-border bg-[#0b111a] px-5 py-4 text-xs text-white/70">
+                  <div className="mt-4 rounded-2xl border border-wolf-border bg-den-bg px-5 py-4 text-xs text-white/70">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase text-wolf-text-subtle">
@@ -484,12 +541,7 @@ export default function SprayLayout() {
                 ) : null}
 
                 {/* Recipients Card */}
-                <div
-                  className="mt-5 flex min-h-0 flex-1"
-                  style={{
-                    maxHeight: "calc(100dvh - var(--app-header-height) - 24px)",
-                  }}
-                >
+                <div className="mt-5 flex min-h-0 flex-1">
                   <RecipientsCard
                     rows={recipients.rows}
                     recipientCount={recipients.recipientCount}
@@ -517,11 +569,6 @@ export default function SprayLayout() {
                     onFillMissingValueChange={recipients.updateFillMissingValue}
                     onPasteOpen={telemetry.handlePasteOpen}
                     onEvent={telemetry.logSprayEvent}
-                    primaryActionLabel={
-                      recipients.recipientCount === 0 ? "Paste list" : ctaLabel
-                    }
-                    primaryActionDisabled={ctaDisabled}
-                    onPrimaryAction={transaction.handleSubmit}
                     footer={
                       <StickyFooter
                         recipientCount={recipients.recipientCount}

@@ -41,6 +41,7 @@ type TokenSelectorProps = {
   onSelectNative: () => void;
   onSelectCustom: () => void;
   onSelectTrusted: (address: string) => void;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function TokenSelector({
@@ -71,6 +72,7 @@ export function TokenSelector({
   onSelectNative,
   onSelectCustom,
   onSelectTrusted,
+  onOpenChange,
 }: TokenSelectorProps) {
   const t = useTranslations("SprayDisperser");
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -92,11 +94,11 @@ export function TokenSelector({
   }, [isOpen, setIsOpen]);
 
   return (
-    <div className="mt-6 space-y-3">
+    <div className="mt-4 space-y-3 lg:mt-0">
       <div className="space-y-2">
         <div
           ref={dropdownRef}
-          className="relative z-30"
+          className={`relative ${isOpen ? "z-50" : "z-auto"}`}
           id="trusted-token-select"
         >
           <button
@@ -104,17 +106,21 @@ export function TokenSelector({
             aria-haspopup="listbox"
             aria-expanded={isOpen}
             aria-controls="trusted-token-options"
-            onClick={() => setIsOpen((v: boolean) => !v)}
+            onClick={() => {
+              const next = !isOpen;
+              setIsOpen(next);
+              onOpenChange?.(next);
+            }}
             title={tokenCardPrimaryLabel}
-            className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-3 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus:border-wolf-emerald focus:outline-none"
+            className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-wolf-panel px-3 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus:border-wolf-emerald focus:outline-none"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
               <Image
                 src={tokenCardIconSrc}
                 alt={`${tokenCardSymbol} token icon`}
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
               />
             </div>
             <div className="text-left leading-tight w-full">
@@ -169,7 +175,7 @@ export function TokenSelector({
             <div
               id="trusted-token-options"
               role="listbox"
-              className="absolute z-40 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-[#0b111a] py-1 text-sm text-white/80 shadow-2xl"
+              className="absolute z-40 mt-2 w-full max-h-[18rem] overflow-y-auto rounded-xl border border-wolf-border bg-den-bg py-1 text-sm text-white/80 shadow-2xl"
             >
               <button
                 type="button"

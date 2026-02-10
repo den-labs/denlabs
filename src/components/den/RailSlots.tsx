@@ -122,7 +122,7 @@ function useIsDesktop() {
     if (typeof window === "undefined") {
       return;
     }
-    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
     const handleChange = () => {
       setIsDesktop(mediaQuery.matches);
     };
