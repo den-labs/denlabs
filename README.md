@@ -123,6 +123,53 @@ pnpm dev
 
 ---
 
+## 🎬 Remotion Studio (Preview + Render)
+
+### Start the Studio (Vite)
+
+```bash
+cd remotion-video/denlabs-studio
+pnpm dev
+```
+
+- Studio runs on `http://localhost:3100` (or `http://localhost:3102` if 3100 is busy).
+- The Vite proxy forwards `/api/*` and `/ws/*` to the render backend.
+
+### Start the Render Backend (Express)
+
+```bash
+cd remotion-video/denlabs-studio/server
+pnpm dev
+```
+
+- Backend runs on `http://localhost:3101`.
+- Health check: `http://localhost:3101/api/health`
+
+### Test Endpoints (curl)
+
+```bash
+# Health
+curl http://localhost:3101/api/health
+
+# Start a render job
+curl -X POST http://localhost:3101/api/render \
+  -H "Content-Type: application/json" \
+  -d '{"compositionId":"DenLabsPromo","format":"mp4","quality":"standard"}'
+
+# Check status (replace JOB_ID)
+curl http://localhost:3101/api/render/JOB_ID
+```
+
+### Confirm the Proxy from Studio
+
+```bash
+# Same requests, but through Vite proxy
+curl http://localhost:3100/api/health
+curl http://localhost:3100/api/render/JOB_ID
+```
+
+---
+
 ## 🎮 Usage Guide: Running Your First Lab
 
 1. **Builder View:** Navigate to `/labs/create`.
