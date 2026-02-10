@@ -256,7 +256,7 @@ export function PastePreviewModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
         ref={modalRef}
-        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl"
+        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-den-bg shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
@@ -301,7 +301,7 @@ export function PastePreviewModal({
                 value={text}
                 onChange={(event) => setText(event.target.value)}
                 placeholder="0xabc...,0.25"
-                className="min-h-[260px] w-full rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
+                className="min-h-[260px] w-full rounded-xl border border-wolf-border bg-wolf-panel px-4 py-3 text-sm text-white/80 placeholder:text-white/30 focus:border-wolf-emerald focus:outline-none"
               />
               {mode === "same" && hasDetectedAmounts ? (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
@@ -328,7 +328,7 @@ export function PastePreviewModal({
               ) : null}
             </div>
 
-            <div className="flex min-h-0 flex-col rounded-xl border border-wolf-border bg-[#0f141d] p-4">
+            <div className="flex min-h-0 flex-col rounded-xl border border-wolf-border bg-wolf-panel p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Preview</h3>
                 <button
@@ -548,7 +548,7 @@ export function PastePreviewModal({
           ) : null}
         </div>
 
-        <div className="sticky bottom-0 z-10 mt-auto border-t border-white/10 bg-[#0a0a0a] px-6 py-4">
+        <div className="sticky bottom-0 z-10 mt-auto border-t border-white/10 bg-den-bg px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -579,7 +579,7 @@ export function PastePreviewModal({
                 type="button"
                 onClick={hasIssues ? handleFixAndApply : handleApplyAsIs}
                 disabled={hasIssues ? !canApplyFixes : !canApplyAsIs}
-                className="rounded-md border border-[#4ca22a] bg-[#89e24a] px-5 py-2 text-xs font-semibold uppercase text-[#09140a] transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
+                className="rounded-md border border-den-lime-dark bg-den-lime-deep px-5 py-2 text-xs font-semibold uppercase text-den-bg transition hover:shadow-[0_12px_30px_rgba(186,255,92,0.4)] disabled:border-wolf-border disabled:bg-wolf-border disabled:text-white/40"
               >
                 {hasIssues ? "Fix & Apply (recommended)" : "Apply"}
               </button>
