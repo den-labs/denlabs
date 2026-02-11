@@ -144,14 +144,14 @@ export function RecipientsTable({
 
   const gridTemplate =
     amountMode === "custom"
-      ? "grid-cols-[minmax(220px,1fr)_120px_110px_44px]"
-      : "grid-cols-[minmax(220px,1fr)_110px_44px]";
+      ? "grid-cols-[minmax(120px,1fr)_80px_36px] sm:grid-cols-[minmax(220px,1fr)_120px_110px_44px]"
+      : "grid-cols-[minmax(120px,1fr)_36px] sm:grid-cols-[minmax(220px,1fr)_110px_44px]";
   const rowTextSize = density === "compact" ? "text-xs" : "text-sm";
   const rowPadding = density === "compact" ? "py-1.5" : "py-2";
   const inputHeight = density === "compact" ? "h-8 text-xs" : "h-9 text-sm";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-wolf-border bg-[#0b111a]">
+    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-wolf-border bg-den-bg">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-wolf-border px-4 py-2 text-[11px] uppercase text-white/60">
         <div className="flex flex-wrap items-center gap-2">
           {filterOptions.map((option) => (
@@ -193,7 +193,7 @@ export function RecipientsTable({
         {amountMode === "custom" ? (
           <span className="text-right">Amount</span>
         ) : null}
-        <span>Status</span>
+        <span className="hidden sm:inline">Status</span>
         <span className="text-right">Actions</span>
       </div>
 
@@ -276,7 +276,7 @@ export function RecipientsTable({
                     />
                   ) : null}
                   <span
-                    className={`text-xs font-semibold ${statusTone(status)}`}
+                    className={`hidden text-xs font-semibold sm:inline ${statusTone(status)}`}
                   >
                     {statusLabel(status)}
                   </span>
@@ -345,7 +345,7 @@ export function RecipientsTable({
                     />
                   ) : null}
                   <span
-                    className={`text-xs font-semibold ${statusTone(status)}`}
+                    className={`hidden text-xs font-semibold sm:inline ${statusTone(status)}`}
                   >
                     {statusLabel(status)}
                   </span>
@@ -377,7 +377,7 @@ export function RecipientsTable({
         )}
 
         {footer ? (
-          <div className="sticky bottom-0 z-10 border-t border-wolf-border bg-[#0b111a] shadow-[0_-10px_24px_rgba(2,6,12,0.75)]">
+          <div className="sticky bottom-0 z-10 border-t border-wolf-border bg-den-bg shadow-[0_-10px_24px_rgba(2,6,12,0.75)]">
             {footer}
           </div>
         ) : null}

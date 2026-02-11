@@ -51,7 +51,7 @@ export function ReplaceConfirmDialog({
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div
         ref={dialogRef}
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-den-bg p-6 shadow-2xl"
       >
         <h3 className="text-lg font-semibold text-white">
           Replace existing recipients?

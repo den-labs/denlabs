@@ -92,7 +92,7 @@ export function SprayLogModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
         ref={modalRef}
-        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl"
+        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-den-bg shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
           <div>
@@ -144,7 +144,7 @@ export function SprayLogModal({
                 return (
                   <li
                     key={event.id}
-                    className="rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3"
+                    className="rounded-xl border border-wolf-border bg-wolf-panel px-4 py-3"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-white">

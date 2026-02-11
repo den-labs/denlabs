@@ -1198,6 +1198,10 @@
     "badge": "Consola Spray",
     "heading": "Envía recompensas en un solo disparo",
     "description": "Pega las wallets, elige la red y dispersa recompensas en un único envío en vez de hacerlo una por una.",
+    "empty": {
+      "title": "Sin destinatarios",
+      "description": "Pega una lista de direcciones de wallet o importa un CSV para comenzar con tu Spray."
+    },
     "actions": {
       "connect": "Conectar wallet",
       "connected": "{network}: {address}",

@@ -1198,6 +1198,10 @@
     "badge": "Spray Rewards",
     "heading": "Send rewards in one clean shot",
     "description": "Paste wallets, pick a network, and Spray rewards in one go instead of sending them one by one.",
+    "empty": {
+      "title": "No recipients yet",
+      "description": "Paste a list of wallet addresses or import a CSV to get started with your Spray."
+    },
     "actions": {
       "connect": "Connect Wallet",
       "connected": "{network}: {address}",

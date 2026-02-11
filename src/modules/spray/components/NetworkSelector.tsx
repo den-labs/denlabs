@@ -13,6 +13,7 @@ type NetworkSelectorProps = {
   onSelect: (key: string) => void;
   label: string;
   badgeIcon: string;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function NetworkSelector({
@@ -23,6 +24,7 @@ export function NetworkSelector({
   onSelect,
   label,
   badgeIcon,
+  onOpenChange,
 }: NetworkSelectorProps) {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,23 +47,27 @@ export function NetworkSelector({
   return (
     <div
       ref={dropdownRef}
-      className={`relative mt-4 w-full ${isOpen ? "z-50" : "z-30"}`}
+      className={`relative mt-4 w-full ${isOpen ? "z-50" : "z-auto"}`}
     >
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls="network-selector-options"
-        onClick={() => setIsOpen((prev: boolean) => !prev)}
-        className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-[#0f141d] px-4 py-3 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
+        onClick={() => {
+          const next = !isOpen;
+          setIsOpen(next);
+          onOpenChange?.(next);
+        }}
+        className="flex w-full items-center gap-3 rounded-xl border border-wolf-border bg-wolf-panel px-4 py-2 text-left text-sm text-white/80 transition hover:border-wolf-emerald focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wolf-emerald"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
           <Image
             src={badgeIcon}
             alt={`${selectedNetworkName} badge`}
-            width={32}
-            height={32}
-            className="h-8 w-8 object-contain"
+            width={24}
+            height={24}
+            className="h-6 w-6 object-contain"
           />
         </div>
         <div className="flex-1 text-left leading-tight">
