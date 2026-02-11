@@ -54,7 +54,6 @@ export function PastePreviewModal({
   const [showDetails, setShowDetails] = useState(false);
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const pendingApplyRef = useRef<(() => void) | null>(null);
-  const lastParseSignature = useRef<string>("");
 
   useEffect(() => {
     if (isOpen) {
@@ -71,7 +70,6 @@ export function PastePreviewModal({
       setShowDetails(false);
       setShowReplaceConfirm(false);
       pendingApplyRef.current = null;
-      lastParseSignature.current = "";
     }
   }, [initialText, isOpen, mode]);
 
@@ -151,35 +149,6 @@ export function PastePreviewModal({
     }
   }, [hasDetectedAmounts, isOpen, mode, preferSameAmount]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (!text.trim()) return;
-    const signature = [
-      parsed.linesTotal,
-      parsed.issuesSummary.total,
-      parsed.detectedAmountRows,
-      parsed.headerIgnored ? "1" : "0",
-      modalMode,
-    ].join("|");
-
-    if (signature === lastParseSignature.current) {
-      return;
-    }
-    lastParseSignature.current = signature;
-
-    onEvent?.("paste_parsed", {
-      linesTotal: parsed.linesTotal,
-      uniqueAddresses: parsed.uniqueAddresses,
-      issuesTotal: parsed.issuesSummary.total,
-      invalidRows: parsed.invalidRows,
-      missingAmountRows: parsed.missingAmountRows,
-      duplicateRows: parsed.duplicateRows,
-      detectedAmountRows: parsed.detectedAmountRows,
-      headerIgnored: parsed.headerIgnored,
-      mode: modalMode,
-    });
-  }, [isOpen, modalMode, onEvent, parsed, text]);
-
   const applyWithMode = (rows: ParsedRecipient[]) => {
     if (modalMode !== mode) {
       onModeChange?.(modalMode);
@@ -193,7 +162,14 @@ export function PastePreviewModal({
       replaceMode,
       mode: modalMode,
       fixesApplied,
+      linesTotal: parsed.linesTotal,
+      uniqueAddresses: parsed.uniqueAddresses,
       issuesTotal: parsed.issuesSummary.total,
+      invalidRows: parsed.invalidRows,
+      duplicateRows: parsed.duplicateRows,
+      missingAmountRows: parsed.missingAmountRows,
+      detectedAmountRows: parsed.detectedAmountRows,
+      headerIgnored: parsed.headerIgnored,
     });
   };
 
