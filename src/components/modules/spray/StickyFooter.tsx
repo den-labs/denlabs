@@ -25,10 +25,30 @@ export function StickyFooter({
     <div className="border-t border-wolf-border bg-den-bg/95 px-4 py-4 backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between text-xs text-white/70">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>{`Wallets: ${recipientCount}`}</span>
-          <span>{totalLabel}</span>
-          {feeLabel ? <span>{feeLabel}</span> : null}
-          <span>{allowanceLabel}</span>
+          <span>
+            <span className="text-white/40">Recipients:</span>{" "}
+            <span className="font-semibold text-white">{recipientCount}</span>
+          </span>
+          <span>
+            <span className="text-white/40">Total:</span>{" "}
+            <span className="font-semibold text-white">
+              {totalLabel.replace(/^Total:\s*/, "")}
+            </span>
+          </span>
+          {feeLabel ? (
+            <span>
+              <span className="text-white/40">Fee:</span>{" "}
+              <span className="text-white/60">
+                {feeLabel.replace(/^Estimated fee:\s*/, "")}
+              </span>
+            </span>
+          ) : null}
+          <span>
+            <span className="text-white/40">Allowance:</span>{" "}
+            <span className="text-white/60">
+              {allowanceLabel.replace(/^Allowance:\s*/, "")}
+            </span>
+          </span>
         </div>
         <button
           type="button"

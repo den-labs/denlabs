@@ -47,7 +47,7 @@ export function NetworkSelector({
   return (
     <div
       ref={dropdownRef}
-      className={`relative mt-4 w-full ${isOpen ? "z-50" : "z-auto"}`}
+      className={`relative w-full ${isOpen ? "z-50" : "z-auto"}`}
     >
       <button
         type="button"

@@ -57,6 +57,8 @@ export function StatusStrip({
   const walletAddress = user.walletAddress;
   const isSelfVerified = user.selfVerified;
   const isConnected = user.isBuilder;
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => setHasMounted(true), []);
   const isWalletOnly = variant === "wallet-only";
   const isIconsOnly = variant === "icons-only";
   const isCompactWallet = isWalletOnly || isIconsOnly;
@@ -235,7 +237,7 @@ export function StatusStrip({
           </a>
         ))}
         {/* Only show connect button when NOT connected - WalletMenu handles connected state */}
-        {!isConnected && (
+        {!(hasMounted && isConnected) && (
           <ConnectWalletButton
             className={cn(
               "inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-[#14181f] text-white/80 transition hover:border-white/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-70",
@@ -258,7 +260,7 @@ export function StatusStrip({
       )}
     >
       {/* Only show connect button when NOT connected - WalletMenu handles connected state */}
-      {!isConnected && (
+      {!(hasMounted && isConnected) && (
         <div
           className={cn(
             "order-1 flex w-full items-center gap-2 sm:order-2 sm:w-auto",

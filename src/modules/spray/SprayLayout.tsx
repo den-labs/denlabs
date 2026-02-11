@@ -349,7 +349,7 @@ export default function SprayLayout() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                  <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-x-4">
                     <NetworkSelector
                       selectedNetworkKey={network.selectedNetworkKey}
                       selectedNetworkName={network.selectedNetwork.name}
@@ -573,7 +573,7 @@ export default function SprayLayout() {
                       <StickyFooter
                         recipientCount={recipients.recipientCount}
                         totalLabel={`Total: ${totalDisplay}`}
-                        feeLabel="Estimated fee: \u2014"
+                        feeLabel="Estimated fee: —"
                         allowanceLabel={
                           token.mode === "token"
                             ? transaction.allowanceStatus === "approved"
