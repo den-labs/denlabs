@@ -100,8 +100,8 @@ export const SPRAY_NETWORKS: Record<string, SprayNetworkConfig> = {
     explorerUrls: ["https://celoscan.io"],
     trustedTokens: [
       {
-        label: "Celo Colombian Peso (cCOP)",
-        symbol: "cCOP",
+        label: "Celo Colombian Peso (COPm)",
+        symbol: "COPm",
         address: "0x8A567e2aE79CA692Bd748aB832081C45de4041eA",
         iconUrl: CELO_CCOP_ICON,
         decimals: 18,
