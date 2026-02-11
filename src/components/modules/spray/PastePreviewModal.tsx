@@ -256,7 +256,7 @@ export function PastePreviewModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
         ref={modalRef}
-        className="relative flex max-h-[calc(100dvh-var(--app-header-height)-24px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-den-bg shadow-2xl"
+        className="relative flex max-h-[90dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-den-bg shadow-2xl"
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
